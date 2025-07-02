@@ -38,7 +38,13 @@ logger = logging.getLogger(__name__)
 
 # Initialize real web browsing components
 booking_handler = BookingHandler()
-gemini_api = GeminiAPI()
+try:
+    gemini_api = GeminiAPI()
+    GEMINI_AVAILABLE = True
+except Exception as e:
+    logger.warning(f"Failed to initialize Gemini API: {e}")
+    gemini_api = None
+    GEMINI_AVAILABLE = False
 
 class RealWebBrowsingContext7Tools:
     """Real web browsing implementation for Context 7 tools using Selenium and LLM intelligence"""
@@ -47,6 +53,19 @@ class RealWebBrowsingContext7Tools:
         self.booking_handler = booking_handler
         self.gemini_api = gemini_api
         self.browser = None
+
+    def _safe_gemini_call(self, method_name, *args, **kwargs):
+        """Safely call Gemini API methods with fallback."""
+        if not GEMINI_AVAILABLE or not self.gemini_api:
+            logger.warning(f"Gemini API not available for {method_name}")
+            return None
+
+        try:
+            method = getattr(self.gemini_api, method_name)
+            return method(*args, **kwargs)
+        except Exception as e:
+            logger.error(f"Error calling Gemini API {method_name}: {e}")
+            return None
 
     def initialize_browser(self):
         """Initialize advanced browser with CAPTCHA bypass capabilities"""
@@ -814,7 +833,7 @@ For actual flight booking, you'll need to:
             Example: {{"origin": "Boston", "destination": "Seattle", "departure_date": "2024-02-16"}}
             """
 
-            response = self.gemini_api.generate_text(prompt, temperature=0.3)
+            response = self._safe_gemini_call('generate_text', prompt, temperature=0.3)
 
             # Try to parse JSON response
             try:
