@@ -21,7 +21,15 @@ try:
     app = create_app()
     print("Successfully created app")
 
-    if __name__ == '__main__':
+except Exception as e:
+    print(f"Error creating application: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+
+# Make app available for Gunicorn
+if __name__ == '__main__':
+    try:
         print("Starting Flask server on port 5001...")
         port = int(os.environ.get('PORT', 5001))
         debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
@@ -39,8 +47,8 @@ try:
 
         print("Flask server started successfully")
 
-except Exception as e:
-    print(f"Error starting application: {e}")
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
+    except Exception as e:
+        print(f"Error starting application: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)

@@ -16,6 +16,11 @@ supabase==2.3.4
 realtime==1.0.3
 websockets==11.0.3
 
+# ADDITIONAL DEPENDENCIES FOR AUTOWAVE
+gunicorn==21.2.0
+urllib3==2.0.7
+certifi==2023.7.22
+
 # BUILD TOOLS - HEROKU COMPATIBILITY
 setuptools>=65.0.0
 wheel>=0.38.0
