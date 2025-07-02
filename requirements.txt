@@ -27,6 +27,10 @@ markdown==3.4.4
 selenium==4.15.2
 webdriver-manager==4.0.1
 
+# BROWSER-USE FOR ADVANCED AUTOMATION
+browser-use==0.1.4
+pyperclip==1.8.2
+
 # SUPABASE - HEROKU COMPATIBLE
 supabase==2.3.4
 realtime==1.0.3
