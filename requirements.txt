@@ -1,4 +1,4 @@
-# CORE DEPENDENCIES - EXACT VERSIONS ONLY
+# CORE DEPENDENCIES - HEROKU COMPATIBLE
 Flask==3.0.0
 Flask-CORS==4.0.0
 python-dotenv==1.0.0
@@ -11,13 +11,12 @@ google-generativeai==0.3.2
 # WEB SCRAPING
 beautifulsoup4==4.12.2
 
-# DATA ANALYSIS DEPENDENCIES
-numpy==1.24.3
-pandas==2.0.3
-matplotlib==3.7.2
-seaborn==0.12.2
-
-# SUPABASE WITH REALTIME FIX - COMPATIBLE VERSIONS
+# SUPABASE - HEROKU COMPATIBLE
 supabase==2.3.4
 realtime==1.0.3
 websockets==11.0.3
+
+# BUILD TOOLS - HEROKU COMPATIBILITY
+setuptools>=65.0.0
+wheel>=0.38.0
+pip>=22.0.0
