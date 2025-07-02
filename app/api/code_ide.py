@@ -19,7 +19,13 @@ logger = logging.getLogger(__name__)
 code_ide_bp = Blueprint('code_ide', __name__)
 
 # Initialize Gemini API
-gemini_api = GeminiAPI()
+try:
+    gemini_api = GeminiAPI()
+    GEMINI_AVAILABLE = True
+except Exception as e:
+    logger.warning(f"Failed to initialize Gemini API: {e}")
+    gemini_api = None
+    GEMINI_AVAILABLE = False
 
 class CodeSectionParser:
     """
@@ -412,10 +418,15 @@ def generate_code():
             content_type_str = f"\n\nDetected content types: {', '.join(content_types)}"
 
         full_prompt = f"{system_prompt}\n\nCreate the following web component or application: {prompt}{content_type_str}"
-        response = gemini_api.generate_text(
-            prompt=full_prompt,
-            temperature=0.2
-        )
+
+        if GEMINI_AVAILABLE and gemini_api:
+            response = gemini_api.generate_text(
+                prompt=full_prompt,
+                temperature=0.2
+            )
+        else:
+            logger.warning("Gemini API not available, using fallback response")
+            response = "// Gemini API not available - please configure API key"
 
         # Check if response is valid
         if response is None:
@@ -633,10 +644,16 @@ def generate_code_stream():
                 code_buffer = ""
 
                 # Generate code using Gemini API with streaming
-                for chunk in gemini_api.generate_text_stream(prompt=full_prompt, temperature=0.2):
-                    code_buffer += chunk
-                    # Send the chunk as an event
-                    yield f'data: {{"event": "chunk", "chunk": {json.dumps(chunk)}}}\n\n'
+                if GEMINI_AVAILABLE and gemini_api:
+                    for chunk in gemini_api.generate_text_stream(prompt=full_prompt, temperature=0.2):
+                        code_buffer += chunk
+                        # Send the chunk as an event
+                        yield f'data: {{"event": "chunk", "chunk": {json.dumps(chunk)}}}\n\n'
+                else:
+                    # Fallback when Gemini API not available
+                    fallback_response = "// Gemini API not available - please configure API key"
+                    code_buffer = fallback_response
+                    yield f'data: {{"event": "chunk", "chunk": {json.dumps(fallback_response)}}}\n\n'
 
                 # Extract code from response if needed
                 if code_buffer:
