@@ -25,6 +25,7 @@ markdown==3.4.4
 
 # SELENIUM FOR WEB AUTOMATION
 selenium==4.15.2
+webdriver-manager==4.0.1
 
 # SUPABASE - HEROKU COMPATIBLE
 supabase==2.3.4
