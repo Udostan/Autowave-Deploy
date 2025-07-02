@@ -1339,7 +1339,7 @@ class SuperAgent(BaseAgent):
 
                     Here is the content I extracted for each stock:
 
-                    {' '.join([f"--- {result['symbol']} ---" + "\n" + result['content'][:1000] + "...\n\n" for result in symbol_results])}
+                    {' '.join([f"--- {result['symbol']} ---" + chr(10) + result['content'][:1000] + "..." + chr(10) + chr(10) for result in symbol_results])}
 
                     Please provide a comprehensive comparison of these stocks that:
                     1. Compares the current stock prices and key metrics for each stock
