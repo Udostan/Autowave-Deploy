@@ -1,0 +1,1905 @@
+{% extends "layout.html" %}
+
+{% block title %}Agent Wave - AutoWave{% endblock %}
+
+{% block header %}Agent Wave{% endblock %}
+
+{% block extra_css %}
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          dark: {
+            100: '#e0e0e0',
+            200: '#a0a0a0',
+            300: '#717171',
+            400: '#4a4a4a',
+            500: '#2d2d2d',
+            600: '#1e1e1e',
+            700: '#1a1a1a',
+            800: '#121212',
+            900: '#0a0a0a',
+          },
+          primary: {
+            100: '#ebf8ff',
+            200: '#bee3f8',
+            300: '#90cdf4',
+            400: '#63b3ed',
+            500: '#4299e1',
+            600: '#3182ce',
+            700: '#2b6cb0',
+            800: '#2c5282',
+            900: '#2a4365',
+          },
+        },
+        animation: {
+          'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          'bounce-slow': 'bounce 2s infinite',
+          'spin-slow': 'spin 3s linear infinite',
+          'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+        }
+      }
+    }
+  }
+</script>
+<style>
+    /* Dark theme styles */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    /* Custom Scrollbar for Dark Theme */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #444;
+    }
+
+    #main-content {
+        background-color: #121212;
+    }
+
+    main {
+        background-color: #121212;
+    }
+
+    .bg-white {
+        background-color: #121212 !important;
+    }
+
+    .text-gray-700 {
+        color: #e0e0e0 !important;
+    }
+
+    .border-gray-200 {
+        border-color: #333 !important;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Document container styles */
+    .document-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Input styles */
+    .document-input {
+        background-color: #2d2d2d;
+        border: 1px solid #444;
+        color: #e0e0e0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        width: 100%;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .document-input:focus {
+        border-color: #555;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(80, 80, 80, 0.3);
+    }
+
+    /* Button styles */
+    .document-button {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .document-button:hover {
+        background-color: #3d3d3d;
+    }
+
+    .document-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(80, 80, 80, 0.3);
+    }
+
+    /* Select styles */
+    .document-select {
+        background-color: #2d2d2d;
+        border: 1px solid #444;
+        color: #e0e0e0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 16px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23999999'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 40px;
+    }
+
+    .document-select:focus {
+        border-color: #555;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(80, 80, 80, 0.3);
+    }
+
+    /* Results styles */
+    .document-results {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .document-step {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        border: 1px solid #444;
+    }
+
+    .step-icon {
+        margin-right: 12px;
+        color: #aaa;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+    }
+
+    .step-text {
+        color: #e0e0e0;
+    }
+
+    /* Loading animation */
+    .loading-dots {
+        display: inline-flex;
+    }
+
+    .loading-dots span {
+        width: 6px;
+        height: 6px;
+        margin: 0 2px;
+        background-color: #888;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+
+    .loading-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .loading-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(0.8);
+            opacity: 0.5;
+        }
+    }
+
+    /* Document results and containers */
+    .document-results, .document-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    /* Sidebar toggle button */
+    .sidebar-toggle {
+        position: fixed;
+        top: 50%;
+        left: calc(16rem + 300px); /* Position at the edge of the reasoning sidebar */
+        transform: translateY(-50%) translateX(-50%); /* Center the button on the dividing line */
+        width: 30px;
+        height: 30px;
+        background-color: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        transition: left 0.3s ease;
+    }
+
+    .sidebar-toggle.collapsed {
+        left: 16rem; /* Position at the edge of the main sidebar when collapsed */
+        transform: translateY(-50%) translateX(-50%); /* Keep centered on the dividing line */
+    }
+
+    /* When main sidebar is collapsed */
+    body.collapsed-sidebar .sidebar-toggle {
+        left: calc(4rem + 300px); /* Adjust for collapsed main sidebar */
+    }
+
+    body.collapsed-sidebar .sidebar-toggle.collapsed {
+        left: 4rem; /* Adjust for collapsed main sidebar when reasoning sidebar is collapsed */
+    }
+
+    /* Reasoning sidebar */
+    .reasoning-sidebar {
+        position: fixed;
+        top: 70px; /* Adjust based on header height */
+        left: 16rem; /* Match sidebar width */
+        width: 300px; /* Fixed width for sidebar */
+        height: calc(100vh - 70px); /* Extend to bottom of page */
+        background-color: #121212;
+        z-index: 10;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #333;
+        overflow: hidden; /* Prevent content from overflowing */
+    }
+
+    /* When main sidebar is collapsed */
+    body.collapsed-sidebar .reasoning-sidebar {
+        left: 4rem; /* Match collapsed sidebar width */
+    }
+
+    .reasoning-sidebar.collapsed {
+        transform: translateX(-300px);
+    }
+
+    .reasoning-sidebar.collapsed .reasoning-header,
+    .reasoning-sidebar.collapsed .reasoning-footer {
+        width: calc(100% + 300px); /* Extend to the edge of the main sidebar when collapsed */
+        transform: translateX(300px); /* Move to align with the main sidebar edge */
+    }
+
+    .reasoning-header {
+        padding: 15px;
+        border-bottom: 1px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin: 0;
+        transition: transform 0.3s ease, width 0.3s ease;
+    }
+
+    .document-steps-container {
+        overflow-y: auto;
+        flex: 1;
+        padding: 15px;
+        max-height: calc(100vh - 220px); /* Leave space for header and input box */
+        scrollbar-color: #333 #1a1a1a; /* For Firefox */
+        scrollbar-width: thin; /* For Firefox */
+    }
+
+    .reasoning-footer {
+        border-top: 1px solid #333;
+        width: 100%;
+        padding: 15px;
+        background-color: #121212;
+        margin-top: auto;
+        transition: transform 0.3s ease, width 0.3s ease;
+    }
+
+    .reasoning-input-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .reasoning-input {
+        width: 100%;
+        padding: 12px 15px;
+        padding-right: 50px; /* Make room for the button */
+        border: 1px solid #333;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #1a1a1a;
+        color: #e2e8f0;
+        resize: none;
+        min-height: 80px;
+        max-height: 120px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.4;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .reasoning-input:focus {
+        outline: none;
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    .reasoning-input::placeholder {
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .reasoning-send-btn-inside {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        z-index: 1;
+        color: #888888;
+    }
+
+    .reasoning-send-btn-inside:hover {
+        color: #cccccc;
+        transform: translateY(-1px) scale(1.1);
+    }
+
+    .reasoning-send-btn-inside:active {
+        transform: translateY(0) scale(1);
+    }
+
+    .reasoning-send-btn-inside:disabled {
+        color: #4a5568;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Fixed preview container */
+    .fixed-preview-container {
+        position: fixed;
+        top: 70px; /* Match top of side-by-side layout */
+        right: 0;
+        left: calc(16rem + 300px); /* Position after the reasoning sidebar */
+        width: auto; /* Auto width to fill available space */
+        height: calc(100vh - 70px); /* Extend to bottom of page */
+        padding: 20px 20px 20px 40px; /* Normal padding since no input box at bottom */
+        display: flex;
+        flex-direction: column;
+        z-index: 5;
+        transition: left 0.3s ease; /* Smooth transition when sidebar collapses */
+    }
+
+    /* When reasoning sidebar is collapsed */
+    .fixed-preview-container.sidebar-collapsed {
+        left: 16rem; /* Position after the main sidebar when reasoning sidebar is collapsed */
+    }
+
+    /* When main sidebar is collapsed */
+    body.collapsed-sidebar .fixed-preview-container {
+        left: calc(4rem + 300px); /* Adjust for collapsed main sidebar */
+    }
+
+    body.collapsed-sidebar .fixed-preview-container.sidebar-collapsed {
+        left: 4rem; /* Adjust for collapsed main sidebar when reasoning sidebar is collapsed */
+    }
+
+    /* Document preview */
+    .document-preview-container {
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        padding: 20px;
+        height: 100%;
+        overflow-y: auto;
+        flex: 1;
+        /* Support for multi-page documents */
+        max-height: calc(100vh - 130px);
+        scrollbar-color: #333 #1a1a1a; /* For Firefox */
+        scrollbar-width: thin; /* For Firefox */
+    }
+
+    /* A4 page styling for document content */
+    .document-page {
+        width: 21cm; /* A4 width */
+        min-height: 29.7cm; /* A4 height */
+        padding: 2cm; /* Standard margins */
+        margin: 0 auto 1.5cm auto; /* Space between pages */
+        background-color: #fff;
+        color: #000;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        page-break-after: always;
+        box-sizing: border-box;
+        border-radius: 2px;
+    }
+
+    /* Ensure headings are always visible with proper contrast */
+    .document-page h1,
+    .document-page h2,
+    .document-page h3 {
+        color: #000 !important; /* Force black color for headings */
+        font-weight: bold;
+    }
+
+    /* Ensure paragraph text is dark enough for readability */
+    .document-page p,
+    .document-page li,
+    .document-page td,
+    .document-page th {
+        color: #111 !important; /* Dark gray, almost black */
+    }
+
+    /* Dark mode version of the A4 page */
+    .dark-theme .document-page {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Override text colors for dark theme */
+    .dark-theme .document-page h1,
+    .dark-theme .document-page h2,
+    .dark-theme .document-page h3 {
+        color: #fff !important; /* White headings for dark theme */
+    }
+
+    .dark-theme .document-page p,
+    .dark-theme .document-page li,
+    .dark-theme .document-page td,
+    .dark-theme .document-page th {
+        color: #e0e0e0 !important; /* Light gray for dark theme */
+    }
+
+    /* Page number styling */
+    .document-page::after {
+        content: attr(data-page);
+        position: absolute;
+        bottom: 0.5cm;
+        right: 0.5cm;
+        font-size: 11pt; /* Larger font size */
+        color: #333; /* Darker color for better visibility */
+        font-weight: 500; /* Semi-bold for better visibility */
+    }
+
+    .dark-theme .document-page::after {
+        color: #ddd; /* Lighter color for dark theme */
+    }
+
+    /* Page header styling */
+    .page-header {
+        position: absolute;
+        top: 0.5cm;
+        left: 2cm;
+        right: 2cm;
+        height: 1cm;
+        border-bottom: 1px solid #333; /* Darker border for better visibility */
+        font-size: 10pt; /* Slightly larger font */
+        color: #333; /* Darker text color */
+        text-align: center;
+        font-weight: 500; /* Semi-bold for better visibility */
+        padding-top: 0.2cm;
+    }
+
+    .dark-theme .page-header {
+        border-bottom: 1px solid #555; /* Lighter border for dark theme */
+        color: #ddd; /* Lighter text for dark theme */
+    }
+
+    /* Page footer styling */
+    .page-footer {
+        position: absolute;
+        bottom: 0.5cm;
+        left: 2cm;
+        right: 2cm;
+        height: 1cm;
+        border-top: 1px solid #333; /* Darker border for better visibility */
+        font-size: 10pt; /* Slightly larger font */
+        color: #333; /* Darker text color */
+        text-align: center;
+        font-weight: 500; /* Semi-bold for better visibility */
+        padding-top: 0.2cm;
+    }
+
+    .dark-theme .page-footer {
+        border-top: 1px solid #555; /* Lighter border for dark theme */
+        color: #ddd; /* Lighter text for dark theme */
+    }
+
+    /* Multi-page document styling */
+    .document-preview-container h1,
+    .document-preview-container h2,
+    .document-preview-container h3 {
+        margin-top: 1.5em;
+        margin-bottom: 0.75em;
+        color: #e0e0e0;
+    }
+
+    .document-preview-container h1 {
+        font-size: 1.8em;
+        border-bottom: 1px solid #333;
+        padding-bottom: 0.3em;
+    }
+
+    .document-preview-container h2 {
+        font-size: 1.5em;
+        border-bottom: 1px solid #333;
+        padding-bottom: 0.2em;
+    }
+
+    .document-preview-container h3 {
+        font-size: 1.2em;
+    }
+
+    .document-preview-container p {
+        margin-bottom: 1em;
+        line-height: 1.6;
+    }
+
+    .document-preview-container ul,
+    .document-preview-container ol {
+        margin-bottom: 1em;
+        padding-left: 2em;
+    }
+
+    .document-preview-container li {
+        margin-bottom: 0.5em;
+    }
+
+    .document-preview-container blockquote {
+        border-left: 3px solid #555;
+        padding-left: 1em;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+        color: #aaa;
+    }
+
+    .document-preview-container table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 1em;
+    }
+
+    .document-preview-container th,
+    .document-preview-container td {
+        border: 1px solid #333;
+        padding: 0.5em;
+        text-align: left;
+    }
+
+    .document-preview-container th {
+        background-color: #222;
+    }
+
+    .document-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 200px;
+    }
+
+    .thinking-placeholder {
+        min-height: 100px;
+    }
+
+    /* Download button */
+    .download-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background-color: #4299e1;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        margin-top: 10px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .download-button:hover {
+        background-color: #3182ce;
+    }
+
+    /* Old fixed input container styles removed - input now in reasoning section */
+        transition: color 0.2s ease;
+        padding: 0;
+        z-index: 2;
+    }
+
+    .document-button-inside:hover {
+        color: #3182ce;
+    }
+
+    .document-button-inside svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Responsive layout */
+    @media (max-width: 768px) {
+        .reasoning-sidebar {
+            left: 0;
+            width: 250px;
+        }
+
+        .reasoning-sidebar.collapsed {
+            transform: translateX(-250px);
+        }
+
+        .reasoning-sidebar.collapsed .reasoning-header,
+        .reasoning-sidebar.collapsed .reasoning-footer {
+            width: calc(100% + 250px); /* Adjust for mobile sidebar width */
+            transform: translateX(250px);
+        }
+
+        .sidebar-toggle {
+            left: 250px; /* Position at the edge of the reasoning sidebar */
+            transform: translateY(-50%) translateX(-50%); /* Center on the dividing line */
+        }
+
+        .sidebar-toggle.collapsed {
+            left: 0; /* Position at the edge of the screen when collapsed */
+            transform: translateY(-50%) translateX(-50%); /* Keep centered on the dividing line */
+        }
+
+        .fixed-preview-container {
+            left: 250px;
+            width: auto;
+            right: 0;
+        }
+
+        .fixed-preview-container.sidebar-collapsed {
+            left: 0;
+        }
+
+        body.collapsed-sidebar .fixed-preview-container,
+        body.collapsed-sidebar .fixed-preview-container.sidebar-collapsed {
+            left: 0;
+        }
+
+        .fixed-input-container {
+            margin-left: 250px;
+            bottom: 15px;
+        }
+
+        .fixed-input-container.sidebar-collapsed {
+            margin-left: 0;
+        }
+
+        body.collapsed-sidebar .fixed-input-container,
+        body.collapsed-sidebar .fixed-input-container.sidebar-collapsed {
+            margin-left: 0;
+        }
+    }
+
+    /* Document options */
+    .document-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    /* Document actions */
+    .document-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    /* Document header styles for preview */
+    .document-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .document-title {
+        margin: 0;
+        font-size: 24px;
+        color: #e2e8f0;
+        flex: 1;
+    }
+
+    .document-type-badge {
+        background-color: #4a5568;
+        color: #e2e8f0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-left: 10px;
+    }
+
+    .download-icon-button {
+        margin-left: auto;
+        background-color: transparent;
+        color: #4299e1;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        transition: color 0.2s;
+    }
+
+    .download-icon-button:hover {
+        color: #3182ce;
+    }
+
+    .format-menu {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .format-option {
+        transition: background-color 0.2s;
+    }
+
+    .action-button {
+        background-color: transparent;
+        border: none;
+        color: #ccc;
+        font-size: 24px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 8px;
+        border-radius: 50%;
+    }
+
+    .action-button:hover {
+        background-color: #2d2d2d;
+        color: #fff;
+    }
+
+    /* Data analysis styles */
+    .analysis-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .analysis-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .analysis-title {
+        margin: 0;
+        font-size: 24px;
+        color: #e2e8f0;
+        flex: 1;
+    }
+
+    .analysis-type-badge {
+        background-color: #4a5568;
+        color: #e2e8f0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-left: 10px;
+    }
+
+    .visualization-section {
+        margin-bottom: 20px;
+    }
+
+    .chart-container {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .chart-image {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 4px;
+    }
+
+    .analysis-summary {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .markdown-content {
+        color: #e2e8f0;
+        line-height: 1.6;
+    }
+
+    .markdown-content h1,
+    .markdown-content h2,
+    .markdown-content h3 {
+        color: #e2e8f0;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+    }
+
+    .markdown-content p {
+        margin-bottom: 1em;
+    }
+
+    .markdown-content ul,
+    .markdown-content ol {
+        margin-bottom: 1em;
+        padding-left: 1.5em;
+    }
+
+    .markdown-content li {
+        margin-bottom: 0.5em;
+    }
+
+    /* Styling for headings in markdown content */
+    .markdown-content h1,
+    .markdown-content h2,
+    .markdown-content h3,
+    .markdown-content h4,
+    .markdown-content h5,
+    .markdown-content h6 {
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        font-weight: bold;
+        color: #e2e8f0;
+    }
+
+    .markdown-content h1 { font-size: 2em; }
+    .markdown-content h2 { font-size: 1.5em; }
+    .markdown-content h3 { font-size: 1.25em; }
+
+    /* Styling for bold text in markdown content */
+    .markdown-content strong,
+    .markdown-content b {
+        font-weight: bold;
+    }
+
+    /* Pre tag styling for data analysis */
+    .markdown-content pre {
+        font-family: inherit;
+        white-space: pre-wrap;
+        background-color: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        color: #e2e8f0;
+        line-height: 1.6;
+        overflow: visible;
+    }
+
+    /* Styling for headings in pre tags */
+    .markdown-content pre h1,
+    .markdown-content pre h2,
+    .markdown-content pre h3,
+    .markdown-content pre h4,
+    .markdown-content pre h5,
+    .markdown-content pre h6 {
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        font-weight: bold;
+        color: #e2e8f0;
+    }
+
+    .markdown-content pre h1 { font-size: 2em; }
+    .markdown-content pre h2 { font-size: 1.5em; }
+    .markdown-content pre h3 { font-size: 1.25em; }
+
+    /* Styling for bold text in pre tags */
+    .markdown-content pre strong,
+    .markdown-content pre b {
+        font-weight: bold;
+    }
+
+    /* Styling for lists in pre tags */
+    .markdown-content pre ul,
+    .markdown-content pre ol {
+        padding-left: 2em;
+        margin-bottom: 1em;
+    }
+
+    .markdown-content pre li {
+        margin-bottom: 0.5em;
+    }
+
+    /* User prompt styling */
+    .user-prompt {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        border: 1px solid #444;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .user-prompt .text-white {
+        margin-top: 4px;
+        font-weight: 500;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Hide elements */
+    .hidden {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Top Action Buttons (Download & Share) -->
+    <div class="fixed top-4 right-20 z-40 flex gap-3">
+        <!-- Download Button -->
+        <button class="download-summary-btn p-1 text-gray-400 hover:text-white transition-colors duration-200" title="Download document">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+        </button>
+
+        <!-- Share Button -->
+        <button class="share-summary-btn p-1 text-gray-400 hover:text-white transition-colors duration-200" title="Share document">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Sidebar Toggle Button -->
+    <div id="sidebarToggle" class="sidebar-toggle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+        </svg>
+    </div>
+
+    <!-- Reasoning Sidebar -->
+    <div id="reasoningSidebar" class="reasoning-sidebar">
+        <div class="reasoning-header">
+            <h3 class="text-lg font-semibold">Reasoning</h3>
+        </div>
+        <div id="documentSteps" class="document-steps-container">
+            <!-- Document generation steps will be added here dynamically -->
+            <div class="document-placeholder thinking-placeholder">
+                <p class="text-center text-gray-400">Enter a prompt below to begin generation</p>
+            </div>
+        </div>
+
+        <!-- Input Box in Reasoning Section -->
+        <div class="reasoning-footer">
+            <div class="reasoning-input-container">
+                <textarea
+                    id="documentContent"
+                    class="reasoning-input"
+                    placeholder="Describe what you want to create (e.g., 'Create a 5-page business report', 'Analyze sales data in 2 pages', 'Create a bar chart of monthly revenue')..."
+                    rows="3"
+                ></textarea>
+                <button id="generateButton" class="reasoning-send-btn-inside">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 2L11 13"></path>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="documentResults" class="hidden">
+        <!-- Hidden container for document results -->
+    </div>
+
+    <div id="finalDocument" class="document-container hidden">
+        <!-- Final document will be added here -->
+    </div>
+</div>
+
+<div class="fixed-preview-container">
+    <div id="documentPreview" class="document-preview-container">
+        <div class="document-placeholder">
+            <p class="text-center text-gray-400">Your design preview will appear here<br><span class="text-sm">You can create documents, data visualizations, and more</span></p>
+        </div>
+    </div>
+
+    <div id="documentActionButtons" class="hidden">
+        <!-- Hidden container for actions -->
+    </div>
+</div>
+
+<!-- Input box moved to reasoning section -->
+{% endblock %}
+
+{% block extra_js %}
+<!-- Add html2pdf.js for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Note: History functionality is provided by professional_history.js in layout.html -->
+<script>
+    // Debug: Check if professional history system is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Document Generator page loaded');
+        console.log('Professional History available:', !!window.professionalHistory);
+        console.log('History toggle element:', !!document.getElementById('history-toggle'));
+        console.log('History sidebar element:', !!document.getElementById('history-sidebar'));
+        console.log('Refresh button element:', !!document.getElementById('refresh-history'));
+
+        // Wait for professional history to initialize
+        setTimeout(() => {
+            if (window.professionalHistory) {
+                console.log('✅ Professional history system is working');
+                console.log('Auto-refresh enabled:', !!window.professionalHistory.refreshInterval);
+            } else {
+                console.warn('⚠️ Professional history system not found');
+            }
+        }, 2000);
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check for content parameter in URL and auto-execute
+        const urlParams = new URLSearchParams(window.location.search);
+        const contentParam = urlParams.get('content');
+
+        const documentContent = document.getElementById('documentContent');
+        const generateButton = document.getElementById('generateButton');
+        const documentResults = document.getElementById('documentResults');
+        const documentSteps = document.getElementById('documentSteps');
+        const finalDocument = document.getElementById('finalDocument');
+        const documentPreview = document.getElementById('documentPreview');
+        const documentActionButtons = document.getElementById('documentActionButtons');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const reasoningSidebar = document.getElementById('reasoningSidebar');
+
+        let generationInProgress = false;
+        let stepInterval;
+        let currentStep = 0;
+
+        // Check if main sidebar is collapsed
+        function checkMainSidebar() {
+            // Check localStorage for sidebar state
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.body.classList.add('collapsed-sidebar');
+            } else {
+                document.body.classList.remove('collapsed-sidebar');
+            }
+        }
+
+        // Initial check
+        checkMainSidebar();
+
+        // Listen for changes to localStorage
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'sidebarCollapsed') {
+                checkMainSidebar();
+            }
+        });
+
+        // Also check periodically
+        setInterval(checkMainSidebar, 500);
+
+        // Auto-execute if content parameter is present
+        if (contentParam && documentContent && generateButton) {
+            console.log('Content parameter found in URL:', contentParam);
+            // Set the content field
+            documentContent.value = contentParam;
+            console.log('Document content field populated from URL parameter');
+
+            // Auto-execute after a short delay
+            setTimeout(() => {
+                console.log('Auto-executing document generation from URL parameter');
+                generateButton.click();
+            }, 500); // Short delay to ensure everything is loaded
+        }
+
+        // Handle sidebar toggle
+        sidebarToggle.addEventListener('click', function() {
+            reasoningSidebar.classList.toggle('collapsed');
+            sidebarToggle.classList.toggle('collapsed');
+
+            // Toggle the collapsed class on the preview container and input container
+            document.querySelector('.fixed-preview-container').classList.toggle('sidebar-collapsed');
+            document.querySelector('.fixed-input-container').classList.toggle('sidebar-collapsed');
+
+            // Update toggle icon
+            const icon = sidebarToggle.querySelector('svg');
+            if (reasoningSidebar.classList.contains('collapsed')) {
+                icon.innerHTML = '<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>';
+            } else {
+                icon.innerHTML = '<path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>';
+            }
+        });
+
+        // Design generation steps
+        const documentStepTexts = [
+            "Analyzing design requirements...",
+            "Researching relevant content and styles...",
+            "Creating design structure...",
+            "Applying design principles and guidelines...",
+            "Optimizing for target audience...",
+            "Creating design preview...",
+            "Finalizing design..."
+        ];
+
+        // Data analysis steps
+        const dataAnalysisStepTexts = [
+            "Parsing and validating data...",
+            "Analyzing data structure and types...",
+            "Performing statistical analysis...",
+            "Identifying patterns and insights...",
+            "Generating appropriate visualizations...",
+            "Creating data summary...",
+            "Finalizing analysis..."
+        ];
+
+        // Add a design generation step
+        function addDocumentStep(text) {
+            const step = document.createElement('div');
+            step.className = 'document-step';
+            step.innerHTML = `
+                <div class="step-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <div class="step-text">${text}</div>
+            `;
+            documentSteps.appendChild(step);
+            return step;
+        }
+
+        // Check if content is requesting data analysis
+        function isDataAnalysisRequest(content) {
+            const dataAnalysisKeywords = [
+                'analyze data', 'data analysis', 'analyze dataset', 'visualize data',
+                'create chart', 'create graph', 'plot data', 'data visualization',
+                'create visualization', 'generate chart', 'generate graph', 'data insights',
+                'correlation analysis', 'statistical analysis', 'analyze statistics',
+                'create dashboard', 'data dashboard', 'analyze survey', 'analyze results',
+                'create histogram', 'create bar chart', 'create pie chart', 'create scatter plot',
+                'create line chart', 'create heatmap', 'create box plot'
+            ];
+
+            const contentLower = content.toLowerCase();
+
+            // Check for data analysis keywords
+            for (const keyword of dataAnalysisKeywords) {
+                if (contentLower.includes(keyword)) {
+                    return true;
+                }
+            }
+
+            // Check for CSV or tabular data in the content
+            if (contentLower.includes('csv') || contentLower.includes('excel') ||
+                contentLower.includes('spreadsheet') || contentLower.includes('dataset') ||
+                contentLower.includes('data set') || contentLower.includes('table')) {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Add user prompt at the top of the reasoning section
+        function addUserPrompt(prompt) {
+            const promptDiv = document.createElement('div');
+            promptDiv.className = 'user-prompt';
+            promptDiv.innerHTML = `
+                <div class="text-sm text-gray-400">Your prompt:</div>
+                <div class="text-white">${prompt}</div>
+            `;
+
+            // Add to the top of the reasoning section
+            if (documentSteps.firstChild) {
+                documentSteps.insertBefore(promptDiv, documentSteps.firstChild);
+            } else {
+                documentSteps.appendChild(promptDiv);
+            }
+
+            return promptDiv;
+        }
+
+        // Start design generation simulation
+        function startDocumentGeneration(content) {
+            if (generationInProgress) return;
+
+            generationInProgress = true;
+            currentStep = 0;
+
+            // Clear previous steps
+            documentSteps.innerHTML = '';
+
+            // Remove placeholder if it exists
+            const placeholder = documentSteps.querySelector('.thinking-placeholder');
+            if (placeholder) {
+                documentSteps.removeChild(placeholder);
+            }
+
+            // Add user prompt at the top
+            addUserPrompt(content);
+
+            // Hide final document
+            finalDocument.classList.add('hidden');
+
+            // Clear previous document preview and show loading
+            documentPreview.innerHTML = `
+                <div class="document-placeholder">
+                    <div class="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+
+            // Determine if this is a data analysis request
+            const isDataAnalysis = isDataAnalysisRequest(content);
+            const steps = isDataAnalysis ? dataAnalysisStepTexts : documentStepTexts;
+
+            // Add first step immediately
+            addDocumentStep(steps[currentStep]);
+            currentStep++;
+
+            // Add subsequent steps with delay
+            stepInterval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    addDocumentStep(steps[currentStep]);
+                    currentStep++;
+
+                    // Scroll to the bottom of the steps container
+                    documentSteps.scrollTop = documentSteps.scrollHeight;
+                } else {
+                    clearInterval(stepInterval);
+                }
+            }, 1500);
+        }
+
+        // Stop design generation simulation
+        function stopDocumentGeneration() {
+            clearInterval(stepInterval);
+            generationInProgress = false;
+            documentActionButtons.classList.remove('hidden');
+        }
+
+        // Auto-resize input box
+        if (documentContent) {
+            documentContent.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+
+            // Enter key handling
+            documentContent.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    generateButton.click();
+                }
+            });
+        }
+
+        // Handle generate button click
+        generateButton.addEventListener('click', function() {
+            const content = documentContent.value.trim();
+
+            if (!content) {
+                alert('Please describe what you want to create.');
+                return;
+            }
+
+            // Clear the input field immediately to allow for new input
+            documentContent.value = '';
+
+            // Start design generation simulation
+            startDocumentGeneration(content);
+
+            // Make API call to backend
+            fetch('/api/document/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: content,
+                    page_count: null // Let the backend extract page count from content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Stop simulation
+                stopDocumentGeneration();
+
+                // Display final design
+                if (data.success) {
+                    // Set the design HTML content directly in the preview panel
+                    documentPreview.innerHTML = data.document_html || '<p>Design creation failed.</p>';
+
+                    // Store the design HTML in the hidden finalDocument container for reference
+                    finalDocument.innerHTML = data.document_html || '<p>Design creation failed.</p>';
+
+                    // Store the PDF data for download (for future use if needed)
+                    if (data.pdf_base64) {
+                        const titleElement = documentPreview.querySelector('.document-title');
+                        const title = titleElement ? titleElement.textContent.trim().replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'document';
+
+                        // Create a hidden download link
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = `data:application/pdf;base64,${data.pdf_base64}`;
+                        downloadLink.download = `${title}.pdf`;
+                        downloadLink.id = 'pdfDownloadLink';
+                        downloadLink.style.display = 'none';
+                        document.body.appendChild(downloadLink);
+                    }
+
+                    // Track successful activity in enhanced history
+                    if (window.trackActivity) {
+                        try {
+                            window.trackActivity('agent_wave', 'document_generation', {
+                                content: content,
+                                request_type: isDataAnalysisRequest(content) ? 'data_analysis' : 'document'
+                            }, {
+                                success: true,
+                                has_pdf: !!data.pdf_base64,
+                                document_type: data.is_email_campaign ? 'email_campaign' :
+                                              data.is_learning_path ? 'learning_path' : 'document'
+                            });
+                        } catch (trackError) {
+                            console.warn('Error tracking successful activity:', trackError);
+                        }
+                    }
+                } else {
+                    documentPreview.innerHTML = `<div class="document-content"><p>Error: ${data.error || 'Design creation failed.'}</p></div>`;
+                    documentActionButtons.classList.add('hidden');
+
+                    // Track failed activity in enhanced history
+                    if (window.trackActivity) {
+                        try {
+                            window.trackActivity('agent_wave', 'document_generation', {
+                                content: content,
+                                request_type: isDataAnalysisRequest(content) ? 'data_analysis' : 'document'
+                            }, null, null, false, data.error || 'Design creation failed');
+                        } catch (trackError) {
+                            console.warn('Error tracking failed activity:', trackError);
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                stopDocumentGeneration();
+                documentPreview.innerHTML = `<div class="document-content"><p>Error: ${error.message || 'An error occurred during design creation.'}</p></div>`;
+                documentActionButtons.classList.add('hidden');
+
+                // Track network/API error in enhanced history
+                if (window.trackActivity) {
+                    try {
+                        window.trackActivity('agent_wave', 'document_generation', {
+                            content: content,
+                            request_type: isDataAnalysisRequest(content) ? 'data_analysis' : 'document'
+                        }, null, null, false, error.message || 'Network error during document generation');
+                    } catch (trackError) {
+                        console.warn('Error tracking network error:', trackError);
+                    }
+                }
+            });
+        });
+
+        // Placeholder for future feedback functions
+
+        // PDF functionality removed
+
+        // Show message
+        function showMessage(text) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'fixed top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg z-50';
+            messageElement.textContent = text;
+            document.body.appendChild(messageElement);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                document.body.removeChild(messageElement);
+            }, 3000);
+        }
+
+        // No event listeners needed
+    });
+
+    // Working Action Buttons Implementation (copied from Prime Agent Tools)
+    console.log('🚀 Setting up Agent Wave action buttons...');
+
+    // Enhanced event delegation for all action buttons (following Prime Agent Tools pattern)
+    document.body.addEventListener('click', (event) => {
+        console.log('Agent Wave - Body click detected:', event.target, 'Classes:', event.target.className);
+
+        // Check if the clicked element is a download-summary-btn or one of its children
+        const downloadBtn = event.target.closest('.download-summary-btn');
+        if (downloadBtn) {
+            console.log('Agent Wave - Download button clicked!', downloadBtn);
+            event.preventDefault();
+            event.stopPropagation();
+            showDownloadOptionsMenu(downloadBtn);
+            return;
+        }
+
+        // Check if the clicked element is a share-summary-btn or one of its children
+        const shareBtn = event.target.closest('.share-summary-btn');
+        if (shareBtn) {
+            console.log('Agent Wave - Share button clicked!', shareBtn);
+            event.preventDefault();
+            event.stopPropagation();
+            shareSummary();
+            return;
+        }
+
+        // Check if the clicked element is the backend-generated downloadButton
+        const backendDownloadBtn = event.target.closest('#downloadButton');
+        if (backendDownloadBtn) {
+            console.log('Agent Wave - Backend download button clicked!', backendDownloadBtn);
+            event.preventDefault();
+            event.stopPropagation();
+            showDownloadOptionsMenu(backendDownloadBtn);
+            return;
+        }
+
+        // Check for buttons with onclick="downloadDocument()" or similar
+        const onclickDownloadBtn = event.target.closest('[onclick*="download"]');
+        if (onclickDownloadBtn && onclickDownloadBtn.closest('#documentPreview')) {
+            console.log('Agent Wave - Onclick download button clicked!', onclickDownloadBtn);
+            event.preventDefault();
+            event.stopPropagation();
+            showDownloadOptionsMenu(onclickDownloadBtn);
+            return;
+        }
+    });
+
+    // Show download options menu
+    function showDownloadOptionsMenu(downloadBtn) {
+        console.log('Agent Wave - Showing download options menu');
+
+        // Remove existing menu if any
+        const existingMenu = document.getElementById('downloadOptionsMenu');
+        if (existingMenu) {
+            existingMenu.remove();
+            return;
+        }
+
+        const menu = document.createElement('div');
+        menu.id = 'downloadOptionsMenu';
+        menu.style.cssText = `
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            min-width: 180px;
+            margin-top: 5px;
+        `;
+
+        menu.innerHTML = `
+            <button class="download-html-btn w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Download as HTML
+            </button>
+            <button class="download-pdf-btn w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Download as PDF
+            </button>
+        `;
+
+        // Position the menu relative to the download button
+        downloadBtn.style.position = 'relative';
+        downloadBtn.appendChild(menu);
+
+        // Add event listeners for menu options
+        menu.querySelector('.download-html-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            downloadAsHTML();
+            menu.remove();
+        });
+
+        menu.querySelector('.download-pdf-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            downloadAsPDF();
+            menu.remove();
+        });
+
+        // Close menu when clicking outside
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!downloadBtn.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }, 100);
+    }
+
+    // Download as HTML function
+    function downloadAsHTML() {
+        console.log('Agent Wave - Downloading as HTML');
+
+        const documentPreview = document.getElementById('documentPreview');
+        if (!documentPreview) {
+            showToast('❌ No document to download', 'error');
+            return;
+        }
+
+        // Get the actual generated content (not the placeholder)
+        let htmlContent = documentPreview.innerHTML;
+
+        // Check if we have actual generated content (not placeholder)
+        if (!htmlContent ||
+            htmlContent.trim() === '' ||
+            htmlContent.includes('Your design preview will appear here') ||
+            htmlContent.includes('document-placeholder') ||
+            htmlContent.includes('loading-dots')) {
+            showToast('❌ No document content to download. Please generate a document first.', 'error');
+            return;
+        }
+
+        console.log('Found generated content for download:', htmlContent.substring(0, 200) + '...');
+
+        // Create full HTML document
+        const fullHtmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Wave Document</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; color: #333; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        .content { margin: 20px 0; }
+        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
+        h1, h2, h3 { color: #333; }
+        pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AutoWave Agent Wave - Document</h1>
+        <p>Generated on: ${new Date().toLocaleString()}</p>
+    </div>
+    <div class="content">
+        ${htmlContent}
+    </div>
+    <div class="footer">
+        <p>Generated by AutoWave Agent Wave | <a href="https://autowave.pro">autowave.pro</a></p>
+    </div>
+</body>
+</html>`;
+
+        const blob = new Blob([fullHtmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+
+        // Create filename
+        const filename = 'agent_wave_document_' + new Date().toISOString().slice(0, 10) + '.html';
+
+        // Create a temporary link and trigger download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+
+        showToast('✅ HTML file downloaded successfully!', 'success');
+        console.log('HTML download completed successfully!');
+    }
+
+    // Download as PDF function
+    function downloadAsPDF() {
+        console.log('Agent Wave - Downloading as PDF');
+
+        const documentPreview = document.getElementById('documentPreview');
+        if (!documentPreview) {
+            showToast('❌ No document to download', 'error');
+            return;
+        }
+
+        // Get the actual generated content (not the placeholder)
+        let htmlContent = documentPreview.innerHTML;
+
+        // Check if we have actual generated content (not placeholder)
+        if (!htmlContent ||
+            htmlContent.trim() === '' ||
+            htmlContent.includes('Your design preview will appear here') ||
+            htmlContent.includes('document-placeholder') ||
+            htmlContent.includes('loading-dots')) {
+            showToast('❌ No document content to download. Please generate a document first.', 'error');
+            return;
+        }
+
+        console.log('Found generated content for PDF:', htmlContent.substring(0, 200) + '...');
+
+        // Check if html2pdf is available
+        if (typeof html2pdf === 'undefined') {
+            console.error('html2pdf library not loaded');
+            showToast('❌ PDF generation library not available', 'error');
+            return;
+        }
+
+        const filename = 'agent_wave_document_' + new Date().toISOString().slice(0, 10) + '.pdf';
+
+        // Create a temporary container for PDF generation
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.position = 'absolute';
+        pdfContainer.style.left = '-9999px';
+        pdfContainer.style.top = '-9999px';
+        pdfContainer.style.width = '210mm';
+        pdfContainer.style.fontFamily = 'Arial, sans-serif';
+        pdfContainer.style.fontSize = '12px';
+        pdfContainer.style.lineHeight = '1.6';
+        pdfContainer.style.color = '#333';
+        pdfContainer.style.background = 'white';
+        pdfContainer.style.padding = '20px';
+
+        pdfContainer.innerHTML = `
+            <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+                <h1>AutoWave Agent Wave - Document</h1>
+                <p>Generated on: ${new Date().toLocaleString()}</p>
+            </div>
+            <div style="margin: 20px 0;">
+                ${htmlContent}
+            </div>
+            <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px;">
+                <p>Generated by AutoWave Agent Wave | autowave.pro</p>
+            </div>
+        `;
+
+        document.body.appendChild(pdfContainer);
+
+        // Show loading toast
+        showToast('📄 Generating PDF...', 'info');
+
+        // Configure PDF options
+        const options = {
+            margin: 10,
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait',
+                compress: true
+            }
+        };
+
+        // Generate and download PDF
+        html2pdf().from(pdfContainer).set(options).save().then(() => {
+            console.log('PDF download completed successfully!');
+            showToast('✅ PDF downloaded successfully!', 'success');
+            document.body.removeChild(pdfContainer);
+        }).catch((error) => {
+            console.error('PDF generation failed:', error);
+            showToast('❌ PDF generation failed. Please try again.', 'error');
+            if (document.body.contains(pdfContainer)) {
+                document.body.removeChild(pdfContainer);
+            }
+        });
+    }
+
+    // Share function
+    function shareSummary() {
+        console.log('Agent Wave - Share function called');
+
+        const documentPreview = document.getElementById('documentPreview');
+        if (!documentPreview) {
+            showToast('❌ No document to share', 'error');
+            return;
+        }
+
+        // Get the actual generated content text
+        let textContent = documentPreview.innerText.trim();
+
+        // Check if we have actual generated content (not placeholder)
+        if (!textContent ||
+            textContent === '' ||
+            textContent.includes('Your design preview will appear here') ||
+            textContent.includes('loading') ||
+            textContent.length < 10) {
+            showToast('❌ No document content to share. Please generate a document first.', 'error');
+            return;
+        }
+
+        console.log('Found generated content for sharing:', textContent.substring(0, 200) + '...');
+
+        // Create share data
+        const shareData = {
+            title: `AutoWave - Agent Wave Document`,
+            text: textContent,
+            url: window.location.href
+        };
+
+        console.log('Share data prepared:', shareData);
+
+        // Check if Web Share API is available
+        if (navigator.share) {
+            console.log('Using Web Share API');
+            navigator.share(shareData)
+                .then(() => {
+                    console.log('Share successful');
+                    showToast('✅ Content shared successfully!', 'success');
+                })
+                .catch(err => {
+                    console.error('Share failed:', err);
+                    fallbackShare(shareData);
+                });
+        } else {
+            console.log('Web Share API not available, using fallback');
+            fallbackShare(shareData);
+        }
+    }
+
+    // Fallback share function
+    function fallbackShare(shareData) {
+        console.log('Using fallback share method');
+
+        const formattedText = `${shareData.title}
+
+${shareData.text}
+
+---
+Shared from AutoWave Agent Wave: ${shareData.url}`;
+
+        console.log('Formatted text for sharing:', formattedText);
+
+        navigator.clipboard.writeText(formattedText)
+            .then(() => {
+                console.log('Text copied to clipboard successfully');
+                showToast('✅ Content copied to clipboard! You can now paste it anywhere to share.', 'success');
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = formattedText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+
+                    showToast('✅ Content copied to clipboard! You can now paste it anywhere to share.', 'success');
+                } catch (fallbackErr) {
+                    console.error('Fallback copy method also failed:', fallbackErr);
+                    showToast('❌ Failed to copy content. Please try again.', 'error');
+                }
+            });
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 text-white font-medium max-w-sm`;
+
+        if (type === 'success') {
+            toast.style.backgroundColor = '#10B981';
+        } else if (type === 'error') {
+            toast.style.backgroundColor = '#EF4444';
+        } else {
+            toast.style.backgroundColor = '#3B82F6';
+        }
+
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = 'transform 0.3s ease-in-out';
+        setTimeout(() => {
+            toast.style.transform = 'translateX(0)';
+        }, 10);
+
+        setTimeout(() => {
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 4000);
+    }
+
+    // Override the backend-generated download functions
+    window.downloadDocument = function() {
+        console.log('Backend downloadDocument() function called - redirecting to our implementation');
+
+        // Find the download button and trigger our menu
+        const downloadBtn = document.getElementById('downloadButton');
+        if (downloadBtn) {
+            showDownloadOptionsMenu(downloadBtn);
+        } else {
+            // Fallback to our document download function
+            downloadAsHTML();
+        }
+    };
+
+    // Override downloadWebpage function as well
+    window.downloadWebpage = function() {
+        console.log('Backend downloadWebpage() function called - redirecting to our implementation');
+
+        // Find the download button and trigger our menu
+        const downloadBtn = document.getElementById('downloadButton');
+        if (downloadBtn) {
+            showDownloadOptionsMenu(downloadBtn);
+        } else {
+            // Fallback to our document download function
+            downloadAsHTML();
+        }
+    };
+
+    console.log('✅ Agent Wave action buttons setup complete!');
+
+    // Test content removed - now shows proper placeholder
+</script>
+{% endblock %}

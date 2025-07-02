@@ -1,0 +1,217 @@
+{% extends "layout.html" %}
+
+{% block title %}Privacy Policy - AutoWave{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dark theme styles consistent with homepage */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    #main-content {
+        background-color: #121212;
+    }
+
+    main {
+        background-color: #121212;
+    }
+
+    .bg-white {
+        background-color: #121212 !important;
+    }
+
+    .text-gray-700, .text-gray-800 {
+        color: #e0e0e0 !important;
+    }
+
+    .text-gray-600 {
+        color: #aaa !important;
+    }
+
+    .text-gray-500 {
+        color: #888 !important;
+    }
+
+    .border-gray-200 {
+        border-color: #333 !important;
+    }
+
+    /* Content container */
+    .content-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        line-height: 1.6;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #e0e0e0;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .last-updated {
+        color: #888;
+        text-align: center;
+        margin-bottom: 3rem;
+        font-size: 0.9rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #e0e0e0;
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .content-text {
+        color: #ccc;
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .highlight {
+        color: #e0e0e0;
+        font-weight: 500;
+    }
+
+    .company-link {
+        color: #4a9eff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .company-link:hover {
+        color: #6bb6ff;
+        text-decoration: underline;
+    }
+
+    ul {
+        color: #ccc;
+        margin-bottom: 1.5rem;
+        padding-left: 1.5rem;
+    }
+
+    li {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Footer navigation */
+    .footer-nav {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        align-items: center;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #333;
+    }
+
+    .footer-link {
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 400;
+        transition: color 0.3s ease;
+        padding: 8px 0;
+    }
+
+    .footer-link:hover {
+        color: #aaa;
+        text-decoration: none;
+    }
+
+    .footer-link.current {
+        color: #aaa;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1 class="page-title">Privacy Policy</h1>
+    <p class="last-updated">Last updated: January 2025</p>
+    
+    <div class="content-text">
+        At AutoWave, operated by <a href="https://botrex.pro" class="company-link" target="_blank">Botrex Technology</a>, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you use our AI-powered platform.
+    </div>
+
+    <h2 class="section-title">Information We Collect</h2>
+    <div class="content-text">
+        <span class="highlight">Account Information:</span> When you create an account, we collect your email address and authentication information through our secure Google OAuth integration.
+    </div>
+    <div class="content-text">
+        <span class="highlight">Usage Data:</span> We collect information about how you interact with our platform, including features used, session duration, and general usage patterns to improve our services.
+    </div>
+    <div class="content-text">
+        <span class="highlight">Content Data:</span> We temporarily process the content you submit to our AI services, including text, images, and documents, solely to provide you with AI-generated responses.
+    </div>
+
+    <h2 class="section-title">How We Use Your Information</h2>
+    <ul>
+        <li>Provide and improve our AI services and platform functionality</li>
+        <li>Authenticate your account and maintain security</li>
+        <li>Process payments and manage subscriptions</li>
+        <li>Communicate with you about service updates and support</li>
+        <li>Analyze usage patterns to enhance user experience</li>
+    </ul>
+
+    <h2 class="section-title">Data Security</h2>
+    <div class="content-text">
+        We implement enterprise-grade security measures to protect your information, including encryption in transit and at rest, secure authentication protocols, and regular security audits. Your conversations and content are processed securely and are not stored permanently on our servers.
+    </div>
+
+    <h2 class="section-title">Third-Party Services</h2>
+    <div class="content-text">
+        AutoWave integrates with trusted third-party services including Google (for authentication and AI services), Supabase (for secure data management), and Paystack (for payment processing). These services have their own privacy policies and security measures.
+    </div>
+
+    <h2 class="section-title">Data Retention</h2>
+    <div class="content-text">
+        We retain your account information for as long as your account is active. Conversation data and uploaded content are processed temporarily and are not permanently stored. You can request deletion of your account and associated data at any time.
+    </div>
+
+    <h2 class="section-title">Your Rights</h2>
+    <ul>
+        <li>Access and review your personal information</li>
+        <li>Request correction of inaccurate data</li>
+        <li>Request deletion of your account and data</li>
+        <li>Opt out of non-essential communications</li>
+        <li>Export your data in a portable format</li>
+    </ul>
+
+    <h2 class="section-title">Cookies and Tracking</h2>
+    <div class="content-text">
+        We use essential cookies for authentication and session management. We do not use tracking cookies for advertising purposes. You can control cookie settings through your browser preferences.
+    </div>
+
+    <h2 class="section-title">Children's Privacy</h2>
+    <div class="content-text">
+        AutoWave is not intended for use by children under 13 years of age. We do not knowingly collect personal information from children under 13. If you believe we have collected such information, please contact us immediately.
+    </div>
+
+    <h2 class="section-title">Changes to This Policy</h2>
+    <div class="content-text">
+        We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on this page and updating the "Last updated" date.
+    </div>
+
+    <h2 class="section-title">Contact Us</h2>
+    <div class="content-text">
+        If you have any questions about this Privacy Policy or our data practices, please contact us through our support channels or visit <a href="https://botrex.pro" class="company-link" target="_blank">botrex.pro</a> for more information.
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+        <a href="/about" class="footer-link">About Us</a>
+        <a href="/blog" class="footer-link">Blog</a>
+        <a href="/privacy" class="footer-link current">Privacy</a>
+        <a href="/terms" class="footer-link">Terms</a>
+    </div>
+</div>
+{% endblock %}

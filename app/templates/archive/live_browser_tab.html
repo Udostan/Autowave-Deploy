@@ -1,0 +1,1269 @@
+<!-- Live Browser Tab -->
+<div id="live-browser-content" class="tab-content">
+    <div class="max-w-screen-xl mx-auto px-4 py-4">
+        <!-- Main Layout -->
+        <div class="flex flex-col gap-4">
+            <!-- Browser View -->
+            <div class="w-full">
+                <div class="bg-gray-900 rounded-lg shadow h-full">
+                    <!-- Browser Header -->
+                    <div class="flex items-center justify-between p-2 bg-gray-800 rounded-t-lg border-b border-gray-700">
+                        <div class="flex space-x-1">
+                            <button id="browser-back" class="text-gray-400 hover:text-white p-1 rounded" title="Back">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <button id="browser-forward" class="text-gray-400 hover:text-white p-1 rounded" title="Forward">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                            <button id="browser-refresh" class="text-gray-400 hover:text-white p-1 rounded" title="Refresh">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-gray-300 text-xs font-medium truncate px-2">
+                            <span id="browser-title">Live Browser</span>
+                        </div>
+                        <button id="browser-fullscreen" class="text-gray-400 hover:text-white p-1 rounded" title="Fullscreen">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Browser View -->
+                    <div class="relative bg-white rounded-b-lg overflow-hidden" style="height: 70vh; min-height: 400px;">
+                        <!-- Loading Overlay -->
+                        <div id="browser-loading" class="absolute inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-10 hidden">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-300"></div>
+                        </div>
+
+                        <!-- Browser Placeholder -->
+                        <div id="browser-placeholder" class="absolute inset-0 flex items-center justify-center bg-gray-800 text-gray-400">
+                            <div class="text-center p-4">
+                                <svg class="mx-auto h-12 w-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                                </svg>
+                                <p class="text-sm">Click "Start Browser" to begin</p>
+                            </div>
+                        </div>
+
+
+
+                        <!-- Direct Browser Execution Message -->
+                        <div id="screenshot-display" class="w-full h-full relative hidden">
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 text-white p-8">
+                                <svg class="w-16 h-16 mb-4 text-green-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <h2 class="text-xl font-bold mb-2">Chrome Browser Running on Your Computer</h2>
+                                <p class="text-center mb-4">The browser is operating in a separate Chrome window on your computer. <span class="text-yellow-300 font-bold">Look for the Chrome window</span> that should have opened on your screen.</p>
+                                <div class="bg-gray-700 p-4 rounded-lg max-w-md mb-4">
+                                    <p class="text-sm mb-2"><span class="font-bold">How it works:</span></p>
+                                    <ol class="text-sm list-decimal pl-5 space-y-1">
+                                        <li>Enter a task in the box below</li>
+                                        <li>Click "Execute Task on Your Computer"</li>
+                                        <li>A Chrome window will open (or come to the foreground)</li>
+                                        <li>Watch as the browser automatically executes your task</li>
+                                        <li>Task progress will be displayed in the progress section below</li>
+                                    </ol>
+                                </div>
+                                <div class="bg-yellow-800 p-3 rounded-lg text-yellow-200 text-sm">
+                                    <p class="flex items-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                        </svg>
+                                        Don't see a Chrome window? Try clicking "Stop Browser" and then "Start Browser" again.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden iframe for compatibility (not displayed) -->
+                        <iframe id="browser-frame" class="w-full h-full border-0 hidden" src="about:blank" style="display: none !important;" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox allow-top-navigation allow-modals allow-downloads" allow="camera; microphone; geolocation; fullscreen; clipboard-read; clipboard-write"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Section (Below Browser) -->
+            <div class="w-full">
+                <div class="bg-gray-900 rounded-lg shadow p-4">
+                    <!-- Browser Controls -->
+                    <div class="flex gap-2 mb-3">
+                        <button id="live-browser-start" class="flex-1 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium py-2 px-3 rounded transition-colors">
+                            <span class="flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                </svg>
+                                Start Browser
+                            </span>
+                        </button>
+                        <button id="live-browser-stop" class="flex-1 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium py-2 px-3 rounded transition-colors">
+                            <span class="flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Stop Browser
+                            </span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <!-- URL Input -->
+                            <div class="relative mb-3">
+                                <div class="flex">
+                                    <input id="live-browser-url" type="text" class="flex-grow bg-gray-800 text-gray-200 text-sm rounded-l py-2 px-3 focus:outline-none focus:ring-1 focus:ring-gray-600" placeholder="Enter URL (e.g., google.com)">
+                                    <button id="live-browser-navigate" class="bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium py-2 px-3 rounded-r transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Status Display -->
+                            <div id="live-browser-status" class="mb-3 p-2 bg-gray-800 rounded text-gray-300 text-xs">
+                                <div class="flex items-center">
+                                    <div id="status-indicator" class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
+                                    <p><span class="font-medium">Status:</span> <span id="live-browser-status-text">Not running</span></p>
+                                </div>
+                                <p class="truncate mt-1"><span class="font-medium">URL:</span> <span id="live-browser-current-url">None</span></p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <!-- Task Input -->
+                            <div class="mb-3">
+                                <div class="flex items-center mb-2">
+                                    <h3 class="text-sm font-medium text-white">Task Execution</h3>
+                                    <div class="ml-auto">
+                                        <button id="live-browser-task-chain-toggle" class="text-xs text-gray-400 hover:text-white flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                                            </svg>
+                                            Task Chain
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Single Task Mode -->
+                                <div id="live-browser-single-task-mode">
+                                    <textarea id="live-browser-task" class="w-full bg-gray-800 text-gray-200 text-sm rounded py-2 px-3 focus:outline-none focus:ring-1 focus:ring-gray-600" rows="3" placeholder="Enter a complex task (e.g., 'Go to Amazon, search for wireless headphones under $100, sort by customer rating, and find one with noise cancellation')"></textarea>
+                                    <button id="live-browser-execute-task" class="mt-2 w-full bg-green-700 hover:bg-green-600 text-white text-sm font-medium py-2 px-3 rounded transition-colors flex items-center justify-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                        Execute Task on Your Computer
+                                    </button>
+                                    <p class="text-xs text-gray-400 mt-1 text-center">Watch your computer screen to see the browser in action</p>
+                                </div>
+
+                                <!-- Task Chain Mode -->
+                                <div id="live-browser-task-chain-mode" class="hidden">
+                                    <div class="mb-2">
+                                        <button id="live-browser-create-chain" class="w-full bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium py-1 px-2 rounded transition-colors flex items-center justify-center">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                            </svg>
+                                            Create New Chain
+                                        </button>
+                                    </div>
+
+                                    <div id="live-browser-chain-tasks" class="mb-2 max-h-40 overflow-y-auto">
+                                        <!-- Task chain items will be added here -->
+                                        <div class="text-center text-gray-500 text-xs py-2">No tasks in chain yet</div>
+                                    </div>
+
+                                    <div class="flex space-x-2">
+                                        <div class="flex-grow">
+                                            <textarea id="live-browser-chain-task" class="w-full bg-gray-800 text-gray-200 text-xs rounded py-2 px-3 focus:outline-none focus:ring-1 focus:ring-gray-600" rows="2" placeholder="Enter a task to add to the chain"></textarea>
+                                        </div>
+                                        <div>
+                                            <button id="live-browser-add-to-chain" class="h-full bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium py-1 px-2 rounded transition-colors flex items-center justify-center">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button id="live-browser-execute-chain" class="mt-2 w-full bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium py-2 px-3 rounded transition-colors flex items-center justify-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                        Execute Chain
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Note -->
+                    <div class="p-2 bg-gray-800 rounded text-gray-400 text-xs">
+                        <p>The browser is powered by AI and operates autonomously based on your instructions. It can understand complex tasks, break them down into steps, and execute them automatically. <span class="text-white font-bold">The browser operates in a separate Chrome window on your computer</span> - you will see it typing, clicking, and navigating in that window in real-time.</p>
+                        <p class="mt-1 flex items-center">
+                            <svg class="w-4 h-4 mr-1 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>If you don't see a Chrome window, try clicking "Stop Browser" and then "Start Browser" again.</span>
+                        </p>
+                    </div>
+
+                    <!-- Task Progress Panel -->
+                    <div id="live-browser-progress" class="mt-3 p-3 bg-gray-800 rounded hidden">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-sm font-medium text-white flex items-center">
+                                <svg class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Task Progress
+                            </h3>
+                            <div class="text-xs text-green-400 flex items-center">
+                                <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>
+                                Chrome window active on your computer
+                            </div>
+                        </div>
+                        <div id="live-browser-progress-text" class="whitespace-pre-line text-gray-300 text-xs bg-gray-900 p-2 rounded max-h-40 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Feedback Form -->
+{% include 'feedback_form.html' %}
+
+<!-- Live Browser JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements - Controls
+        const liveBrowserContent = document.getElementById('live-browser-content');
+        const liveBrowserTask = document.getElementById('live-browser-task');
+        const liveBrowserExecuteTask = document.getElementById('live-browser-execute-task');
+        const liveBrowserStart = document.getElementById('live-browser-start');
+        const liveBrowserStop = document.getElementById('live-browser-stop');
+        const liveBrowserUrl = document.getElementById('live-browser-url');
+        const liveBrowserNavigate = document.getElementById('live-browser-navigate');
+        const liveBrowserStatusText = document.getElementById('live-browser-status-text');
+        const liveBrowserCurrentUrl = document.getElementById('live-browser-current-url');
+        const liveBrowserProgress = document.getElementById('live-browser-progress');
+        const liveBrowserProgressText = document.getElementById('live-browser-progress-text');
+        const statusIndicator = document.getElementById('status-indicator');
+
+        // Elements - Task Chain
+        const taskChainToggle = document.getElementById('live-browser-task-chain-toggle');
+        const singleTaskMode = document.getElementById('live-browser-single-task-mode');
+        const taskChainMode = document.getElementById('live-browser-task-chain-mode');
+        const createChainBtn = document.getElementById('live-browser-create-chain');
+        const chainTasksContainer = document.getElementById('live-browser-chain-tasks');
+        const chainTaskInput = document.getElementById('live-browser-chain-task');
+        const addToChainBtn = document.getElementById('live-browser-add-to-chain');
+        const executeChainBtn = document.getElementById('live-browser-execute-chain');
+
+        // Elements - Browser
+        const browserFrame = document.getElementById('browser-frame');
+        const browserPlaceholder = document.getElementById('browser-placeholder');
+        const browserLoading = document.getElementById('browser-loading');
+        const browserTitle = document.getElementById('browser-title');
+        const browserBack = document.getElementById('browser-back');
+        const browserForward = document.getElementById('browser-forward');
+        const browserRefresh = document.getElementById('browser-refresh');
+        const browserFullscreen = document.getElementById('browser-fullscreen');
+
+        // Elements - Screenshot Display (YouTube-style video player)
+        const screenshotDisplay = document.getElementById('screenshot-display');
+        const browserScreenshot = document.getElementById('browser-screenshot');
+        const downloadScreenshot = document.getElementById('download-screenshot');
+        const fullscreenScreenshot = document.getElementById('fullscreen-screenshot');
+
+        // Browser state
+        let browserState = {
+            isRunning: false,
+            currentUrl: "https://www.google.com",
+            isLoading: false,
+            taskInProgress: false,
+            taskChainMode: false,
+            taskChain: [],
+            chainId: null
+        };
+
+        // Proxy URL for secure browsing
+        const proxyBaseUrl = '/api/live-browser/proxy?url=';
+
+        // Update UI based on browser state
+        function updateBrowserUI() {
+            // Update status indicator
+            if (browserState.isRunning) {
+                statusIndicator.classList.remove('bg-red-500');
+                statusIndicator.classList.add('bg-green-500');
+                liveBrowserStatusText.textContent = 'Running';
+            } else {
+                statusIndicator.classList.remove('bg-green-500');
+                statusIndicator.classList.add('bg-red-500');
+                liveBrowserStatusText.textContent = 'Not running';
+            }
+
+            // Update URL display
+            if (browserState.currentUrl === 'about:blank' || !browserState.currentUrl) {
+                liveBrowserCurrentUrl.textContent = 'https://www.google.com';
+                browserState.currentUrl = 'https://www.google.com';
+            } else {
+                liveBrowserCurrentUrl.textContent = browserState.currentUrl;
+            }
+
+            // Update browser title
+            if (browserState.currentUrl) {
+                const domain = new URL(browserState.currentUrl).hostname;
+                browserTitle.textContent = domain;
+            } else {
+                browserTitle.textContent = 'Live Browser';
+            }
+
+            // Update button states
+            liveBrowserStart.disabled = browserState.isRunning;
+            liveBrowserStop.disabled = !browserState.isRunning;
+            liveBrowserNavigate.disabled = !browserState.isRunning;
+            liveBrowserExecuteTask.disabled = !browserState.isRunning || browserState.taskInProgress;
+            browserBack.disabled = !browserState.isRunning;
+            browserForward.disabled = !browserState.isRunning;
+            browserRefresh.disabled = !browserState.isRunning;
+
+            // Update task chain button states
+            if (executeChainBtn) {
+                executeChainBtn.disabled = !browserState.isRunning || browserState.taskInProgress || browserState.taskChain.length === 0;
+                if (executeChainBtn.disabled) {
+                    executeChainBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    executeChainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            if (createChainBtn) {
+                createChainBtn.disabled = !browserState.isRunning || browserState.taskInProgress;
+                if (createChainBtn.disabled) {
+                    createChainBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    createChainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            if (addToChainBtn) {
+                addToChainBtn.disabled = !browserState.isRunning || browserState.taskInProgress;
+                if (addToChainBtn.disabled) {
+                    addToChainBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    addToChainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            // Update button styles
+            if (browserState.isRunning) {
+                liveBrowserStart.classList.add('opacity-50', 'cursor-not-allowed');
+                liveBrowserStop.classList.remove('opacity-50', 'cursor-not-allowed');
+                liveBrowserNavigate.classList.remove('opacity-50', 'cursor-not-allowed');
+                liveBrowserExecuteTask.classList.remove('opacity-50', 'cursor-not-allowed');
+                browserBack.classList.remove('opacity-50', 'cursor-not-allowed');
+                browserForward.classList.remove('opacity-50', 'cursor-not-allowed');
+                browserRefresh.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                liveBrowserStart.classList.remove('opacity-50', 'cursor-not-allowed');
+                liveBrowserStop.classList.add('opacity-50', 'cursor-not-allowed');
+                liveBrowserNavigate.classList.add('opacity-50', 'cursor-not-allowed');
+                liveBrowserExecuteTask.classList.add('opacity-50', 'cursor-not-allowed');
+                browserBack.classList.add('opacity-50', 'cursor-not-allowed');
+                browserForward.classList.add('opacity-50', 'cursor-not-allowed');
+                browserRefresh.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+
+            // Update browser visibility
+            if (browserState.isRunning) {
+                browserPlaceholder.classList.add('hidden');
+                screenshotDisplay.classList.remove('hidden');
+                browserFrame.classList.add('hidden'); // Keep iframe hidden, we're using the YouTube-style video player instead
+            } else {
+                browserPlaceholder.classList.remove('hidden');
+                screenshotDisplay.classList.add('hidden');
+                browserFrame.classList.add('hidden');
+            }
+
+            // Update loading state
+            if (browserState.isLoading) {
+                browserLoading.classList.remove('hidden');
+            } else {
+                browserLoading.classList.add('hidden');
+            }
+        }
+
+        // Check browser status from server
+        function checkBrowserStatus() {
+            fetch('/api/live-browser/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        browserState.isRunning = data.is_running;
+
+                        // Handle about:blank URL
+                        if (data.current_url === 'about:blank' || !data.current_url) {
+                            browserState.currentUrl = 'https://www.google.com';
+                        } else {
+                            browserState.currentUrl = data.current_url;
+                        }
+
+                        // Update UI
+                        updateBrowserUI();
+
+                        // If browser is running, update the screenshot
+                        if (browserState.isRunning) {
+                            updateScreenshot();
+                        }
+                    } else {
+                        console.error('Error checking browser status:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking browser status:', error);
+                });
+        }
+
+        // Update the screenshot with a timestamp to prevent caching
+        function updateScreenshot() {
+            const timestamp = new Date().getTime();
+            browserScreenshot.src = `/api/live-browser/screenshot?t=${timestamp}`;
+        }
+
+        // Set up a timer to update screenshots regularly
+        let screenshotTimer = null;
+
+        function startScreenshotTimer() {
+            // Clear existing timer if any
+            if (screenshotTimer) {
+                clearInterval(screenshotTimer);
+            }
+
+            // Set up a new timer to update screenshots every 500ms
+            screenshotTimer = setInterval(updateScreenshot, 500);
+            console.log('Screenshot timer started');
+        }
+
+        function stopScreenshotTimer() {
+            // Clear the timer
+            if (screenshotTimer) {
+                clearInterval(screenshotTimer);
+                screenshotTimer = null;
+                console.log('Screenshot timer stopped');
+            }
+        }
+
+        // Get proxy URL for a given URL
+        function getProxyUrl(url) {
+            // Ensure URL has protocol
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+
+            // Use our proxy service to avoid cross-origin issues
+            return `/api/visual-browser-simple/proxy?url=${encodeURIComponent(url)}`;
+        }
+
+        // Navigate iframe to URL
+        function navigateIframe(url) {
+            browserState.isLoading = true;
+            updateBrowserUI();
+
+            // Use embedded browser with the URL parameter
+            browserFrame.src = `/embedded-browser?url=${encodeURIComponent(url)}`;
+
+            // Update browser title
+            try {
+                const domain = new URL(url).hostname;
+                browserTitle.textContent = domain;
+            } catch (e) {
+                browserTitle.textContent = 'Live Browser';
+            }
+
+            // Wait for iframe to load
+            browserFrame.onload = function() {
+                browserState.isLoading = false;
+                updateBrowserUI();
+            };
+
+            // Timeout in case iframe fails to load
+            setTimeout(function() {
+                browserState.isLoading = false;
+                updateBrowserUI();
+            }, 10000);
+        }
+
+        // Recording control functions
+        function startRecording() {
+            if (!browserState.isRecording && screenRecordingSocket && screenRecordingSocket.readyState === WebSocket.OPEN) {
+                screenRecordingSocket.send(JSON.stringify({
+                    type: 'command',
+                    command: 'start_recording'
+                }));
+            } else {
+                // Fallback to API if WebSocket is not available
+                fetch('/api/screen-recorder/start-recording', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            browserState.isRecording = true;
+                            browserState.currentRecordingId = data.recording_id;
+                            updateBrowserUI();
+                        } else {
+                            console.error('Error starting recording:', data.error);
+                            alert('Error starting recording: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error starting recording:', error);
+                        alert('Error starting recording: ' + error.message);
+                    });
+            }
+        }
+
+        function stopRecording() {
+            if (browserState.isRecording && screenRecordingSocket && screenRecordingSocket.readyState === WebSocket.OPEN) {
+                screenRecordingSocket.send(JSON.stringify({
+                    type: 'command',
+                    command: 'stop_recording'
+                }));
+            } else {
+                // Fallback to API if WebSocket is not available
+                fetch('/api/screen-recorder/stop-recording', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            browserState.isRecording = false;
+                            updateBrowserUI();
+                        } else {
+                            console.error('Error stopping recording:', data.error);
+                            alert('Error stopping recording: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error stopping recording:', error);
+                        alert('Error stopping recording: ' + error.message);
+                    });
+            }
+        }
+
+        function saveRecording() {
+            if (browserState.currentRecordingId) {
+                // Open download link in new tab
+                window.open(`/api/screen-recorder/recordings/${browserState.currentRecordingId}/download`, '_blank');
+            } else if (browserState.isRecording) {
+                // Stop recording first, then save
+                stopRecording();
+                setTimeout(() => {
+                    if (browserState.currentRecordingId) {
+                        window.open(`/api/screen-recorder/recordings/${browserState.currentRecordingId}/download`, '_blank');
+                    }
+                }, 1000);
+            }
+        }
+
+        // Start browser
+        liveBrowserStart.addEventListener('click', function() {
+            browserState.isLoading = true;
+            updateBrowserUI();
+
+            fetch('/api/live-browser/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    browserState.isLoading = false;
+
+                    if (data.success) {
+                        browserState.isRunning = true;
+                        updateBrowserUI();
+
+                        // Navigate to Google as default
+                        navigateIframe('https://www.google.com');
+                        browserState.currentUrl = 'https://www.google.com';
+                        liveBrowserCurrentUrl.textContent = 'https://www.google.com';
+
+                        // Start the screenshot timer
+                        startScreenshotTimer();
+                    } else {
+                        console.error('Error starting browser:', data.error);
+                        alert('Error starting browser: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    browserState.isLoading = false;
+                    updateBrowserUI();
+                    console.error('Error starting browser:', error);
+                    alert('Error starting browser: ' + error.message);
+                });
+        });
+
+        // Stop browser
+        liveBrowserStop.addEventListener('click', function() {
+            browserState.isLoading = true;
+            updateBrowserUI();
+
+            // Stop the screenshot timer
+            stopScreenshotTimer();
+
+            fetch('/api/live-browser/stop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    browserState.isLoading = false;
+
+                    if (data.success) {
+                        browserState.isRunning = false;
+                        browserState.currentUrl = null;
+                        browserFrame.src = 'about:blank';
+
+                        // Clear the screenshot
+                        browserScreenshot.src = '/static/screenshots/placeholder.png';
+
+                        updateBrowserUI();
+                    } else {
+                        console.error('Error stopping browser:', data.error);
+                        alert('Error stopping browser: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    browserState.isLoading = false;
+                    updateBrowserUI();
+                    console.error('Error stopping browser:', error);
+                    alert('Error stopping browser: ' + error.message);
+                });
+        });
+
+        // Navigate to URL
+        liveBrowserNavigate.addEventListener('click', function() {
+            const url = liveBrowserUrl.value.trim();
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            browserState.isLoading = true;
+            updateBrowserUI();
+
+            fetch('/api/live-browser/navigate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: url
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update iframe directly for immediate feedback
+                        navigateIframe(url);
+                        browserState.currentUrl = url;
+                        liveBrowserCurrentUrl.textContent = url;
+                    } else {
+                        browserState.isLoading = false;
+                        updateBrowserUI();
+                        console.error('Error navigating to URL:', data.error);
+                        alert('Error navigating to URL: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    browserState.isLoading = false;
+                    updateBrowserUI();
+                    console.error('Error navigating to URL:', error);
+                    alert('Error navigating to URL: ' + error.message);
+                });
+        });
+
+        // Execute task
+        liveBrowserExecuteTask.addEventListener('click', function() {
+            if (!browserState.isRunning || browserState.taskInProgress) return;
+
+            const task = liveBrowserTask.value.trim();
+            if (!task) {
+                alert('Please enter a task');
+                return;
+            }
+
+            // Show progress container
+            liveBrowserProgress.classList.remove('hidden');
+            liveBrowserProgressText.textContent = 'Processing task: ' + task + '\n\nConnecting to AI agent...';
+            browserState.taskInProgress = true;
+            updateBrowserUI();
+
+            // Send task to backend
+            fetch('/api/live-browser/execute-task', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    task_type: 'autonomous',
+                    task_data: {
+                        task: task
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    liveBrowserProgressText.textContent += '\n\nTask submitted successfully. The browser is now executing your task in a separate Chrome window. Look for the Chrome window on your screen!';
+
+                    // If we have a task_id, poll for updates
+                    if (data.task_id) {
+                        liveBrowserProgressText.textContent += `\n\nTask ID: ${data.task_id}`;
+                        pollTaskStatus(data.task_id, task);
+                    } else {
+                        // Handle immediate response (old API)
+                        handleTaskResult(data);
+                    }
+                } else {
+                    liveBrowserProgressText.textContent += '\n\nError: ' + (data.error || 'Unknown error');
+                    browserState.taskInProgress = false;
+                    updateBrowserUI();
+                    console.error('Error executing task:', data.error);
+
+                    // Auto-scroll to bottom
+                    liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+                }
+            })
+            .catch(error => {
+                liveBrowserProgressText.textContent += '\n\nError: ' + error.message;
+                browserState.taskInProgress = false;
+                updateBrowserUI();
+                console.error('Error executing task:', error);
+
+                // Auto-scroll to bottom
+                liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+            });
+        });
+
+        // Poll for task status
+        function pollTaskStatus(taskId, originalTask) {
+            console.log(`Polling for task status: ${taskId}`);
+
+            // Function to check task status
+            function checkTaskStatus() {
+                fetch(`/api/live-browser/task-status/${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update progress
+                        if (data.progress && data.progress.length > 0) {
+                            // Clear existing progress text and add new progress
+                            let progressText = `Processing task: ${originalTask}\n\nTask submitted successfully. The browser is now executing your task in a separate Chrome window. Look for the Chrome window on your screen!\n\nTask ID: ${taskId}\n\nProgress:`;
+
+                            data.progress.forEach(progress => {
+                                progressText += `\n- ${progress.message}`;
+                            });
+
+                            liveBrowserProgressText.textContent = progressText;
+
+                            // Auto-scroll to bottom
+                            liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+                        }
+
+                        // Check if task is completed
+                        if (data.status === 'completed') {
+                            console.log('Task completed');
+
+                            // Handle the result
+                            if (data.result) {
+                                handleTaskResult(data.result);
+                            } else {
+                                liveBrowserProgressText.textContent += '\n\nTask completed, but no result was returned.';
+                                browserState.taskInProgress = false;
+                                updateBrowserUI();
+                            }
+
+                            return; // Stop polling
+                        } else if (data.status === 'error') {
+                            console.log('Task failed');
+
+                            liveBrowserProgressText.textContent += '\n\nTask failed: ' + (data.result?.error || 'Unknown error');
+                            browserState.taskInProgress = false;
+                            updateBrowserUI();
+
+                            return; // Stop polling
+                        }
+
+                        // Continue polling if task is still in progress
+                        setTimeout(checkTaskStatus, 1000);
+                    } else {
+                        liveBrowserProgressText.textContent += '\n\nError checking task status: ' + (data.error || 'Unknown error');
+                        browserState.taskInProgress = false;
+                        updateBrowserUI();
+                        console.error('Error checking task status:', data.error);
+                    }
+                })
+                .catch(error => {
+                    liveBrowserProgressText.textContent += '\n\nError checking task status: ' + error.message;
+                    browserState.taskInProgress = false;
+                    updateBrowserUI();
+                    console.error('Error checking task status:', error);
+                });
+            }
+
+            // Start polling
+            checkTaskStatus();
+        }
+
+        // Handle task result
+        function handleTaskResult(result) {
+            console.log('Handling task result:', result);
+
+            // Update with task result
+            if (result.message) {
+                liveBrowserProgressText.textContent += '\n\n' + result.message;
+            }
+
+            // Display execution log if available
+            if (result.execution_log && result.execution_log.length > 0) {
+                liveBrowserProgressText.textContent += '\n\nStep-by-step execution:';
+
+                result.execution_log.forEach((step, index) => {
+                    const stepNumber = index + 1;
+                    const action = step.action || 'unknown';
+                    const success = step.success ? 'Success' : 'Failed';
+                    const message = step.message || '';
+
+                    liveBrowserProgressText.textContent += `\n\nStep ${stepNumber}: ${action} - ${success}`;
+                    if (message) {
+                        liveBrowserProgressText.textContent += `\n${message}`;
+                    }
+                });
+            }
+
+            // Mark task as complete
+            liveBrowserProgressText.textContent += '\n\nTask execution completed!';
+            browserState.taskInProgress = false;
+            updateBrowserUI();
+
+            // Auto-scroll to bottom
+            liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+
+            // Check browser status to update UI
+            checkBrowserStatus();
+
+            // Clear the task input
+            liveBrowserTask.value = '';
+        }
+
+        // Browser navigation buttons
+        browserBack.addEventListener('click', function() {
+            if (!browserState.isRunning) return;
+            browserFrame.contentWindow.history.back();
+        });
+
+        browserForward.addEventListener('click', function() {
+            if (!browserState.isRunning) return;
+            browserFrame.contentWindow.history.forward();
+        });
+
+        browserRefresh.addEventListener('click', function() {
+            if (!browserState.isRunning) return;
+            browserFrame.contentWindow.location.reload();
+        });
+
+        browserFullscreen.addEventListener('click', function() {
+            if (!browserState.isRunning) return;
+
+            if (browserFrame.requestFullscreen) {
+                browserFrame.requestFullscreen();
+            } else if (browserFrame.webkitRequestFullscreen) {
+                browserFrame.webkitRequestFullscreen();
+            } else if (browserFrame.msRequestFullscreen) {
+                browserFrame.msRequestFullscreen();
+            }
+        });
+
+        // Handle iframe load events
+        browserFrame.addEventListener('load', function() {
+            browserState.isLoading = false;
+            updateBrowserUI();
+
+            // Update URL display
+            try {
+                const currentUrl = browserFrame.contentWindow.location.href;
+                if (currentUrl !== 'about:blank') {
+                    browserState.currentUrl = currentUrl;
+                    liveBrowserCurrentUrl.textContent = currentUrl;
+
+                    // Update browser title
+                    const domain = new URL(currentUrl).hostname;
+                    browserTitle.textContent = domain;
+                } else {
+                    // If about:blank, use Google as default
+                    browserState.currentUrl = 'https://www.google.com';
+                    liveBrowserCurrentUrl.textContent = 'https://www.google.com';
+
+                    // Update browser title for Google
+                    browserTitle.textContent = 'google.com';
+                }
+            } catch (e) {
+                // Cross-origin restrictions may prevent access
+                console.log('Could not access iframe location due to security restrictions');
+
+                // Default to Google
+                browserState.currentUrl = 'https://www.google.com';
+                liveBrowserCurrentUrl.textContent = 'https://www.google.com';
+                browserTitle.textContent = 'google.com';
+            }
+        });
+
+        // Enter key in URL field
+        liveBrowserUrl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                liveBrowserNavigate.click();
+            }
+        });
+
+        // Screenshot display controls event listeners
+        downloadScreenshot.addEventListener('click', function() {
+            // Get the current timestamp
+            const timestamp = new Date().getTime();
+
+            // Open the screenshot in a new tab
+            window.open(`/api/live-browser/screenshot?t=${timestamp}&download=true`, '_blank');
+        });
+
+        fullscreenScreenshot.addEventListener('click', function() {
+            // Enter fullscreen mode
+            if (screenshotDisplay.requestFullscreen) {
+                screenshotDisplay.requestFullscreen();
+            } else if (screenshotDisplay.webkitRequestFullscreen) {
+                screenshotDisplay.webkitRequestFullscreen();
+            } else if (screenshotDisplay.msRequestFullscreen) {
+                screenshotDisplay.msRequestFullscreen();
+            }
+        });
+
+        // Check status periodically
+        setInterval(checkBrowserStatus, 5000);
+
+        // Initial status check and UI update
+        checkBrowserStatus();
+        updateBrowserUI();
+
+        // Task Chain Functions
+
+        // Toggle Task Chain Mode
+        if (taskChainToggle) {
+            taskChainToggle.addEventListener('click', function() {
+                browserState.taskChainMode = !browserState.taskChainMode;
+
+                if (browserState.taskChainMode) {
+                    singleTaskMode.classList.add('hidden');
+                    taskChainMode.classList.remove('hidden');
+                    taskChainToggle.classList.add('text-white');
+                    taskChainToggle.classList.remove('text-gray-400');
+                } else {
+                    singleTaskMode.classList.remove('hidden');
+                    taskChainMode.classList.add('hidden');
+                    taskChainToggle.classList.remove('text-white');
+                    taskChainToggle.classList.add('text-gray-400');
+                }
+            });
+        }
+
+        // Create Task Chain
+        if (createChainBtn) {
+            createChainBtn.addEventListener('click', function() {
+                if (!browserState.isRunning || browserState.taskInProgress) return;
+
+                fetch('/api/live-browser/task-chain/create', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        browserState.taskChain = [];
+                        browserState.chainId = data.chain_id;
+                        updateChainUI();
+
+                        // Show success message
+                        liveBrowserProgress.classList.remove('hidden');
+                        liveBrowserProgressText.textContent = 'New task chain created.';
+                        liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+                    } else {
+                        console.error('Error creating task chain:', data.error);
+                        alert('Error creating task chain: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error creating task chain:', error);
+                    alert('Error creating task chain: ' + error.message);
+                });
+            });
+        }
+
+        // Add Task to Chain
+        if (addToChainBtn) {
+            addToChainBtn.addEventListener('click', function() {
+                if (!browserState.isRunning || browserState.taskInProgress) return;
+
+                const task = chainTaskInput.value.trim();
+                if (!task) {
+                    alert('Please enter a task');
+                    return;
+                }
+
+                // Create chain if not exists
+                if (!browserState.chainId) {
+                    fetch('/api/live-browser/task-chain/create', {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            browserState.chainId = data.chain_id;
+                            addTaskToChain(task);
+                        } else {
+                            console.error('Error creating task chain:', data.error);
+                            alert('Error creating task chain: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error creating task chain:', error);
+                        alert('Error creating task chain: ' + error.message);
+                    });
+                } else {
+                    addTaskToChain(task);
+                }
+            });
+        }
+
+        function addTaskToChain(task) {
+            fetch('/api/live-browser/task-chain/add-task', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    task_type: 'autonomous',
+                    task_data: {
+                        task: task
+                    },
+                    description: task
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Add task to local state
+                    browserState.taskChain.push({
+                        id: data.task_index,
+                        description: task
+                    });
+
+                    // Update UI
+                    updateChainUI();
+
+                    // Clear input
+                    chainTaskInput.value = '';
+                } else {
+                    console.error('Error adding task to chain:', data.error);
+                    alert('Error adding task to chain: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error adding task to chain:', error);
+                alert('Error adding task to chain: ' + error.message);
+            });
+        }
+
+        // Execute Task Chain
+        if (executeChainBtn) {
+            executeChainBtn.addEventListener('click', function() {
+                if (!browserState.isRunning || browserState.taskInProgress || browserState.taskChain.length === 0) return;
+
+                // Show progress
+                liveBrowserProgress.classList.remove('hidden');
+                liveBrowserProgressText.textContent = 'Executing task chain...';
+                browserState.taskInProgress = true;
+                updateBrowserUI();
+
+                fetch('/api/live-browser/task-chain/execute', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        liveBrowserProgressText.textContent += '\n\n' + data.message;
+
+                        // Display results for each task
+                        if (data.results && data.results.length > 0) {
+                            liveBrowserProgressText.textContent += '\n\nTask Results:';
+
+                            data.results.forEach((result, index) => {
+                                const taskNumber = index + 1;
+                                const success = result.success ? 'Success' : 'Failed';
+                                const message = result.message || '';
+                                const description = result.task_description || `Task ${taskNumber}`;
+
+                                liveBrowserProgressText.textContent += `\n\nTask ${taskNumber}: ${description} - ${success}`;
+                                if (message) {
+                                    liveBrowserProgressText.textContent += `\n${message}`;
+                                }
+
+                                if (result.skipped) {
+                                    liveBrowserProgressText.textContent += '\n(Task was skipped due to condition)';
+                                }
+                            });
+                        }
+
+                        // Mark chain as complete
+                        liveBrowserProgressText.textContent += '\n\nTask chain completed!';
+
+                        // Auto-scroll to bottom
+                        liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+
+                        // Check browser status to update UI
+                        checkBrowserStatus();
+                    } else {
+                        liveBrowserProgressText.textContent += '\n\nTask chain failed: ' + (data.error || 'Unknown error');
+                        console.error('Error executing task chain:', data.error);
+
+                        // Auto-scroll to bottom
+                        liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+                    }
+
+                    browserState.taskInProgress = false;
+                    updateBrowserUI();
+                })
+                .catch(error => {
+                    console.error('Error executing task chain:', error);
+                    liveBrowserProgressText.textContent += '\n\nError executing task chain: ' + error.message;
+                    browserState.taskInProgress = false;
+                    updateBrowserUI();
+
+                    // Auto-scroll to bottom
+                    liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+                });
+            });
+        }
+
+        // Update Chain UI
+        function updateChainUI() {
+            if (!chainTasksContainer) return;
+
+            if (browserState.taskChain.length === 0) {
+                chainTasksContainer.innerHTML = '<div class="text-center text-gray-500 text-xs py-2">No tasks in chain yet</div>';
+                return;
+            }
+
+            chainTasksContainer.innerHTML = '';
+
+            browserState.taskChain.forEach((task, index) => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'p-2 mb-1 bg-gray-700 rounded text-xs text-white flex items-center';
+
+                const taskNumber = document.createElement('span');
+                taskNumber.className = 'mr-2 bg-gray-600 rounded-full w-5 h-5 flex items-center justify-center text-xs';
+                taskNumber.textContent = index + 1;
+
+                const taskText = document.createElement('span');
+                taskText.className = 'flex-grow truncate';
+                taskText.textContent = task.description;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'ml-2 text-gray-400 hover:text-white';
+                removeBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                removeBtn.addEventListener('click', function() {
+                    browserState.taskChain.splice(index, 1);
+                    updateChainUI();
+                    updateBrowserUI();
+                });
+
+                taskElement.appendChild(taskNumber);
+                taskElement.appendChild(taskText);
+                taskElement.appendChild(removeBtn);
+
+                chainTasksContainer.appendChild(taskElement);
+            });
+
+            updateBrowserUI();
+        }
+
+        // Visual Recognition Function
+        function performOCR() {
+            if (!browserState.isRunning || browserState.taskInProgress) return;
+
+            liveBrowserProgress.classList.remove('hidden');
+            liveBrowserProgressText.textContent = 'Performing OCR on current page...';
+            browserState.taskInProgress = true;
+            updateBrowserUI();
+
+            fetch('/api/live-browser/visual/ocr', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    liveBrowserProgressText.textContent += '\n\nOCR Results:';
+                    liveBrowserProgressText.textContent += '\n' + data.text;
+
+                    if (data.boxes && data.boxes.length > 0) {
+                        liveBrowserProgressText.textContent += `\n\nFound ${data.boxes.length} text elements on the page.`;
+                    }
+
+                    // Auto-scroll to bottom
+                    liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+                } else {
+                    liveBrowserProgressText.textContent += '\n\nOCR failed: ' + (data.error || 'Unknown error');
+                    console.error('Error performing OCR:', data.error);
+
+                    // Auto-scroll to bottom
+                    liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+                }
+
+                browserState.taskInProgress = false;
+                updateBrowserUI();
+            })
+            .catch(error => {
+                console.error('Error performing OCR:', error);
+                liveBrowserProgressText.textContent += '\n\nError performing OCR: ' + error.message;
+                browserState.taskInProgress = false;
+                updateBrowserUI();
+
+                // Auto-scroll to bottom
+                liveBrowserProgressText.scrollTop = liveBrowserProgressText.scrollHeight;
+            });
+        }
+
+        // Add OCR button to the UI
+        const controlsContainer = document.querySelector('.flex.space-x-2.mb-2');
+        if (controlsContainer) {
+            const ocrButton = document.createElement('button');
+            ocrButton.className = 'bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium py-1 px-2 rounded transition-colors flex items-center';
+            ocrButton.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>OCR';
+            ocrButton.addEventListener('click', performOCR);
+            controlsContainer.appendChild(ocrButton);
+        }
+    });
+</script>

@@ -1,0 +1,636 @@
+{% extends "layout.html" %}
+
+{% block title %}Data Analysis - AutoWave{% endblock %}
+
+{% block header %}Data Analysis{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dark theme styles */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    #main-content {
+        background-color: #121212;
+    }
+
+    main {
+        background-color: #121212;
+    }
+
+    .bg-white {
+        background-color: #121212 !important;
+    }
+
+    .text-gray-700 {
+        color: #e0e0e0 !important;
+    }
+
+    .border-gray-200 {
+        border-color: #333 !important;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Analysis container styles */
+    .analysis-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Input styles */
+    .analysis-input {
+        width: 100%;
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 16px;
+        resize: none;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .analysis-input:focus {
+        border-color: #6c63ff;
+    }
+
+    .analysis-button {
+        background-color: #6c63ff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .analysis-button:hover {
+        background-color: #5a52d5;
+    }
+
+    .analysis-button-inside {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: transparent;
+        border: none;
+        color: #6c63ff;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.3s;
+    }
+
+    .analysis-button-inside:hover {
+        background-color: rgba(108, 99, 255, 0.1);
+    }
+
+    /* Loading animation */
+    .loading-dots {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 8px;
+    }
+
+    .loading-dots span {
+        width: 8px;
+        height: 8px;
+        margin: 0 2px;
+        background-color: #e0e0e0;
+        border-radius: 50%;
+        display: inline-block;
+        animation: pulse 1.4s infinite ease-in-out;
+    }
+
+    .loading-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .loading-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(0.8);
+            opacity: 0.5;
+        }
+    }
+
+    /* Analysis results and containers */
+    .analysis-results, .analysis-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    /* Side-by-side layout */
+    .side-by-side-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        margin-top: 0;
+        margin-bottom: 80px; /* Space for fixed input */
+        height: calc(100vh - 170px); /* Adjust height to fit screen */
+        padding-right: calc(50% + 20px); /* Make space for fixed preview */
+    }
+
+    .reasoning-column {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .reasoning-column h3 {
+        margin-top: 0;
+    }
+
+    .analysis-steps-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .analysis-step {
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #252525;
+        border-radius: 8px;
+        border-left: 3px solid #6c63ff;
+    }
+
+    .analysis-step-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #e0e0e0;
+    }
+
+    .analysis-step-content {
+        color: #b0b0b0;
+    }
+
+    .analysis-placeholder {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        color: #666;
+        text-align: center;
+    }
+
+    /* Fixed preview container */
+    .fixed-preview-container {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        width: calc(50% - 40px);
+        height: calc(100vh - 170px);
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .analysis-preview-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 20px;
+    }
+
+    /* Fixed input container */
+    .fixed-input-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #121212;
+        padding: 15px 20px;
+        border-top: 1px solid #333;
+    }
+
+    .input-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .input-container {
+        position: relative;
+    }
+
+    /* Chart styles */
+    .chart-container {
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    .chart-image {
+        max-width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Data input section */
+    .data-input-section {
+        margin-bottom: 20px;
+    }
+
+    .data-input-tabs {
+        display: flex;
+        margin-bottom: 10px;
+    }
+
+    .data-input-tab {
+        padding: 8px 16px;
+        background-color: #252525;
+        border: 1px solid #444;
+        border-radius: 8px 8px 0 0;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+
+    .data-input-tab.active {
+        background-color: #2d2d2d;
+        border-bottom-color: #2d2d2d;
+    }
+
+    .data-input-content {
+        background-color: #2d2d2d;
+        border: 1px solid #444;
+        border-radius: 0 8px 8px 8px;
+        padding: 15px;
+    }
+
+    /* Analysis options */
+    .analysis-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .option-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .option-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .option-select {
+        width: 100%;
+        padding: 8px;
+        background-color: #252525;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        border-radius: 4px;
+    }
+
+    /* Divider */
+    .divider {
+        position: absolute;
+        top: 0;
+        right: calc(50% + 10px);
+        width: 1px;
+        height: 100%;
+        background-color: #333;
+    }
+
+    /* Markdown content */
+    .markdown-content {
+        line-height: 1.6;
+    }
+
+    .markdown-content h2 {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        color: #e0e0e0;
+    }
+
+    .markdown-content h3 {
+        margin-top: 15px;
+        margin-bottom: 8px;
+        color: #e0e0e0;
+    }
+
+    .markdown-content ul, .markdown-content ol {
+        margin-left: 20px;
+        margin-bottom: 15px;
+    }
+
+    .markdown-content p {
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="side-by-side-layout">
+        <div class="reasoning-column">
+            <h3 class="text-lg font-semibold mb-2">Reasoning</h3>
+            <div id="analysisSteps" class="analysis-steps-container">
+                <!-- Analysis steps will be added here dynamically -->
+                <div class="analysis-placeholder thinking-placeholder">
+                    <p class="text-center text-gray-400">Reasoning steps will appear here</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+    </div>
+
+    <div id="analysisResults" class="hidden">
+        <!-- Hidden container for analysis results -->
+    </div>
+</div>
+
+<div class="fixed-preview-container">
+    <div id="analysisPreview" class="analysis-preview-container">
+        <div class="analysis-placeholder">
+            <p class="text-center text-gray-400">Your data visualization will appear here</p>
+        </div>
+    </div>
+</div>
+
+<div class="fixed-input-container">
+    <div class="input-wrapper">
+        <div class="data-input-section">
+            <div class="data-input-tabs">
+                <div class="data-input-tab active" data-tab="csv">CSV/Text</div>
+                <div class="data-input-tab" data-tab="json">JSON</div>
+                <div class="data-input-tab" data-tab="sample">Sample Data</div>
+            </div>
+            <div class="data-input-content">
+                <div id="csvInput" class="tab-content">
+                    <textarea id="dataInput" class="analysis-input" rows="4" placeholder="Paste your CSV data or text data here..."></textarea>
+                </div>
+                <div id="jsonInput" class="tab-content" style="display: none;">
+                    <textarea id="jsonDataInput" class="analysis-input" rows="4" placeholder="Paste your JSON data here..."></textarea>
+                </div>
+                <div id="sampleInput" class="tab-content" style="display: none;">
+                    <div class="analysis-options">
+                        <div class="option-group">
+                            <label class="option-label">Sample Dataset</label>
+                            <select id="sampleDataset" class="option-select">
+                                <option value="sales">Sales Data</option>
+                                <option value="weather">Weather Data</option>
+                                <option value="finance">Financial Data</option>
+                            </select>
+                        </div>
+                        <button id="loadSampleButton" class="analysis-button">Load Sample</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-options">
+            <div class="option-group">
+                <label class="option-label">Analysis Type</label>
+                <select id="analysisType" class="option-select">
+                    <option value="summary">Summary Statistics</option>
+                    <option value="correlation">Correlation Analysis</option>
+                    <option value="distribution">Distribution Analysis</option>
+                    <option value="group_analysis">Group Analysis</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label class="option-label">Chart Type</label>
+                <select id="chartType" class="option-select">
+                    <option value="bar">Bar Chart</option>
+                    <option value="line">Line Chart</option>
+                    <option value="scatter">Scatter Plot</option>
+                    <option value="histogram">Histogram</option>
+                    <option value="pie">Pie Chart</option>
+                    <option value="heatmap">Heatmap</option>
+                    <option value="box">Box Plot</option>
+                    <option value="correlation">Correlation Matrix</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label class="option-label">Title</label>
+                <input type="text" id="chartTitle" class="analysis-input" placeholder="Chart Title" style="height: auto; padding: 8px;">
+            </div>
+        </div>
+
+        <div class="input-container">
+            <button id="analyzeButton" class="analysis-button">Analyze Data</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dataInput = document.getElementById('dataInput');
+        const jsonDataInput = document.getElementById('jsonDataInput');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const analysisResults = document.getElementById('analysisResults');
+        const analysisSteps = document.getElementById('analysisSteps');
+        const analysisPreview = document.getElementById('analysisPreview');
+        const analysisType = document.getElementById('analysisType');
+        const chartType = document.getElementById('chartType');
+        const chartTitle = document.getElementById('chartTitle');
+        const sampleDataset = document.getElementById('sampleDataset');
+        const loadSampleButton = document.getElementById('loadSampleButton');
+        
+        // Tab switching
+        const tabs = document.querySelectorAll('.data-input-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Show selected tab content
+                const tabName = this.getAttribute('data-tab');
+                if (tabName === 'csv') {
+                    document.getElementById('csvInput').style.display = 'block';
+                } else if (tabName === 'json') {
+                    document.getElementById('jsonInput').style.display = 'block';
+                } else if (tabName === 'sample') {
+                    document.getElementById('sampleInput').style.display = 'block';
+                }
+            });
+        });
+        
+        // Load sample data
+        loadSampleButton.addEventListener('click', function() {
+            const dataType = sampleDataset.value;
+            
+            // Fetch sample data from the server
+            fetch(`/api/data-analysis/sample-data?type=${dataType}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Display the sample data in the JSON input
+                        jsonDataInput.value = JSON.stringify(data.data, null, 2);
+                        
+                        // Switch to JSON tab
+                        tabs.forEach(t => t.classList.remove('active'));
+                        document.querySelector('[data-tab="json"]').classList.add('active');
+                        
+                        // Hide all tab content
+                        document.querySelectorAll('.tab-content').forEach(content => {
+                            content.style.display = 'none';
+                        });
+                        
+                        // Show JSON tab content
+                        document.getElementById('jsonInput').style.display = 'block';
+                    } else {
+                        alert('Error loading sample data: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading sample data');
+                });
+        });
+        
+        // Simulated analysis steps
+        let analysisInterval;
+        const analysisStepMessages = [
+            { title: "Data Loading", content: "Loading and parsing the dataset..." },
+            { title: "Data Validation", content: "Checking data types and structure..." },
+            { title: "Missing Values", content: "Identifying and handling missing values..." },
+            { title: "Statistical Analysis", content: "Calculating summary statistics and distributions..." },
+            { title: "Correlation Analysis", content: "Analyzing relationships between variables..." },
+            { title: "Visualization Preparation", content: "Preparing data for visualization..." },
+            { title: "Chart Generation", content: "Generating the requested chart type..." },
+            { title: "Insight Extraction", content: "Extracting key insights from the analysis..." }
+        ];
+        
+        function startAnalysisSimulation() {
+            // Clear previous steps
+            analysisSteps.innerHTML = '';
+            
+            // Show the first step immediately
+            addAnalysisStep(analysisStepMessages[0].title, analysisStepMessages[0].content);
+            
+            let stepIndex = 1;
+            
+            // Add subsequent steps with delays
+            analysisInterval = setInterval(() => {
+                if (stepIndex < analysisStepMessages.length) {
+                    addAnalysisStep(analysisStepMessages[stepIndex].title, analysisStepMessages[stepIndex].content);
+                    stepIndex++;
+                } else {
+                    clearInterval(analysisInterval);
+                }
+            }, 1000);
+        }
+        
+        function stopAnalysisSimulation() {
+            clearInterval(analysisInterval);
+        }
+        
+        function addAnalysisStep(title, content) {
+            const stepElement = document.createElement('div');
+            stepElement.className = 'analysis-step';
+            stepElement.innerHTML = `
+                <div class="analysis-step-title">${title}</div>
+                <div class="analysis-step-content">${content}</div>
+            `;
+            analysisSteps.appendChild(stepElement);
+            
+            // Scroll to the bottom
+            analysisSteps.scrollTop = analysisSteps.scrollHeight;
+        }
+        
+        // Handle analyze button click
+        analyzeButton.addEventListener('click', function() {
+            let data;
+            const activeTab = document.querySelector('.data-input-tab.active').getAttribute('data-tab');
+            
+            if (activeTab === 'csv') {
+                data = dataInput.value.trim();
+            } else if (activeTab === 'json') {
+                data = jsonDataInput.value.trim();
+                try {
+                    // Parse JSON to validate it
+                    JSON.parse(data);
+                } catch (e) {
+                    alert('Invalid JSON format. Please check your input.');
+                    return;
+                }
+            } else {
+                alert('Please select a data input method.');
+                return;
+            }
+            
+            if (!data) {
+                alert('Please enter data to analyze.');
+                return;
+            }
+            
+            // Start analysis simulation
+            startAnalysisSimulation();
+            
+            // Make API call to backend
+            fetch('/api/data-analysis/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    data: data,
+                    analysis_type: analysisType.value,
+                    chart_type: chartType.value,
+                    title: chartTitle.value || 'Data Analysis'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Stop simulation
+                stopAnalysisSimulation();
+                
+                // Display analysis results
+                if (data.success) {
+                    // Set the analysis HTML content directly in the preview panel
+                    analysisPreview.innerHTML = data.analysis_html || '<p>Analysis failed.</p>';
+                    
+                    // Add final analysis step
+                    addAnalysisStep("Analysis Complete", "Data analysis and visualization completed successfully.");
+                } else {
+                    analysisPreview.innerHTML = `<p class="text-center text-red-500">Error: ${data.error}</p>`;
+                    addAnalysisStep("Analysis Error", `Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                stopAnalysisSimulation();
+                analysisPreview.innerHTML = '<p class="text-center text-red-500">Error processing request</p>';
+                addAnalysisStep("Analysis Error", "Error processing request. Please try again.");
+            });
+        });
+    });
+</script>
+{% endblock %}

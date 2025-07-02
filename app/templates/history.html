@@ -1,0 +1,802 @@
+{% extends "layout.html" %}
+
+{% block title %}AutoWave - Activity History{% endblock %}
+
+{% block header %}Activity History{% endblock %}
+
+{% block content %}
+<!-- ARCHIVED: This history page has been archived due to functionality issues -->
+<!-- A new comprehensive history system is being implemented -->
+<!-- DO NOT MODIFY THIS FILE - IT SHOULD NOT BE USED -->
+<div class="history-page">
+    <div class="archived-notice" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <i class="fas fa-archive" style="color: #856404; margin-right: 10px; font-size: 18px;"></i>
+            <h3 style="color: #856404; margin: 0; font-size: 16px; font-weight: 600;">Page Archived</h3>
+        </div>
+        <p style="color: #856404; margin: 0; font-size: 14px;">
+            This history page has been temporarily archived due to functionality issues.
+            A new comprehensive history system is being implemented that will properly track
+            all activities across AutoWave agents.
+        </p>
+        <p style="color: #856404; margin: 10px 0 0 0; font-size: 12px; font-style: italic;">
+            Note: This file should not be modified or used in future development.
+        </p>
+    </div>
+
+    <div class="history-description">
+        <p>The new history system will provide unified tracking across all AutoWave agents with proper session management.</p>
+    </div>
+
+    {% if not history_data.available %}
+    <div class="history-unavailable">
+        <div class="unavailable-icon">📊</div>
+        <h3>History Not Available</h3>
+        <p>{{ history_data.message or "History service is not configured. Please check your Supabase settings." }}</p>
+        {% if history_data.error %}
+        <p class="error-details">Error: {{ history_data.error }}</p>
+        {% endif %}
+    </div>
+    {% else %}
+
+    <!-- Analytics Summary -->
+    {% if history_data.analytics %}
+    <div class="analytics-summary">
+        <div class="analytics-card">
+            <div class="analytics-number">{{ history_data.analytics.total_activities }}</div>
+            <div class="analytics-label">Total Activities</div>
+        </div>
+        <div class="analytics-card">
+            <div class="analytics-number">{{ (history_data.analytics.total_processing_time / 1000) | round(1) }}s</div>
+            <div class="analytics-label">Processing Time</div>
+        </div>
+        <div class="analytics-card">
+            <div class="analytics-number">{{ history_data.analytics.total_files_uploaded }}</div>
+            <div class="analytics-label">Files Uploaded</div>
+        </div>
+        <div class="analytics-card">
+            <div class="analytics-number">{{ history_data.analytics.total_tokens_used }}</div>
+            <div class="analytics-label">Tokens Used</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="history-tabs">
+        <button class="tab-button active" data-tab="all">All Activities</button>
+        <button class="tab-button" data-tab="chat">Chat</button>
+        <button class="tab-button" data-tab="prime">Prime Agent</button>
+        <button class="tab-button" data-tab="code">Code Projects</button>
+        <button class="tab-button" data-tab="research">Research</button>
+        <button class="tab-button" data-tab="context7">Prime Agent Tools</button>
+        <button class="tab-button" data-tab="files">File Uploads</button>
+    </div>
+
+    <!-- All Activities Tab -->
+    <div class="tab-content" id="all-content">
+        <div class="history-list">
+            {% if history_data.activities %}
+                {% for activity in history_data.activities %}
+                <div class="history-item activity-{{ activity.agent_type }}">
+                    <div class="activity-icon">
+                        {% if activity.agent_type == 'autowave_chat' %}💬
+                        {% elif activity.agent_type == 'prime_agent' %}🎯
+                        {% elif activity.agent_type == 'agentic_code' %}💻
+                        {% elif activity.agent_type == 'research_lab' %}🔬
+                        {% elif activity.agent_type == 'context7_tools' %}🛠️
+                        {% elif activity.agent_type == 'agent_wave' %}🌊
+                        {% else %}📋
+                        {% endif %}
+                    </div>
+                    <div class="history-item-content">
+                        <div class="history-item-title">
+                            {{ activity.activity_type | title }} - {% if activity.agent_type == 'context7_tools' %}Prime Agent Tools{% else %}{{ activity.agent_type | replace('_', ' ') | title }}{% endif %}
+                        </div>
+                        <div class="history-item-preview">
+                            {% if activity.input_data.message %}
+                                {{ activity.input_data.message[:100] }}{% if activity.input_data.message|length > 100 %}...{% endif %}
+                            {% elif activity.input_data.task %}
+                                {{ activity.input_data.task[:100] }}{% if activity.input_data.task|length > 100 %}...{% endif %}
+                            {% elif activity.input_data.query %}
+                                {{ activity.input_data.query[:100] }}{% if activity.input_data.query|length > 100 %}...{% endif %}
+                            {% else %}
+                                {{ activity.input_data | string | truncate(100) }}
+                            {% endif %}
+                        </div>
+                        <div class="history-item-meta">
+                            <span class="history-date">{{ activity.created_at | format_datetime }}</span>
+                            {% if activity.processing_time_ms %}
+                            <span class="processing-time">{{ (activity.processing_time_ms / 1000) | round(1) }}s</span>
+                            {% endif %}
+                            {% if activity.file_uploads and activity.file_uploads|length > 0 %}
+                            <span class="file-count">📎 {{ activity.file_uploads|length }} file(s)</span>
+                            {% endif %}
+                            <span class="status-badge status-{{ 'success' if activity.success else 'error' }}">
+                                {{ 'Success' if activity.success else 'Error' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No activities found. Start using AutoWave to see your history here!</p>
+                    <a href="/" class="action-button">Go to Homepage</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Chat Tab -->
+    <div class="tab-content" id="chat-content" style="display: none;">
+        <div class="history-list">
+            {% if history_data.chat_conversations %}
+                {% for chat in history_data.chat_conversations %}
+                <div class="history-item chat-item">
+                    <div class="activity-icon">💬</div>
+                    <div class="history-item-content">
+                        <div class="history-item-title">Chat Conversation</div>
+                        <div class="chat-message">
+                            <strong>You:</strong> {{ chat.message[:150] }}{% if chat.message|length > 150 %}...{% endif %}
+                        </div>
+                        <div class="chat-response">
+                            <strong>AI:</strong> {{ chat.response[:150] }}{% if chat.response|length > 150 %}...{% endif %}
+                        </div>
+                        <div class="history-item-meta">
+                            <span class="history-date">{{ chat.created_at | format_datetime }}</span>
+                            {% if chat.model_used %}
+                            <span class="model-used">{{ chat.model_used }}</span>
+                            {% endif %}
+                            {% if chat.tokens_used %}
+                            <span class="tokens-used">{{ chat.tokens_used }} tokens</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No chat conversations found.</p>
+                    <a href="/dark-chat" class="action-button">Start Chatting</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Prime Agent Tab -->
+    <div class="tab-content" id="prime-content" style="display: none;">
+        <div class="history-list">
+            {% if history_data.prime_agent_tasks %}
+                {% for task in history_data.prime_agent_tasks %}
+                <div class="history-item prime-item">
+                    <div class="activity-icon">🎯</div>
+                    <div class="history-item-content">
+                        <div class="history-item-title">Prime Agent Task</div>
+                        <div class="task-description">
+                            {{ task.task_description[:200] }}{% if task.task_description|length > 200 %}...{% endif %}
+                        </div>
+                        {% if task.final_result %}
+                        <div class="task-result">
+                            <strong>Result:</strong> {{ task.final_result[:150] }}{% if task.final_result|length > 150 %}...{% endif %}
+                        </div>
+                        {% endif %}
+                        <div class="history-item-meta">
+                            <span class="history-date">{{ task.created_at | format_datetime }}</span>
+                            <span class="task-status status-{{ task.task_status }}">{{ task.task_status | title }}</span>
+                            {% if task.use_visual_browser %}
+                            <span class="visual-browser">🌐 Visual Browser</span>
+                            {% endif %}
+                            {% if task.execution_time_ms %}
+                            <span class="execution-time">{{ (task.execution_time_ms / 1000) | round(1) }}s</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No Prime Agent tasks found.</p>
+                    <a href="/context7-tools" class="action-button">Start Using Prime Agent</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Code Projects Tab -->
+    <div class="tab-content" id="code-content" style="display: none;">
+        <div class="history-list">
+            {% if history_data.code_projects %}
+                {% for project in history_data.code_projects %}
+                <div class="history-item code-item">
+                    <div class="activity-icon">💻</div>
+                    <div class="history-item-content">
+                        <div class="history-item-title">
+                            {{ project.project_name or 'Code Project' }}
+                        </div>
+                        <div class="project-description">
+                            {{ project.description[:200] }}{% if project.description|length > 200 %}...{% endif %}
+                        </div>
+                        <div class="history-item-meta">
+                            <span class="history-date">{{ project.created_at | format_datetime }}</span>
+                            {% if project.programming_language %}
+                            <span class="language">{{ project.programming_language | title }}</span>
+                            {% endif %}
+                            {% if project.framework %}
+                            <span class="framework">{{ project.framework }}</span>
+                            {% endif %}
+                            {% if project.generated_files %}
+                            <span class="file-count">📁 {{ project.generated_files|length }} file(s)</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No code projects found.</p>
+                    <a href="/agentic-code" class="action-button">Start Coding</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Research Tab -->
+    <div class="tab-content" id="research-content" style="display: none;">
+        <div class="history-list">
+            {% if history_data.research_queries %}
+                {% for research in history_data.research_queries %}
+                <div class="history-item research-item">
+                    <div class="activity-icon">🔬</div>
+                    <div class="history-item-content">
+                        <div class="history-item-title">Research Query</div>
+                        <div class="research-query">
+                            {{ research.query[:200] }}{% if research.query|length > 200 %}...{% endif %}
+                        </div>
+                        {% if research.final_report %}
+                        <div class="research-summary">
+                            <strong>Summary:</strong> {{ research.final_report[:150] }}{% if research.final_report|length > 150 %}...{% endif %}
+                        </div>
+                        {% endif %}
+                        <div class="history-item-meta">
+                            <span class="history-date">{{ research.created_at | format_datetime }}</span>
+                            <span class="research-depth">{{ research.research_depth | title }} Research</span>
+                            {% if research.sources_count %}
+                            <span class="sources-count">📚 {{ research.sources_count }} sources</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No research queries found.</p>
+                    <a href="/deep-research" class="action-button">Start Researching</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Prime Agent Tools Tab -->
+    <div class="tab-content" id="context7-content" style="display: none;">
+        <div class="history-list">
+            {% if history_data.context7_usage %}
+                {% for usage in history_data.context7_usage %}
+                <div class="history-item context7-item">
+                    <div class="activity-icon">🛠️</div>
+                    <div class="history-item-content">
+                        <div class="history-item-title">{{ usage.tool_name }}</div>
+                        <div class="tool-details">
+                            {% if usage.tool_category %}
+                            <span class="tool-category">{{ usage.tool_category | title }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="history-item-meta">
+                            <span class="history-date">{{ usage.created_at | format_datetime }}</span>
+                            <span class="status-badge status-{{ 'success' if usage.success else 'error' }}">
+                                {{ 'Success' if usage.success else 'Error' }}
+                            </span>
+                            {% if usage.screenshots and usage.screenshots|length > 0 %}
+                            <span class="screenshot-count">📸 {{ usage.screenshots|length }} screenshot(s)</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No Prime Agent Tools usage found.</p>
+                    <a href="/context7-tools" class="action-button">Use Prime Agent Tools</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- File Uploads Tab -->
+    <div class="tab-content" id="files-content" style="display: none;">
+        <div class="history-list">
+            {% if history_data.file_uploads %}
+                {% for file in history_data.file_uploads %}
+                <div class="history-item file-item">
+                    <div class="activity-icon">📎</div>
+                    <div class="history-item-content">
+                        <div class="history-item-title">{{ file.filename }}</div>
+                        <div class="file-details">
+                            <span class="file-type">{{ file.file_type | upper }}</span>
+                            {% if file.file_size %}
+                            <span class="file-size">{{ (file.file_size / 1024) | round(1) }} KB</span>
+                            {% endif %}
+                            {% if file.mime_type %}
+                            <span class="mime-type">{{ file.mime_type }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="history-item-meta">
+                            <span class="history-date">{{ file.created_at | format_datetime }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No file uploads found.</p>
+                    <a href="/" class="action-button">Upload Files</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+<style>
+    /* Match homepage dark theme colors */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .history-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .history-description {
+        margin-bottom: 25px;
+        color: #aaa;
+        font-size: 17px;
+        text-align: center;
+    }
+
+    /* History Unavailable State - Match homepage theme */
+    .history-unavailable {
+        text-align: center;
+        padding: 60px 20px;
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        margin: 40px 0;
+    }
+
+    .unavailable-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #aaa;
+    }
+
+    .history-unavailable h3 {
+        color: #e0e0e0;
+        margin-bottom: 15px;
+    }
+
+    .error-details {
+        color: #ef4444;
+        font-size: 14px;
+        margin-top: 10px;
+        font-family: monospace;
+    }
+
+    /* Analytics Summary - Match homepage dark theme */
+    .analytics-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        color: #e0e0e0;
+    }
+
+    .analytics-card {
+        text-align: center;
+        padding: 15px;
+        background: #2d2d2d;
+        border: 1px solid #444;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .analytics-card:hover {
+        background: #3d3d3d;
+        border-color: #555;
+    }
+
+    .analytics-number {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #e0e0e0;
+    }
+
+    .analytics-label {
+        font-size: 14px;
+        color: #aaa;
+    }
+
+    .history-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #333;
+        margin-bottom: 20px;
+        gap: 5px;
+    }
+
+    .tab-button {
+        padding: 12px 16px;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #aaa;
+        transition: all 0.3s ease;
+        border-radius: 6px 6px 0 0;
+        white-space: nowrap;
+    }
+
+    .tab-button:hover {
+        color: #e0e0e0;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-button.active {
+        color: #e0e0e0;
+        border-bottom-color: #e0e0e0;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .history-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 20px;
+        background-color: #1e1e1e;
+        border-radius: 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #333;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .history-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        border-color: #444;
+        background-color: #2d2d2d;
+    }
+
+    .activity-icon {
+        font-size: 24px;
+        margin-right: 15px;
+        margin-top: 2px;
+        flex-shrink: 0;
+        color: #aaa;
+    }
+
+    .history-item-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .history-item-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #e0e0e0;
+        font-size: 16px;
+    }
+
+    .history-item-preview,
+    .chat-message,
+    .chat-response,
+    .task-description,
+    .project-description,
+    .research-query,
+    .research-summary,
+    .task-result {
+        color: #ccc;
+        line-height: 1.5;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .chat-message,
+    .chat-response {
+        padding: 8px 12px;
+        background: #2d2d2d;
+        border: 1px solid #444;
+        border-radius: 6px;
+        margin-bottom: 6px;
+    }
+
+    .chat-response {
+        background: #3d3d3d;
+        border-color: #555;
+    }
+
+    .history-item-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .history-date {
+        font-size: 13px;
+        color: #888;
+        font-weight: 500;
+    }
+
+    .processing-time,
+    .execution-time,
+    .file-count,
+    .tokens-used,
+    .model-used,
+    .language,
+    .framework,
+    .research-depth,
+    .sources-count,
+    .tool-category,
+    .screenshot-count,
+    .file-type,
+    .file-size,
+    .mime-type {
+        font-size: 12px;
+        padding: 3px 8px;
+        background: #2d2d2d;
+        border: 1px solid #444;
+        border-radius: 12px;
+        color: #aaa;
+        font-weight: 500;
+    }
+
+    .status-badge {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-error {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-in_progress {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .visual-browser {
+        color: #007bff;
+        font-weight: 500;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #aaa;
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        margin: 20px 0;
+    }
+
+    .empty-state .action-button {
+        display: inline-block;
+        margin-top: 20px;
+        background: #2d2d2d;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        padding: 12px 24px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .empty-state .action-button:hover {
+        background: #3d3d3d;
+        border-color: #555;
+        transform: translateY(-2px);
+    }
+
+    /* Agent-specific styling */
+    .activity-autowave_chat {
+        border-left: 4px solid #28a745;
+    }
+
+    .activity-prime_agent {
+        border-left: 4px solid #007bff;
+    }
+
+    .activity-agentic_code {
+        border-left: 4px solid #6f42c1;
+    }
+
+    .activity-research_lab {
+        border-left: 4px solid #fd7e14;
+    }
+
+    .activity-context7_tools {
+        border-left: 4px solid #20c997;
+    }
+
+    .activity-agent_wave {
+        border-left: 4px solid #e83e8c;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .history-page {
+            padding: 10px;
+        }
+
+        .analytics-summary {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .analytics-number {
+            font-size: 24px;
+        }
+
+        .history-tabs {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .history-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-button {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .history-item {
+            padding: 15px;
+        }
+
+        .activity-icon {
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .history-item-title {
+            font-size: 15px;
+        }
+
+        .history-item-meta {
+            gap: 8px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Initialize - show first tab
+        if (tabContents.length > 0) {
+            tabContents[0].style.display = 'block';
+        }
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Hide all tab contents
+                tabContents.forEach(content => content.style.display = 'none');
+
+                // Show the selected tab content
+                const tabId = this.getAttribute('data-tab');
+                const targetContent = document.getElementById(`${tabId}-content`);
+                if (targetContent) {
+                    targetContent.style.display = 'block';
+                }
+            });
+        });
+
+        // Add smooth scrolling for better UX
+        const historyItems = document.querySelectorAll('.history-item');
+        historyItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // Add a subtle click effect
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Auto-refresh functionality (optional)
+        const refreshButton = document.createElement('button');
+        refreshButton.innerHTML = '🔄 Refresh';
+        refreshButton.className = 'refresh-button';
+        refreshButton.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        `;
+
+        refreshButton.addEventListener('click', function() {
+            window.location.reload();
+        });
+
+        refreshButton.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.background = '#3d3d3d';
+            this.style.borderColor = '#555';
+        });
+
+        refreshButton.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.background = '#2d2d2d';
+            this.style.borderColor = '#444';
+        });
+
+        document.body.appendChild(refreshButton);
+    });
+</script>
+{% endblock %}

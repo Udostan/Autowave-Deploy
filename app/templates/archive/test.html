@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Test</title>
+</head>
+<body>
+    <h1>JavaScript Test</h1>
+    <button id="testButton">Click Me</button>
+    <div id="result"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            const testButton = document.getElementById('testButton');
+            const result = document.getElementById('result');
+            
+            console.log('Test button:', testButton);
+            
+            testButton.addEventListener('click', function() {
+                console.log('Button clicked');
+                result.textContent = 'Button clicked at ' + new Date().toLocaleTimeString();
+                alert('Button clicked!');
+            });
+        });
+    </script>
+</body>
+</html>

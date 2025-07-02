@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test History Sidebar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-result {
+            background: #1e1e1e;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+        }
+        .success {
+            border-left-color: #28a745;
+        }
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>History Sidebar Debug Test</h1>
+        
+        <div>
+            <button class="test-button" onclick="testHistoryAPI()">Test History API</button>
+            <button class="test-button" onclick="testHistorySidebar()">Test History Sidebar</button>
+            <button class="test-button" onclick="openHistorySidebar()">Open History Sidebar</button>
+            <button class="test-button" onclick="generateDocument()">Generate Test Document</button>
+            <button class="test-button" onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function addResult(title, success, data) {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${success ? 'success' : 'error'}`;
+            div.innerHTML = `
+                <h3>${title}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            resultsDiv.appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testHistoryAPI() {
+            try {
+                console.log('Testing history API...');
+                const response = await fetch('/api/history/unified?limit=10');
+                const data = await response.json();
+                
+                addResult('History API Test', response.ok && data.success, {
+                    status: response.status,
+                    success: data.success,
+                    count: data.count,
+                    history_length: data.history ? data.history.length : 0,
+                    agent_wave_count: data.history ? data.history.filter(item => item.agent_type === 'agent_wave').length : 0,
+                    sample_items: data.history ? data.history.slice(0, 3).map(item => ({
+                        agent_type: item.agent_type,
+                        agent_display_name: item.agent_display_name,
+                        preview_text: item.preview_text,
+                        session_id: item.session_id
+                    })) : []
+                });
+                
+            } catch (error) {
+                addResult('History API Test', false, {
+                    error: error.message,
+                    stack: error.stack
+                });
+            }
+        }
+        
+        function testHistorySidebar() {
+            try {
+                console.log('Testing history sidebar elements...');
+                
+                const toggle = document.getElementById('history-toggle');
+                const sidebar = document.getElementById('history-sidebar');
+                const overlay = document.getElementById('history-overlay');
+                const listEl = document.getElementById('history-list');
+                const loadingEl = document.getElementById('history-loading');
+                const emptyEl = document.getElementById('history-empty');
+                
+                const results = {
+                    toggle_exists: !!toggle,
+                    sidebar_exists: !!sidebar,
+                    overlay_exists: !!overlay,
+                    list_exists: !!listEl,
+                    loading_exists: !!loadingEl,
+                    empty_exists: !!emptyEl,
+                    professional_history_exists: !!window.professionalHistory,
+                    professional_history_type: typeof window.professionalHistory
+                };
+                
+                if (window.professionalHistory) {
+                    results.history_data_length = window.professionalHistory.historyData ? window.professionalHistory.historyData.length : 0;
+                    results.is_open = window.professionalHistory.isOpen;
+                    results.current_filter = window.professionalHistory.currentFilter;
+                }
+                
+                addResult('History Sidebar Elements Test', 
+                    results.toggle_exists && results.sidebar_exists && results.overlay_exists, 
+                    results);
+                
+            } catch (error) {
+                addResult('History Sidebar Elements Test', false, {
+                    error: error.message,
+                    stack: error.stack
+                });
+            }
+        }
+        
+        function openHistorySidebar() {
+            try {
+                console.log('Attempting to open history sidebar...');
+                
+                if (window.professionalHistory) {
+                    window.professionalHistory.openSidebar();
+                    addResult('Open History Sidebar', true, {
+                        message: 'History sidebar opened successfully',
+                        is_open: window.professionalHistory.isOpen
+                    });
+                } else {
+                    addResult('Open History Sidebar', false, {
+                        error: 'Professional history system not found'
+                    });
+                }
+                
+            } catch (error) {
+                addResult('Open History Sidebar', false, {
+                    error: error.message,
+                    stack: error.stack
+                });
+            }
+        }
+        
+        async function generateDocument() {
+            try {
+                console.log('Generating test document...');
+                
+                const docData = {
+                    content: "Test document for history sidebar debugging - " + new Date().toISOString(),
+                    page_count: 1
+                };
+                
+                const response = await fetch('/api/document/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(docData)
+                });
+                
+                const data = await response.json();
+                
+                addResult('Generate Test Document', response.ok && data.success, {
+                    status: response.status,
+                    success: data.success,
+                    session_id: data.session_id,
+                    has_pdf: !!data.pdf_base64,
+                    preview_length: data.preview ? data.preview.length : 0,
+                    error: data.error
+                });
+                
+                // Wait a moment then test history again
+                setTimeout(() => {
+                    testHistoryAPI();
+                }, 3000);
+                
+            } catch (error) {
+                addResult('Generate Test Document', false, {
+                    error: error.message,
+                    stack: error.stack
+                });
+            }
+        }
+        
+        // Auto-run basic tests on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                testHistorySidebar();
+                testHistoryAPI();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

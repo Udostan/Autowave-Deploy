@@ -1,0 +1,226 @@
+/* Design Task Styling */
+
+/* Design container */
+.design-container {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Design header */
+.design-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.design-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.design-header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.design-header-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.design-header-actions button:hover {
+    color: #333;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Design tabs */
+.design-tabs {
+    display: flex;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f8f9fa;
+}
+
+.design-tab {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.design-tab:hover {
+    color: #333;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.design-tab.active {
+    color: #333;
+    border-bottom-color: #333;
+    background-color: #fff;
+}
+
+/* Design content */
+.design-content {
+    padding: 1rem;
+}
+
+.design-tab-content {
+    display: none;
+}
+
+.design-tab-content.active {
+    display: block;
+}
+
+/* Preview tab */
+.design-preview {
+    text-align: center;
+    padding: 1rem;
+}
+
+.design-preview img {
+    max-width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Code tab */
+.design-code {
+    font-family: 'SF Mono', 'Consolas', 'Monaco', 'Andale Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    overflow-x: auto;
+}
+
+.design-code pre {
+    margin: 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+}
+
+.design-code-file {
+    margin-bottom: 1rem;
+}
+
+.design-code-file-header {
+    background-color: #f0f0f0;
+    padding: 0.5rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    font-weight: 500;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.design-code-file-content {
+    margin: 0;
+    border-radius: 0 0 4px 4px;
+}
+
+/* Download button */
+.design-download {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.design-download:hover {
+    background-color: #555;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .design-container {
+    background-color: #1f1f1f;
+    border-color: #333;
+}
+
+[data-theme="dark"] .design-header {
+    background-color: #2a2a2a;
+    border-color: #333;
+}
+
+[data-theme="dark"] .design-header h3 {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .design-header-actions button {
+    color: #aaa;
+}
+
+[data-theme="dark"] .design-header-actions button:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .design-tabs {
+    background-color: #2a2a2a;
+    border-color: #333;
+}
+
+[data-theme="dark"] .design-tab {
+    color: #aaa;
+}
+
+[data-theme="dark"] .design-tab:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .design-tab.active {
+    color: #fff;
+    border-bottom-color: #fff;
+    background-color: #1f1f1f;
+}
+
+[data-theme="dark"] .design-preview img {
+    border-color: #333;
+}
+
+[data-theme="dark"] .design-code pre {
+    background-color: #2a2a2a;
+    border-color: #333;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .design-code-file-header {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .design-download {
+    background-color: #555;
+}
+
+[data-theme="dark"] .design-download:hover {
+    background-color: #777;
+}

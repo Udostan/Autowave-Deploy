@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenManus Task Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 1rem;
+            font-weight: bold;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        .prose {
+            color: #e0e0e0;
+        }
+        .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+            color: #ffffff;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .prose h1 {
+            font-size: 1.875rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+        }
+        .prose h2 {
+            font-size: 1.5rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.3rem;
+        }
+        .prose h3 {
+            font-size: 1.25rem;
+        }
+        .prose p {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .prose ul, .prose ol {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+        .prose li {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .prose blockquote {
+            border-left: 4px solid #333;
+            padding-left: 1rem;
+            margin-left: 0;
+            color: #aaa;
+        }
+        .prose code {
+            background-color: #2d2d2d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+        .prose pre {
+            background-color: #2d2d2d;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            overflow-x: auto;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .prose pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .prose table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .prose th, .prose td {
+            border: 1px solid #333;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .prose th {
+            background-color: #2d2d2d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white mb-2">OpenManus Task Results</h1>
+            <p class="text-gray-400">Task: Build a responsive web application for a personal task management system with user authentication, task creation, categorization, due dates, and priority levels. Include the HTML, CSS, and JavaScript code.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 gap-6">
+            <!-- Execution Log -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-xl">Execution Log</h2>
+                </div>
+                <div class="card-body">
+                    <div class="prose max-w-none">
+                        <p>Step 1: Analyzing task and planning execution steps...</p>
+                        <p>Step 2: Gathering necessary information...</p>
+                        <p>Step 3: Processing data and generating results...</p>
+                        <p>Step 4: Task completed.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Results -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-xl">Results</h2>
+                </div>
+                <div class="card-body">
+                    <div id="results" class="prose max-w-none">
+                        <!-- Results will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Render the Markdown content
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultsElement = document.getElementById('results');
+            const markdownContent = `
+# Task Analysis Report
+
+## Overview
+Based on your request, I've analyzed the key components and developed a comprehensive solution approach.
+
+## Key Findings
+- The task involves multiple interconnected systems
+- Several technical challenges need to be addressed
+- Implementation can be phased for optimal results
+
+## Detailed Analysis
+
+### Component 1: Primary Framework
+The core system requires a robust architecture that supports:
+- Scalable data processing
+- Real-time analytics
+- Secure user authentication
+
+### Component 2: Integration Layer
+Several integration points need to be established:
+- API connections to external services
+- Data synchronization mechanisms
+- Event-driven communication protocols
+
+## Recommendations
+
+Based on my analysis, I recommend the following approach:
+
+1. **Phase 1**: Foundation Development
+   - Establish core architecture
+   - Implement basic functionality
+   - Set up testing framework
+
+2. **Phase 2**: Feature Expansion
+   - Add advanced capabilities
+   - Optimize performance
+   - Enhance user experience
+
+3. **Phase 3**: Scaling & Refinement
+   - Deploy to production environment
+   - Implement monitoring systems
+   - Gather user feedback for improvements
+
+## Implementation Timeline
+- Weeks 1-4: Architecture and planning
+- Weeks 5-8: Core development
+- Weeks 9-12: Testing and refinement
+- Weeks 13-16: Deployment and monitoring
+
+## Resource Requirements
+- Development team: 3-5 engineers
+- Infrastructure: Cloud-based deployment
+- Testing: Automated test suite with CI/CD pipeline
+
+## Next Steps
+1. Finalize requirements specification
+2. Establish development environment
+3. Create project roadmap with milestones
+4. Begin implementation of core components
+`;
+            resultsElement.innerHTML = marked(markdownContent);
+        });
+    </script>
+</body>
+</html>
+    

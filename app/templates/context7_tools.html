@@ -1,0 +1,682 @@
+{% extends "layout.html" %}
+
+{% block title %}Prime Agent Tools - Smart Assistant{% endblock %}
+
+{% block header %}Prime Agent Tools{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/super_agent.css">
+<link rel="stylesheet" href="/static/css/booking_results.css">
+<style>
+    /* Fixed input container styles */
+    .fixed-input-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: transparent;
+        padding: 16px;
+        z-index: 100;
+        margin-left: 16rem; /* Match sidebar width */
+        transition: margin-left 0.3s ease;
+    }
+
+    .input-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background-color: transparent;
+    }
+
+    /* Style the input and button to stand alone */
+    #taskDescription {
+        background-color: #1e293b;
+        border: 1px solid #4a5568;
+        color: #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    #executeTaskBtn {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    @media (max-width: 768px) {
+        .fixed-input-container {
+            margin-left: 0;
+        }
+
+        .input-wrapper {
+            margin: 0 auto;
+            max-width: 95%;
+        }
+    }
+
+    /* Adjust main content to prevent overlap with fixed input */
+    .content-wrapper {
+        padding-bottom: 100px;
+    }
+
+    /* Collapsed sidebar adjustment */
+    body.collapsed-sidebar .fixed-input-container {
+        margin-left: 4rem;
+    }
+
+    /* Task Summary toggle styles */
+    #taskSummaryContainer.collapsed #summaryContainers {
+        display: none;
+    }
+
+    #taskSummaryContainer.collapsed {
+        min-height: 60px;
+    }
+
+    #toggleSummaryBtn svg.rotate-90 {
+        transform: rotate(90deg);
+    }
+
+    /* Full-page expansion styles for task summary */
+    #resultsContainer.summary-expanded {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1000;
+        background: white;
+        overflow: hidden;
+    }
+
+    #resultsContainer.summary-expanded .grid {
+        display: block;
+        height: 100vh;
+    }
+
+    #resultsContainer.summary-expanded #taskSummaryContainer {
+        height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    #resultsContainer.summary-expanded #summaryContainers {
+        height: calc(100vh - 80px);
+        overflow-y: auto;
+    }
+
+    /* Dark scrollbar styles for all elements */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(75, 85, 99, 0.5) rgba(17, 24, 39, 0.1);
+    }
+
+    /* WebKit browsers (Chrome, Safari, etc.) */
+    *::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    *::-webkit-scrollbar-track {
+        background: rgba(17, 24, 39, 0.1);
+        border-radius: 4px;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background-color: rgba(75, 85, 99, 0.5);
+        border-radius: 4px;
+        border: 2px solid rgba(17, 24, 39, 0.1);
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(75, 85, 99, 0.7);
+    }
+
+    /* Specific scrollbar styles for task results and thinking process */
+    #taskResults, .thinking-process, .summary-container-content, .results-content {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(75, 85, 99, 0.5) rgba(17, 24, 39, 0.1);
+    }
+
+    #taskResults::-webkit-scrollbar,
+    .thinking-process::-webkit-scrollbar,
+    .summary-container-content::-webkit-scrollbar,
+    .results-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #taskResults::-webkit-scrollbar-track,
+    .thinking-process::-webkit-scrollbar-track,
+    .summary-container-content::-webkit-scrollbar-track,
+    .results-content::-webkit-scrollbar-track {
+        background: rgba(17, 24, 39, 0.1);
+        border-radius: 4px;
+    }
+
+    #taskResults::-webkit-scrollbar-thumb,
+    .thinking-process::-webkit-scrollbar-thumb,
+    .summary-container-content::-webkit-scrollbar-thumb,
+    .results-content::-webkit-scrollbar-thumb {
+        background-color: rgba(75, 85, 99, 0.5);
+        border-radius: 4px;
+        border: 2px solid rgba(17, 24, 39, 0.1);
+    }
+
+    #taskResults::-webkit-scrollbar-thumb:hover,
+    .thinking-process::-webkit-scrollbar-thumb:hover,
+    .summary-container-content::-webkit-scrollbar-thumb:hover,
+    .results-content::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(75, 85, 99, 0.7);
+    }
+
+    /* Prime Agent Tools specific styles */
+    .tools-header {
+        background: #1e293b;
+        color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .tools-header:hover {
+        background: #334155;
+    }
+
+    .tools-content {
+        max-height: 1000px;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .tools-content.collapsed {
+        max-height: 0;
+    }
+
+    .dropdown-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .dropdown-icon.rotated {
+        transform: rotate(180deg);
+    }
+
+    .tool-category {
+        background: #1e293b;
+        color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .tool-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .tool-card {
+        background: #2d3748;
+        border: 1px solid #4a5568;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        color: white;
+    }
+
+    .tool-card:hover {
+        border-color: #6366f1;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        background: #374151;
+    }
+
+    .tool-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .tool-title {
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 0.25rem;
+    }
+
+    .tool-description {
+        color: #a0aec0;
+        font-size: 0.875rem;
+    }
+
+    /* Input box with arrow inside */
+    .input-container {
+        position: relative;
+    }
+
+    .input-container textarea {
+        padding-right: 50px;
+    }
+
+    .arrow-button {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        background: transparent;
+        border: none;
+        color: #6b7280;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        padding: 4px;
+    }
+
+    .arrow-button:hover {
+        color: #374151;
+    }
+
+    .arrow-button svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* File upload styles */
+    .file-preview {
+        background-color: #1e293b;
+        border: 1px solid #4a5568;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem;
+        background-color: #2d3748;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #4a5568;
+    }
+
+    .file-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
+
+    .file-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-right: 0.75rem;
+        color: #60a5fa;
+    }
+
+    .file-details {
+        flex: 1;
+    }
+
+    .file-name {
+        font-weight: 500;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+    }
+
+    .file-size {
+        color: #9ca3af;
+        font-size: 0.75rem;
+    }
+
+    .file-remove {
+        background: none;
+        border: none;
+        color: #ef4444;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+        transition: background-color 0.2s;
+    }
+
+    .file-remove:hover {
+        background-color: #374151;
+    }
+
+    .file-image-preview {
+        width: 3rem;
+        height: 3rem;
+        object-fit: cover;
+        border-radius: 0.375rem;
+        margin-right: 0.75rem;
+        border: 1px solid #4a5568;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hidden element to pass initial task from server to JavaScript -->
+<div id="initial-task-data" style="display: none;">{{ initial_task or '' }}</div>
+
+<div class="p-6">
+    <!-- Collapsible Tools Header -->
+    <div class="tools-header" onclick="toggleToolsSection()">
+        <div>
+            <h2 class="text-xl font-bold mb-2">🚀 Prime Agent Tools</h2>
+            <p class="text-slate-300">15 advanced AI-powered tools with real web browsing, screenshots, and intelligent analysis</p>
+        </div>
+        <svg class="dropdown-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </div>
+
+    <!-- Tool Categories (Collapsible) -->
+    <div class="tools-content collapsed mb-8" id="toolsContent">
+        <div class="tool-category">
+            <h3 class="text-lg font-semibold mb-2">🚀 Booking & Travel Tools</h3>
+            <div class="tool-grid">
+                <div class="tool-card" onclick="fillPrompt('Book a flight from Boston to Seattle for next Friday')">
+                    <div class="tool-icon">✈️</div>
+                    <div class="tool-title">Flight Booking</div>
+                    <div class="tool-description">Search and compare flights across multiple airlines</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Find hotels in Miami Beach for this weekend')">
+                    <div class="tool-icon">🏨</div>
+                    <div class="tool-title">Hotel Booking</div>
+                    <div class="tool-description">Find and book hotels worldwide</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Get an Uber from Times Square to JFK Airport')">
+                    <div class="tool-icon">🚗</div>
+                    <div class="tool-title">Ride Booking</div>
+                    <div class="tool-description">Compare ride-sharing options and prices</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Find restaurants in Chicago for dinner tonight for 6 people')">
+                    <div class="tool-icon">🍽️</div>
+                    <div class="tool-title">Restaurant Booking</div>
+                    <div class="tool-description">Discover and book restaurant reservations</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-category">
+            <h3 class="text-lg font-semibold mb-2">🔍 Search & Discovery Tools</h3>
+            <div class="tool-grid">
+                <div class="tool-card" onclick="fillPrompt('Find apartments for rent in Austin under $2500')">
+                    <div class="tool-icon">🏠</div>
+                    <div class="tool-title">Real Estate Search</div>
+                    <div class="tool-description">Search properties for rent or sale</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Find concert tickets in Los Angeles for next month')">
+                    <div class="tool-icon">🎫</div>
+                    <div class="tool-title">Event Tickets</div>
+                    <div class="tool-description">Find and compare event tickets</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Find software engineer jobs in San Francisco')">
+                    <div class="tool-icon">💼</div>
+                    <div class="tool-title">Job Search</div>
+                    <div class="tool-description">Search job opportunities across platforms</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Compare prices for iPhone 15 Pro across different stores')">
+                    <div class="tool-icon">💰</div>
+                    <div class="tool-title">Price Comparison</div>
+                    <div class="tool-description">Compare product prices across retailers</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-category">
+            <h3 class="text-lg font-semibold mb-2">🏥 Professional Services</h3>
+            <div class="tool-grid">
+                <div class="tool-card" onclick="fillPrompt('Find a doctor appointment for annual checkup')">
+                    <div class="tool-icon">🏥</div>
+                    <div class="tool-title">Medical Appointment</div>
+                    <div class="tool-description">Schedule medical appointments and find healthcare providers</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Help me renew my passport')">
+                    <div class="tool-icon">🏛️</div>
+                    <div class="tool-title">Government Services</div>
+                    <div class="tool-description">Navigate government services and applications</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Track my Amazon package delivery')">
+                    <div class="tool-icon">📦</div>
+                    <div class="tool-title">Package Tracking</div>
+                    <div class="tool-description">Track packages and shipments across carriers</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Check my bank account balance and recent transactions')">
+                    <div class="tool-icon">💳</div>
+                    <div class="tool-title">Financial Monitoring</div>
+                    <div class="tool-description">Monitor financial accounts and transactions</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Help me fill out a tax form')">
+                    <div class="tool-icon">📝</div>
+                    <div class="tool-title">Form Filling Assistant</div>
+                    <div class="tool-description">Get help filling out forms and applications</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-category">
+            <h3 class="text-lg font-semibold mb-2">📝 AI Planning & Analysis Tools</h3>
+            <div class="tool-grid">
+                <div class="tool-card" onclick="fillPrompt('Create a business plan for a coffee shop startup')">
+                    <div class="tool-icon">📊</div>
+                    <div class="tool-title">Business Plan Creation</div>
+                    <div class="tool-description">Generate comprehensive business plans with AI and web research</div>
+                </div>
+                <div class="tool-card" onclick="fillPrompt('Plan a 2-week trip to Japan with detailed itinerary')">
+                    <div class="tool-icon">🗺️</div>
+                    <div class="tool-title">Travel Planning</div>
+                    <div class="tool-description">Create detailed travel plans with real-time research</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Execution Area -->
+    <div class="content-wrapper" id="task-content">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Execute Prime Agent Tool</h3>
+                <p class="text-gray-600 mb-4">Click on any tool above or describe your task below. Prime Agent tools provide enhanced AI capabilities without interference.</p>
+            </div>
+        </div>
+
+        <!-- Task Progress and Results Container -->
+        <div class="mt-8 hidden" id="resultsContainer">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left Column: Task Progress -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Task Progress</h3>
+                        <div class="flex space-x-2">
+                            <!-- Clear All Button -->
+                            <button id="clearAllTasksBtn" class="p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Clear all tasks">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <!-- Progress Bar -->
+                        <div class="mb-6" id="taskProgress">
+                            <div class="relative pt-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <div id="processingIndicator" class="relative inline-block">
+                                            <div class="h-8 w-8 rounded-full bg-gray-700 animate-spin border-4 border-gray-500 border-t-transparent"></div>
+                                            <span class="checkmark absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-sm">✓</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
+                                    <div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gray-400 transition-all duration-500 ease-in-out" id="progressFill" style="width: 0%"></div>
+                                </div>
+                                <p id="stepDescription" class="text-sm text-gray-400">Ready to execute Prime Agent tools</p>
+                            </div>
+                        </div>
+
+                        <!-- Thinking Process Container -->
+                        <div id="thinkingContainers" class="space-y-6">
+                            <!-- Initial thinking process container -->
+                            <div class="thinking-container" id="thinking-container-initial">
+                                <div class="bg-gray-50 px-4 py-3 rounded-t-md border border-gray-200 flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <button class="toggle-thinking-btn p-1 mr-2 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Toggle thinking process" data-container-id="thinking-container-initial">
+                                            <svg class="w-4 h-4 transform rotate-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+                                        <h4 class="font-medium text-gray-700">Prime Agent Processing</h4>
+                                    </div>
+                                    <div class="flex space-x-1">
+                                        <button class="goto-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Go to summary" data-task-id="summary-container-initial">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="thinking-process bg-gray-50 p-4 rounded-b-md border-l border-r border-b border-gray-200 h-64 overflow-auto">
+                                    <div id="thinkingContent" class="prose prose-sm max-w-none text-sm text-gray-500">
+                                        <div class="thinking-step">
+                                            <p>🤖 Prime Agent tools ready. Click a tool above or enter your task...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Task Summary -->
+                <div id="taskSummaryContainer" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Task Results</h3>
+                        <div class="flex space-x-2">
+                            <!-- Toggle Icon -->
+                            <button id="toggleSummaryBtn" class="p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Expand task summary section">
+                                <svg class="w-5 h-5 transform rotate-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6 overflow-y-scroll h-[800px]" id="summaryContainers">
+                        <!-- Initial summary container -->
+                        <div class="summary-container" id="summary-container-initial">
+                            <div class="bg-gray-50 px-4 py-3 rounded-t-md border border-gray-200 flex justify-between items-center summary-container-header">
+                                <h4 class="font-medium text-gray-700">Prime Agent Results</h4>
+                                <div class="flex space-x-1">
+                                    <!-- Download Icon -->
+                                    <button class="download-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Download summary" data-task-id="summary-container-initial">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                        </svg>
+                                    </button>
+                                    <!-- Copy Icon -->
+                                    <button class="copy-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Copy to clipboard" data-task-id="summary-container-initial">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                        </svg>
+                                    </button>
+                                    <!-- Share Icon -->
+                                    <button class="share-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Share summary" data-task-id="summary-container-initial">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="summary-container-content prose prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto prose-img:max-w-full p-4 border-l border-r border-b border-gray-200 rounded-b-md">
+                                <div class="text-center text-gray-500">
+                                    <div class="mb-4">
+                                        <svg class="w-16 h-16 mx-auto text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-lg font-medium">Prime Agent Tools Ready</p>
+                                    <p class="text-sm">Select a tool above or enter your task to get started</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Remove the non-functional container that appears below -->
+                        <div id="taskResults" class="hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fixed Input Container -->
+<div class="fixed-input-container">
+    <div class="input-wrapper">
+        <div class="input-container flex-1">
+            <div class="relative w-full">
+                <textarea id="taskDescription" class="w-full px-4 py-3 pr-20 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 min-h-[50px] max-h-[150px] resize-none" placeholder="Describe your task or click a tool above... (e.g., 'Book a flight from Boston to Seattle')"></textarea>
+
+                <!-- File Upload Button -->
+                <button id="context7FileUploadBtn" class="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors duration-200 bg-transparent border-0" title="Upload file or image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.49"></path>
+                    </svg>
+                </button>
+
+                <button id="executeTaskBtn" class="arrow-button absolute right-3 top-1/2 transform -translate-y-1/2" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+
+                <!-- Hidden File Input -->
+                <input type="file" id="context7FileInput" class="hidden" accept="image/*,.txt,.py,.js,.html,.css,.json,.md,.pdf,.doc,.docx" multiple>
+
+                <!-- File Preview -->
+                <div id="context7FilePreview" class="file-preview mt-2" style="display: none;">
+                    <!-- File previews will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/universal_file_upload.js"></script>
+<script>
+// Fill prompt function for tool cards
+function fillPrompt(text) {
+    document.getElementById('taskDescription').value = text;
+    document.getElementById('taskDescription').focus();
+}
+
+// Auto-resize textarea
+document.getElementById('taskDescription').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+});
+
+// Toggle tools section
+function toggleToolsSection() {
+    const toolsContent = document.getElementById('toolsContent');
+    const dropdownIcon = document.querySelector('.dropdown-icon');
+
+    if (toolsContent.classList.contains('collapsed')) {
+        toolsContent.classList.remove('collapsed');
+        dropdownIcon.classList.add('rotated');
+    } else {
+        toolsContent.classList.add('collapsed');
+        dropdownIcon.classList.remove('rotated');
+    }
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="/static/js/context7_tools.js"></script>
+{% endblock %}

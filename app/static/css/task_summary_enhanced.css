@@ -1,0 +1,363 @@
+/* Enhanced Task Summary Styling */
+
+/* Main container */
+.task-summary {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: visible;
+    position: relative;
+    letter-spacing: 0.01em;
+}
+
+/* Headings */
+.task-summary h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    margin-top: 2rem;
+    line-height: 1.2;
+    color: #111;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.task-summary h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1.25rem;
+    color: #222;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 0.25rem;
+    letter-spacing: -0.01em;
+}
+
+.task-summary h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-top: 1.75rem;
+    margin-bottom: 1rem;
+    color: #333;
+    letter-spacing: -0.01em;
+}
+
+/* Spacing after headings */
+.task-summary h1 + p,
+.task-summary h2 + p,
+.task-summary h3 + p {
+    margin-top: 0.5rem;
+}
+
+/* Paragraphs */
+.task-summary p {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    font-size: 1rem;
+    color: #444;
+}
+
+/* Add space between consecutive paragraphs */
+.task-summary p + p {
+    margin-top: 1.5rem;
+}
+
+/* Bold text */
+.task-summary strong,
+.task-summary b {
+    font-weight: 700;
+    color: #222;
+}
+
+/* Emphasis */
+.task-summary em,
+.task-summary i {
+    font-style: italic;
+}
+
+/* Lists */
+.task-summary ul,
+.task-summary ol {
+    margin-bottom: 1.5rem;
+    padding-left: 1.25rem;
+}
+
+.task-summary li {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+    font-size: 1rem;
+    position: relative;
+}
+
+/* Add space between paragraphs in list items */
+.task-summary li p {
+    margin-bottom: 0.75rem;
+}
+
+.task-summary li p:last-child {
+    margin-bottom: 0;
+}
+
+.task-summary ul li {
+    list-style-type: none;
+    padding-left: 0.5rem;
+}
+
+.task-summary ul li::before {
+    content: '•';
+    position: absolute;
+    left: -1rem;
+    color: #555;
+    font-weight: bold;
+}
+
+.task-summary ol li {
+    list-style-type: decimal;
+    padding-left: 0.25rem;
+}
+
+/* Key Points section */
+.task-summary h2:nth-of-type(1) {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid #333;
+    margin-top: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.task-summary h2:nth-of-type(1) + ul,
+.task-summary h2:nth-of-type(1) + p {
+    background-color: #f8f9fa;
+    padding: 0 1rem 1rem 1rem;
+    border-radius: 0 0 0.5rem 0.5rem;
+    margin-top: -0.5rem;
+    border-left: 3px solid #333;
+}
+
+/* Sources section */
+.task-summary h2#sources-heading {
+    background-color: #f0f4f8;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    margin-top: 2rem;
+    border-bottom: none;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.task-summary h2#sources-heading + ol,
+.task-summary h2#sources-heading + p + ol {
+    background-color: #f0f4f8;
+    padding: 0 1rem 1rem 2.5rem;
+    border-radius: 0 0 0.5rem 0.5rem;
+    margin-top: -0.5rem;
+}
+
+/* Source links */
+.task-summary a {
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-bottom: 1px dotted #0066cc;
+    padding-bottom: 1px;
+}
+
+.task-summary a:hover {
+    color: #004499;
+    border-bottom: 1px solid #004499;
+}
+
+/* Sources section links */
+.task-summary h2#sources-heading + ol a,
+.task-summary h2#sources-heading + p + ol a,
+#sources-section ol a {
+    font-weight: 600;
+    color: #0055aa;
+    border-bottom: none;
+    position: relative;
+    padding-left: 1.5rem;
+    display: inline-block;
+}
+
+.task-summary h2#sources-heading + ol a::before,
+.task-summary h2#sources-heading + p + ol a::before,
+#sources-section ol a::before {
+    content: '🔗';
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* Conclusion section */
+.task-summary h2:last-of-type {
+    background-color: #f5f5f5;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    margin-top: 2rem;
+    border-bottom: none;
+    color: #333;
+}
+
+.task-summary h2:last-of-type + p {
+    background-color: #f5f5f5;
+    padding: 0 1rem 1rem 1rem;
+    border-radius: 0 0 0.5rem 0.5rem;
+    margin-top: -0.5rem;
+    font-style: italic;
+}
+
+/* Images */
+.task-summary img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5rem auto;
+    display: block;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.task-summary img:hover {
+    transform: scale(1.02);
+}
+
+/* Images that follow paragraphs */
+p + img {
+    margin-top: 1rem;
+}
+
+/* Images that follow headings */
+h1 + img,
+h2 + img,
+h3 + img {
+    margin-top: 1rem;
+}
+
+/* Image captions */
+.image-caption {
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Reduce spacing after paragraphs when followed by images */
+p + img {
+    margin-top: 1rem;
+}
+
+/* Reduce spacing after headings when followed by images */
+h1 + img,
+h2 + img,
+h3 + img {
+    margin-top: 1rem;
+}
+
+/* Force removal of image containers */
+.image-container {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    display: inline !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+/* Ensure images in markdown content are properly displayed */
+.prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5rem auto;
+    display: block;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.prose img:hover {
+    transform: scale(1.02);
+}
+
+/* Fix for images in lists */
+li img {
+    margin: 1rem auto;
+}
+
+/* Fix for images in tables */
+td img, th img {
+    margin: 0.5rem auto;
+}
+
+/* Responsive image grid for multiple images */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 2rem auto;
+}
+
+.image-grid img {
+    margin: 0 auto;
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+/* Section styling */
+.task-summary h2 {
+    clear: both;
+    position: relative;
+}
+
+/* Make the Sources section stand out */
+#sources-section {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f0f4f8;
+    border-radius: 0.5rem;
+    border: 1px solid #d0d7de;
+}
+
+#sources-section h2 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 1px solid #d0d7de;
+    padding-bottom: 0.5rem;
+}
+
+#sources-section ol {
+    margin-bottom: 0;
+}
+
+#sources-section li {
+    margin-bottom: 0.5rem;
+}
+
+#sources-section a {
+    font-weight: 600;
+    color: #0055aa;
+    text-decoration: none;
+    border-bottom: 1px dotted #0055aa;
+    transition: all 0.2s ease;
+}
+
+#sources-section a:hover {
+    color: #003377;
+    border-bottom: 1px solid #003377;
+}

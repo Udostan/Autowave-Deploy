@@ -1,0 +1,14 @@
+    /* Hide the Task: task-1 container */
+    .task-container {
+        display: none !important;
+    }
+    
+    /* Make sure the Thinking Process container is visible */
+    .thinking-container {
+        display: block !important;
+    }
+    
+    /* Hide any elements containing "Task: task-" */
+    [class*="task-"]:not(.thinking-container):not(.summary-container) {
+        display: none !important;
+    }

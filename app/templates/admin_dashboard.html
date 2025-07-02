@@ -1,0 +1,323 @@
+{% extends "layout.html" %}
+
+{% block header %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen" style="background-color: #121212;">
+    <!-- Header Section -->
+    <div class="text-center py-8" style="background-color: #1e1e1e;">
+        <h1 class="text-3xl font-bold mb-4" style="color: #e0e0e0;">🛡️ Admin Dashboard</h1>
+        <p class="text-lg max-w-3xl mx-auto" style="color: #aaa;">
+            Paywall Testing & Management Console
+        </p>
+    </div>
+
+    <!-- Admin Status Section -->
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            
+            <!-- Admin Status Card -->
+            <div class="rounded-lg p-6" style="background-color: #1e1e1e; border: 1px solid #333;">
+                <h3 class="text-xl font-semibold mb-4" style="color: #e0e0e0;">Admin Status</h3>
+                <div id="admin-status-content">
+                    <div class="flex items-center mb-2">
+                        <span class="text-sm" style="color: #aaa;">Email:</span>
+                        <span class="ml-2 text-sm font-medium" style="color: #e0e0e0;" id="admin-email">Loading...</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                        <span class="text-sm" style="color: #aaa;">Admin Access:</span>
+                        <span class="ml-2 text-sm font-medium" id="admin-access-status">Loading...</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm" style="color: #aaa;">Credits:</span>
+                        <span class="ml-2 text-sm font-medium" style="color: #e0e0e0;" id="admin-credits">Loading...</span>
+                    </div>
+                </div>
+                <button id="grant-admin-btn" class="w-full mt-4 py-2 px-4 rounded-lg font-medium" style="background: linear-gradient(90deg, #3b82f6, #8b5cf6); color: white;">
+                    Grant Admin Access
+                </button>
+            </div>
+
+            <!-- Paywall Test Card -->
+            <div class="rounded-lg p-6" style="background-color: #1e1e1e; border: 1px solid #333;">
+                <h3 class="text-xl font-semibold mb-4" style="color: #e0e0e0;">Paywall Testing</h3>
+                <div class="space-y-3">
+                    <button id="test-code-wave" class="w-full py-2 px-4 rounded-lg font-medium" style="background-color: #2d2d2d; color: #e0e0e0; border: 1px solid #444;">
+                        Test Code Wave
+                    </button>
+                    <button id="test-agent-wave" class="w-full py-2 px-4 rounded-lg font-medium" style="background-color: #2d2d2d; color: #e0e0e0; border: 1px solid #444;">
+                        Test Agent Wave
+                    </button>
+                    <button id="test-prime-agent" class="w-full py-2 px-4 rounded-lg font-medium" style="background-color: #2d2d2d; color: #e0e0e0; border: 1px solid #444;">
+                        Test Prime Agent
+                    </button>
+                    <button id="test-research-lab" class="w-full py-2 px-4 rounded-lg font-medium" style="background-color: #2d2d2d; color: #e0e0e0; border: 1px solid #444;">
+                        Test Research Lab
+                    </button>
+                </div>
+            </div>
+
+            <!-- Credit Management Card -->
+            <div class="rounded-lg p-6" style="background-color: #1e1e1e; border: 1px solid #333;">
+                <h3 class="text-xl font-semibold mb-4" style="color: #e0e0e0;">Credit Management</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium mb-1" style="color: #aaa;">Set Credits:</label>
+                        <input type="number" id="credit-amount" value="100" min="0" max="10000" class="w-full px-3 py-2 rounded-lg" style="background-color: #2d2d2d; color: #e0e0e0; border: 1px solid #444;">
+                    </div>
+                    <button id="reset-credits-btn" class="w-full py-2 px-4 rounded-lg font-medium" style="background-color: #f59e0b; color: white;">
+                        Reset Credits
+                    </button>
+                    <button id="simulate-usage-btn" class="w-full py-2 px-4 rounded-lg font-medium" style="background-color: #ef4444; color: white;">
+                        Simulate Usage (-5 credits)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results Section -->
+        <div class="rounded-lg p-6 mb-8" style="background-color: #1e1e1e; border: 1px solid #333;">
+            <h3 class="text-xl font-semibold mb-4" style="color: #e0e0e0;">Test Results</h3>
+            <div id="test-results" class="space-y-2" style="color: #aaa;">
+                <p>Click any test button to see results here...</p>
+            </div>
+        </div>
+
+        <!-- Current Plan Info -->
+        <div class="rounded-lg p-6" style="background-color: #1e1e1e; border: 1px solid #333;">
+            <h3 class="text-xl font-semibold mb-4" style="color: #e0e0e0;">Current Plan Information</h3>
+            <div id="plan-info" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-medium mb-2" style="color: #e0e0e0;">Subscription Details</h4>
+                    <div id="subscription-details" style="color: #aaa;">
+                        Loading...
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-medium mb-2" style="color: #e0e0e0;">Available Features</h4>
+                    <div id="feature-details" style="color: #aaa;">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadAdminStatus();
+    setupEventListeners();
+});
+
+async function loadAdminStatus() {
+    try {
+        const response = await fetch('/admin/test-paywall');
+        const data = await response.json();
+        
+        if (data.success) {
+            updateAdminStatusDisplay(data);
+        } else {
+            showError('Failed to load admin status: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        showError('Error loading admin status: ' + error.message);
+    }
+}
+
+function updateAdminStatusDisplay(data) {
+    const adminStatus = data.admin_status;
+    const planInfo = data.user_plan_info;
+    const testResults = data.test_results;
+    
+    // Update admin status
+    document.getElementById('admin-email').textContent = adminStatus.email || 'Unknown';
+    
+    const accessStatus = document.getElementById('admin-access-status');
+    if (adminStatus.is_admin) {
+        accessStatus.textContent = '✅ Admin';
+        accessStatus.style.color = '#10b981';
+    } else {
+        accessStatus.textContent = '❌ Not Admin';
+        accessStatus.style.color = '#ef4444';
+    }
+    
+    // Update credits display
+    const credits = planInfo.credits || {};
+    const creditsDisplay = document.getElementById('admin-credits');
+    if (credits.unlimited) {
+        creditsDisplay.textContent = '∞ Unlimited';
+        creditsDisplay.style.color = '#10b981';
+    } else {
+        creditsDisplay.textContent = `${credits.remaining || 0} / ${credits.total || 0}`;
+        creditsDisplay.style.color = credits.remaining > 10 ? '#10b981' : '#ef4444';
+    }
+    
+    // Update plan info
+    updatePlanInfoDisplay(planInfo, data.available_plans);
+    
+    // Update test results
+    updateTestResultsDisplay(testResults);
+}
+
+function updatePlanInfoDisplay(planInfo, availablePlans) {
+    const subscriptionDetails = document.getElementById('subscription-details');
+    const featureDetails = document.getElementById('feature-details');
+    
+    subscriptionDetails.innerHTML = `
+        <p><strong>Plan:</strong> ${planInfo.display_name || 'Unknown'}</p>
+        <p><strong>Status:</strong> ${planInfo.subscription?.status || 'Unknown'}</p>
+        <p><strong>Credits:</strong> ${planInfo.credits?.remaining || 0} / ${planInfo.credits?.total || 0}</p>
+    `;
+    
+    const features = planInfo.features || {};
+    featureDetails.innerHTML = `
+        <p><strong>AI Agents:</strong> ${Array.isArray(features.ai_agents) ? features.ai_agents.length : 'All'}</p>
+        <p><strong>Prime Agent Tools:</strong> ${features.prime_agent_tools === -1 ? 'Unlimited' : features.prime_agent_tools || 0}</p>
+        <p><strong>File Upload:</strong> ${features.file_upload_limit === -1 ? 'Unlimited' : features.file_upload_limit || 0}</p>
+        <p><strong>Support:</strong> ${features.support_level || 'Basic'}</p>
+    `;
+}
+
+function updateTestResultsDisplay(testResults) {
+    const testResultsDiv = document.getElementById('test-results');
+    
+    testResultsDiv.innerHTML = `
+        <p><strong>Subscription:</strong> ${testResults.has_subscription ? '✅ Active' : '❌ None'}</p>
+        <p><strong>Plan:</strong> ${testResults.plan_name}</p>
+        <p><strong>Admin Access:</strong> ${testResults.is_admin ? '✅ Yes' : '❌ No'}</p>
+        <p><strong>Unlimited Access:</strong> ${testResults.has_unlimited_access ? '✅ Yes' : '❌ No'}</p>
+    `;
+}
+
+function setupEventListeners() {
+    // Grant admin access
+    document.getElementById('grant-admin-btn').addEventListener('click', async function() {
+        try {
+            const response = await fetch('/admin/grant-access', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showSuccess(data.message);
+                setTimeout(loadAdminStatus, 1000);
+            } else {
+                showError(data.error || 'Failed to grant admin access');
+            }
+        } catch (error) {
+            showError('Error granting admin access: ' + error.message);
+        }
+    });
+    
+    // Reset credits
+    document.getElementById('reset-credits-btn').addEventListener('click', async function() {
+        const credits = document.getElementById('credit-amount').value;
+        
+        try {
+            const response = await fetch('/admin/reset-credits', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({credits: parseInt(credits)})
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showSuccess(data.message);
+                setTimeout(loadAdminStatus, 1000);
+            } else {
+                showError(data.error || 'Failed to reset credits');
+            }
+        } catch (error) {
+            showError('Error resetting credits: ' + error.message);
+        }
+    });
+    
+    // Simulate usage
+    document.getElementById('simulate-usage-btn').addEventListener('click', async function() {
+        try {
+            const response = await fetch('/admin/simulate-usage', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    agent_type: 'test_agent',
+                    action_type: 'admin_test',
+                    credits: 5
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showSuccess(data.message);
+                setTimeout(loadAdminStatus, 1000);
+            } else {
+                showError(data.error || 'Failed to simulate usage');
+            }
+        } catch (error) {
+            showError('Error simulating usage: ' + error.message);
+        }
+    });
+    
+    // Test agent buttons
+    document.getElementById('test-code-wave').addEventListener('click', () => testAgent('code_wave'));
+    document.getElementById('test-agent-wave').addEventListener('click', () => testAgent('agent_wave'));
+    document.getElementById('test-prime-agent').addEventListener('click', () => testAgent('prime_agent'));
+    document.getElementById('test-research-lab').addEventListener('click', () => testAgent('research_lab'));
+}
+
+async function testAgent(agentType) {
+    try {
+        showInfo(`Testing ${agentType}...`);
+        
+        // Simulate agent usage
+        const response = await fetch('/admin/simulate-usage', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                agent_type: agentType,
+                action_type: 'test_usage',
+                credits: 3
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showSuccess(`${agentType} test successful: ${data.message}`);
+            setTimeout(loadAdminStatus, 1000);
+        } else {
+            showError(`${agentType} test failed: ${data.error}`);
+        }
+    } catch (error) {
+        showError(`Error testing ${agentType}: ${error.message}`);
+    }
+}
+
+function showSuccess(message) {
+    showAlert(message, 'bg-green-600');
+}
+
+function showError(message) {
+    showAlert(message, 'bg-red-600');
+}
+
+function showInfo(message) {
+    showAlert(message, 'bg-blue-600');
+}
+
+function showAlert(message, bgClass) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `fixed top-4 right-4 ${bgClass} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+# Vercel-Optimized Requirements for AutoWave
+# Minimal dependencies for serverless deployment
+
+# Core Flask Dependencies
+Flask>=2.3.0
+Flask-CORS>=4.0.0
+Werkzeug>=2.3.0
+python-dotenv>=1.0.0
+
+# AI and API Dependencies
+google-generativeai>=0.3.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# Payment Dependencies
+stripe>=7.0.0
+
+# Security Dependencies
+PyJWT>=2.8.0
+cryptography>=41.0.0
+
+# Authentication Dependencies
+supabase>=2.3.0
+gotrue>=2.4.0
+
+# Essential Utilities
+psutil>=5.9.0
+
+# Image Processing (lightweight)
+Pillow>=10.0.0
+
+# Data Processing (minimal)
+numpy>=1.24.0
+
+# Web Scraping
+lxml>=4.9.0

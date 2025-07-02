@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Browser Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        #browser-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            height: 600px;
+        }
+        #screenshot {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 18px;
+            color: #666;
+        }
+        .controls {
+            display: flex;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Live Browser Test</h1>
+        <div class="form-group">
+            <label for="task">Enter a task:</label>
+            <input type="text" id="task" name="task" placeholder="e.g., go to google.com and find the latest rolex watch" required>
+        </div>
+        <div class="controls">
+            <button id="executeTask">Execute Task</button>
+            <button id="navigateGoogle">Go to Google</button>
+            <button id="clearBrowser">Clear Browser</button>
+        </div>
+        <div id="result"></div>
+        <div id="browser-container">
+            <div class="loading">Browser not started. Execute a task to start browsing.</div>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const taskInput = document.getElementById('task');
+        const executeTaskButton = document.getElementById('executeTask');
+        const navigateGoogleButton = document.getElementById('navigateGoogle');
+        const clearBrowserButton = document.getElementById('clearBrowser');
+        const resultDiv = document.getElementById('result');
+        const browserContainer = document.getElementById('browser-container');
+
+        // State
+        let browserState = {
+            isRunning: false,
+            currentUrl: null,
+            isLoading: false
+        };
+
+        // Update UI based on state
+        function updateUI() {
+            if (browserState.isLoading) {
+                browserContainer.innerHTML = '<div class="loading">Loading...</div>';
+                executeTaskButton.disabled = true;
+                navigateGoogleButton.disabled = true;
+                clearBrowserButton.disabled = true;
+            } else {
+                executeTaskButton.disabled = false;
+                navigateGoogleButton.disabled = false;
+                clearBrowserButton.disabled = false;
+            }
+        }
+
+        // Show result
+        function showResult(success, message) {
+            resultDiv.style.display = 'block';
+            resultDiv.className = success ? 'success' : 'error';
+            resultDiv.innerHTML = message;
+        }
+
+        // Update screenshot
+        function updateScreenshot(screenshotData) {
+            browserContainer.innerHTML = `<img id="screenshot" src="${screenshotData}" alt="Browser Screenshot">`;
+        }
+
+        // Execute task
+        executeTaskButton.addEventListener('click', function() {
+            const task = taskInput.value.trim();
+            if (!task) {
+                showResult(false, 'Please enter a task');
+                return;
+            }
+
+            browserState.isLoading = true;
+            updateUI();
+
+            fetch('/api/live-browser/execute-task', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    task: task
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                browserState.isLoading = false;
+                
+                if (data.success) {
+                    showResult(true, `
+                        <h3>Task Executed Successfully!</h3>
+                        <p>Task: ${data.task}</p>
+                        <p>URL: ${data.url}</p>
+                        <p>Title: ${data.title || 'N/A'}</p>
+                    `);
+                    
+                    if (data.screenshot) {
+                        updateScreenshot(data.screenshot);
+                        browserState.currentUrl = data.url;
+                        browserState.isRunning = true;
+                    }
+                } else {
+                    showResult(false, `
+                        <h3>Error Executing Task</h3>
+                        <p>${data.error || 'Unknown error'}</p>
+                    `);
+                }
+                
+                updateUI();
+            })
+            .catch(error => {
+                browserState.isLoading = false;
+                updateUI();
+                
+                showResult(false, `
+                    <h3>Error Executing Task</h3>
+                    <p>${error.message}</p>
+                `);
+            });
+        });
+
+        // Navigate to Google
+        navigateGoogleButton.addEventListener('click', function() {
+            browserState.isLoading = true;
+            updateUI();
+
+            fetch('/api/live-browser/navigate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: 'https://www.google.com'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                browserState.isLoading = false;
+                
+                if (data.success) {
+                    showResult(true, `
+                        <h3>Navigation Successful!</h3>
+                        <p>URL: ${data.url}</p>
+                        <p>Title: ${data.title || 'N/A'}</p>
+                    `);
+                    
+                    if (data.screenshot) {
+                        updateScreenshot(data.screenshot);
+                        browserState.currentUrl = data.url;
+                        browserState.isRunning = true;
+                    }
+                } else {
+                    showResult(false, `
+                        <h3>Error Navigating</h3>
+                        <p>${data.error || 'Unknown error'}</p>
+                    `);
+                }
+                
+                updateUI();
+            })
+            .catch(error => {
+                browserState.isLoading = false;
+                updateUI();
+                
+                showResult(false, `
+                    <h3>Error Navigating</h3>
+                    <p>${error.message}</p>
+                `);
+            });
+        });
+
+        // Clear browser
+        clearBrowserButton.addEventListener('click', function() {
+            browserContainer.innerHTML = '<div class="loading">Browser not started. Execute a task to start browsing.</div>';
+            browserState.isRunning = false;
+            browserState.currentUrl = null;
+            showResult(true, 'Browser cleared');
+        });
+    </script>
+</body>
+</html>

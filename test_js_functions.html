@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test LLM Tool Detection</title>
+</head>
+<body>
+    <h1>LLM Tool Detection Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Test the detection patterns directly
+        function testDetection() {
+            const results = document.getElementById('results');
+            
+            // Test cases
+            const testCases = [
+                "create an email campaign for new product launch",
+                "optimize this content for SEO: AI is transforming business", 
+                "create a learning path for Python programming",
+                "what is the weather today"
+            ];
+            
+            // Simple detection logic (copied from our implementation)
+            function detectTool(description) {
+                const lowerDesc = description.toLowerCase();
+                
+                // Email patterns
+                const emailPatterns = [
+                    /create\s+(?:an?\s+)?email\s+campaign/i,
+                    /generate\s+(?:an?\s+)?email\s+campaign/i,
+                    /email\s+marketing\s+campaign/i
+                ];
+                
+                for (const pattern of emailPatterns) {
+                    if (pattern.test(description)) {
+                        return 'email-campaign';
+                    }
+                }
+                
+                // SEO patterns
+                const seoPatterns = [
+                    /optimize\s+(?:this\s+)?(?:for\s+)?seo/i,
+                    /optimize\s+(?:this\s+)?content/i,
+                    /seo\s+optimization/i
+                ];
+                
+                for (const pattern of seoPatterns) {
+                    if (pattern.test(description)) {
+                        return 'seo-optimize';
+                    }
+                }
+                
+                // Learning patterns
+                const learningPatterns = [
+                    /create\s+(?:a\s+)?learning\s+path/i,
+                    /learning\s+curriculum/i,
+                    /study\s+plan/i
+                ];
+                
+                for (const pattern of learningPatterns) {
+                    if (pattern.test(description)) {
+                        return 'learning-path';
+                    }
+                }
+                
+                return null;
+            }
+            
+            let html = '<h2>Detection Results:</h2>';
+            
+            testCases.forEach(testCase => {
+                const detected = detectTool(testCase);
+                const status = detected ? `✅ ${detected}` : '❌ No tool detected';
+                html += `<p><strong>"${testCase}"</strong><br>${status}</p>`;
+            });
+            
+            results.innerHTML = html;
+            
+            // Test API endpoints
+            html += '<h2>API Tests:</h2>';
+            
+            // Test email campaign API
+            fetch('/api/llm-tools/email-campaign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    topic: "test campaign",
+                    audience: "test audience",
+                    campaign_type: "promotional",
+                    tone: "professional"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const status = data.status === 'success' ? '✅' : '❌';
+                document.getElementById('email-result').innerHTML = `${status} Email Campaign API: ${data.status}`;
+            })
+            .catch(error => {
+                document.getElementById('email-result').innerHTML = `❌ Email Campaign API: Error - ${error.message}`;
+            });
+            
+            results.innerHTML += '<p id="email-result">🔄 Testing Email Campaign API...</p>';
+        }
+        
+        // Run test when page loads
+        window.onload = testDetection;
+    </script>
+</body>
+</html>

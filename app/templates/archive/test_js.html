@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Test</title>
+</head>
+<body>
+    <h1>JavaScript Test</h1>
+    <button id="testButton">Click Me</button>
+    <div id="result"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            const testButton = document.getElementById('testButton');
+            const result = document.getElementById('result');
+            
+            console.log('Test button:', testButton);
+            
+            testButton.addEventListener('click', function() {
+                console.log('Button clicked');
+                result.textContent = 'Button clicked at ' + new Date().toLocaleTimeString();
+                
+                // Make a simple API request
+                fetch('/api/super-agent/execute-task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        task_description: 'Test task',
+                        use_browser_use: false,
+                        use_advanced_browser: false
+                    })
+                })
+                .then(response => {
+                    console.log('API response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API response data:', data);
+                    result.textContent += '\nAPI response received. Check console for details.';
+                })
+                .catch(error => {
+                    console.error('API error:', error);
+                    result.textContent += '\nAPI error: ' + error.message;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

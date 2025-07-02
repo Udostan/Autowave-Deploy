@@ -1,0 +1,241 @@
+/**
+ * Design Task Preview Styles
+ */
+
+/* Design Container */
+.design-container {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Design Header */
+.design-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.design-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #000000;
+}
+
+.design-header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.design-header-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    color: #555;
+    transition: all 0.2s ease;
+}
+
+.design-header-actions button:hover {
+    background-color: #f0f0f0;
+    color: #000;
+}
+
+/* Design Tabs */
+.design-tabs {
+    display: flex;
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #333;
+}
+
+.design-tab {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: #aaa;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.design-tab:hover {
+    color: #fff;
+    background-color: #333;
+}
+
+.design-tab.active {
+    color: #fff;
+    border-bottom: 2px solid #fff;
+    font-weight: 500;
+}
+
+/* Design Content */
+.design-content {
+    position: relative;
+}
+
+.design-tab-content {
+    display: none;
+    padding: 16px;
+}
+
+.design-tab-content.active {
+    display: block;
+}
+
+/* Preview */
+.design-preview {
+    text-align: center;
+}
+
+.design-preview img {
+    max-width: 100%;
+    max-height: 500px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Live Preview */
+.live-preview-container {
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.live-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #fff;
+}
+
+/* Code */
+.design-code {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.design-code-file {
+    background-color: #2a2a2a;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.design-code-file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #333;
+    color: #fff;
+    font-size: 14px;
+}
+
+.design-code-file-header button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    color: #aaa;
+    transition: all 0.2s ease;
+}
+
+.design-code-file-header button:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+.design-code-file-content {
+    margin: 0;
+    padding: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: #2a2a2a;
+    color: #f8f8f8;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Download Button */
+.design-download {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 8px 16px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.design-download:hover {
+    background-color: #444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .design-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .design-header-actions {
+        margin-top: 8px;
+    }
+    
+    .design-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .live-preview-container {
+        height: 300px;
+    }
+}
+
+/* Code highlighting */
+.language-html {
+    color: #e34c26;
+}
+
+.language-css {
+    color: #563d7c;
+}
+
+.language-javascript {
+    color: #f1e05a;
+}
+
+/* Scrollbar */
+.design-code-file-content::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.design-code-file-content::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+.design-code-file-content::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+
+.design-code-file-content::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}

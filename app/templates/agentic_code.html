@@ -1,0 +1,894 @@
+{% extends "layout.html" %}
+
+{% block title %}Agentic Code - Smart Code Assistant{% endblock %}
+
+{% block header %}Agentic Code{% endblock %}
+
+{% block extra_css %}
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- CodeMirror for code editing -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          dark: {
+            100: '#e0e0e0',
+            200: '#a0a0a0',
+            300: '#717171',
+            400: '#4a4a4a',
+            500: '#2d2d2d',
+            600: '#1e1e1e',
+            700: '#1a1a1a',
+            800: '#121212',
+            900: '#0a0a0a',
+          },
+          primary: {
+            100: '#ebf8ff',
+            200: '#bee3f8',
+            300: '#90cdf4',
+            400: '#63b3ed',
+            500: '#4299e1',
+            600: '#3182ce',
+            700: '#2b6cb0',
+            800: '#2c5282',
+            900: '#2a4365',
+          },
+        },
+        animation: {
+          'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          'bounce-slow': 'bounce 2s infinite',
+          'spin-slow': 'spin 3s linear infinite',
+          'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+          'typing': 'typing 1s steps(40, end)',
+        },
+        keyframes: {
+          typing: {
+            'from': { width: '0' },
+            'to': { width: '100%' }
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+    /* Override layout margins for custom positioning */
+    #main-content {
+        margin-left: 0 !important;
+    }
+
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    /* Custom Scrollbar for Dark Theme */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #444;
+    }
+
+    /* Sidebar toggle button - positioned relative to main content */
+    .sidebar-toggle {
+        position: fixed;
+        top: 50%;
+        left: 300px; /* Position at the edge of the conversation sidebar */
+        transform: translateY(-50%) translateX(-50%);
+        width: 30px;
+        height: 30px;
+        background-color: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        transition: left 0.3s ease;
+    }
+
+    .sidebar-toggle.collapsed {
+        left: 0; /* Position at the left edge when conversation sidebar is collapsed */
+        transform: translateY(-50%) translateX(-50%);
+    }
+
+    /* Conversation sidebar - positioned relative to main content */
+    .conversation-sidebar {
+        position: fixed;
+        top: 70px;
+        left: 0; /* Start at the left edge of main content */
+        width: 300px;
+        height: calc(100vh - 70px);
+        background-color: #121212;
+        z-index: 10;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #333;
+        overflow: hidden;
+    }
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        .conversation-sidebar {
+            width: 100%;
+            left: 0 !important;
+            transform: translateX(-100%);
+            z-index: 30;
+        }
+
+        .conversation-sidebar.mobile-open {
+            transform: translateX(0);
+        }
+
+        .sidebar-toggle {
+            left: 20px !important;
+            top: 20px !important;
+            transform: none !important;
+            z-index: 31;
+        }
+
+        .fixed-preview-container {
+            left: 0 !important;
+            padding: 10px !important;
+        }
+
+        .fixed-preview-container.sidebar-collapsed {
+            left: 0 !important;
+        }
+    }
+
+    .conversation-sidebar.collapsed {
+        transform: translateX(-300px);
+    }
+
+    .conversation-sidebar.collapsed .conversation-header,
+    .conversation-sidebar.collapsed .conversation-footer {
+        width: calc(100% + 300px);
+        transform: translateX(300px);
+    }
+
+    .conversation-header {
+        padding: 15px;
+        border-bottom: 1px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin: 0;
+        transition: transform 0.3s ease, width 0.3s ease;
+    }
+
+    .new-session-btn {
+        background-color: #4299e1;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .new-session-btn:hover {
+        background-color: #3182ce;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+    }
+
+    .new-session-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 2px rgba(66, 153, 225, 0.3);
+    }
+
+    .new-session-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .conversation-container {
+        overflow-y: auto;
+        flex: 1;
+        padding: 15px;
+        padding-bottom: 0;
+        scrollbar-color: #333 #1a1a1a;
+        scrollbar-width: thin;
+    }
+
+    /* User prompt styling */
+    .user-prompt {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        border: 1px solid #444;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .user-prompt .text-white {
+        margin-top: 4px;
+        font-weight: 500;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Agent response styling */
+    .agent-response {
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        border: 1px solid #333;
+        border-left: 3px solid #4299e1;
+    }
+
+    .agent-step {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: flex-start;
+        border: 1px solid #444;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: slideIn 0.3s ease forwards;
+    }
+
+    @keyframes slideIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .step-icon {
+        margin-right: 12px;
+        color: #4299e1;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        min-width: 24px;
+    }
+
+    .step-text {
+        color: #e0e0e0;
+        flex: 1;
+    }
+
+    .conversation-footer {
+        border-top: 1px solid #333;
+        width: 100%;
+        padding: 15px;
+        background-color: #121212;
+        margin-top: auto;
+        transition: transform 0.3s ease, width 0.3s ease;
+    }
+
+    /* Conversation Input Styling */
+    .conversation-input-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .conversation-input {
+        width: 100%;
+        padding: 12px 15px;
+        padding-right: 80px; /* More space for file upload and send buttons */
+        border: 1px solid #333;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #1a1a1a;
+        color: #e2e8f0;
+        resize: none;
+        min-height: 80px;
+        max-height: 120px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.4;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .conversation-input:focus {
+        outline: none;
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    .conversation-input::placeholder {
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .conversation-send-btn {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        z-index: 1;
+        color: #888888;
+    }
+
+    .conversation-send-btn:hover {
+        color: #cccccc;
+        transform: translateY(-1px) scale(1.1);
+    }
+
+    .conversation-send-btn:active {
+        transform: translateY(0) scale(1);
+    }
+
+    .conversation-send-btn:disabled {
+        color: #4a5568;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* File upload button styling */
+    .file-upload-btn {
+        position: absolute;
+        bottom: 8px;
+        right: 40px;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        z-index: 1;
+        color: #888888;
+    }
+
+    .file-upload-btn:hover {
+        color: #cccccc;
+        transform: translateY(-1px) scale(1.1);
+    }
+
+    .file-upload-btn:active {
+        transform: translateY(0) scale(1);
+    }
+
+    /* Hidden file input */
+    .file-input {
+        display: none;
+    }
+
+    /* File preview styling */
+    .file-preview {
+        margin-top: 8px;
+        padding: 8px;
+        background-color: #2d2d2d;
+        border-radius: 6px;
+        border: 1px solid #444;
+        display: none;
+    }
+
+    .file-preview.show {
+        display: block;
+    }
+
+    .file-preview-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 0;
+        color: #e0e0e0;
+        font-size: 12px;
+    }
+
+    .file-preview-name {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .file-preview-name span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .file-remove-btn {
+        background: none;
+        border: none;
+        color: #ff6b6b;
+        cursor: pointer;
+        padding: 2px;
+        font-size: 14px;
+        transition: color 0.2s ease;
+    }
+
+    .file-remove-btn:hover {
+        color: #ff5252;
+    }
+
+    /* Fixed preview container - positioned relative to main content */
+    .fixed-preview-container {
+        position: fixed;
+        top: 70px;
+        right: 0;
+        left: 300px; /* Position after the conversation sidebar */
+        width: auto;
+        height: calc(100vh - 70px);
+        padding: 20px 20px 20px 40px;
+        display: flex;
+        flex-direction: column;
+        z-index: 5;
+        transition: left 0.3s ease;
+    }
+
+    /* When conversation sidebar is collapsed */
+    .fixed-preview-container.sidebar-collapsed {
+        left: 0; /* Position at the left edge when conversation sidebar is collapsed */
+    }
+
+    /* Tab navigation */
+    .tab-navigation {
+        display: flex;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #333;
+        position: relative;
+    }
+
+    /* Action buttons container (positioned on right side of tab header) */
+    .action-buttons {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        gap: 8px;
+    }
+
+    /* Floating copy button inside code editor */
+    .floating-copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 100;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        color: #e0e0e0;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+    }
+
+    .floating-copy-btn:hover {
+        background: #2d2d2d;
+        border-color: #444;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .floating-copy-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .floating-copy-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Make sure code editor container is positioned relative */
+    .code-editor-container {
+        position: relative;
+    }
+
+
+
+    .tab-button {
+        padding: 8px 16px;
+        background-color: #1a1a1a;
+        color: #a0a0a0;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .tab-button.active {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border-bottom: 2px solid #4299e1;
+    }
+
+    /* Code editor and preview */
+    .code-editor-container, .preview-container {
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        height: 100%;
+        overflow-y: auto;
+        flex: 1;
+        scrollbar-color: #333 #1a1a1a;
+        scrollbar-width: thin;
+    }
+
+    .preview-container {
+        padding: 0;
+        background-color: white;
+        color: black;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #previewContent {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    #previewContent iframe {
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        border: none;
+        min-height: 500px;
+    }
+
+    /* CodeMirror customization */
+    .CodeMirror {
+        height: 100% !important;
+        font-family: 'Fira Code', monospace;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    /* Loading animation */
+    .typing-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .typing-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #4299e1;
+        border-radius: 50%;
+        animation: typing-bounce 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typing-bounce {
+        0%, 80%, 100% {
+            transform: scale(0);
+        }
+        40% {
+            transform: scale(1);
+        }
+    }
+
+    /* Responsive layout */
+    @media (max-width: 768px) {
+        .conversation-sidebar {
+            left: 0;
+            width: 250px;
+        }
+
+        .conversation-sidebar.collapsed {
+            transform: translateX(-250px);
+        }
+
+        .conversation-sidebar.collapsed .conversation-header,
+        .conversation-sidebar.collapsed .conversation-footer {
+            width: calc(100% + 250px);
+            transform: translateX(250px);
+        }
+
+        .sidebar-toggle {
+            left: 250px;
+            transform: translateY(-50%) translateX(-50%);
+        }
+
+        .sidebar-toggle.collapsed {
+            left: 0;
+            transform: translateY(-50%) translateX(-50%);
+        }
+
+        .fixed-preview-container {
+            left: 250px;
+            width: auto;
+            right: 0;
+        }
+
+        .fixed-preview-container.sidebar-collapsed {
+            left: 0;
+        }
+
+        body.collapsed-sidebar .fixed-preview-container,
+        body.collapsed-sidebar .fixed-preview-container.sidebar-collapsed {
+            left: 0;
+        }
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* Additional file upload styles for universal compatibility */
+    .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem;
+        background-color: #2d2d2d;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #444;
+    }
+
+    .file-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
+
+    .file-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-right: 0.75rem;
+        color: #60a5fa;
+    }
+
+    .file-details {
+        flex: 1;
+    }
+
+    .file-name {
+        font-weight: 500;
+        color: #e0e0e0;
+        font-size: 0.875rem;
+    }
+
+    .file-size {
+        color: #9ca3af;
+        font-size: 0.75rem;
+    }
+
+    .file-remove {
+        background: none;
+        border: none;
+        color: #ef4444;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+        transition: background-color 0.2s;
+    }
+
+    .file-remove:hover {
+        background-color: #374151;
+    }
+
+    .file-image-preview {
+        width: 3rem;
+        height: 3rem;
+        object-fit: cover;
+        border-radius: 0.375rem;
+        margin-right: 0.75rem;
+        border: 1px solid #444;
+    }
+
+
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hidden element to pass initial message from server to JavaScript -->
+<div id="initial-message-data" style="display: none;">{{ initial_message or '' }}</div>
+
+<div class="content-wrapper">
+    <!-- Sidebar Toggle Button -->
+    <div id="sidebarToggle" class="sidebar-toggle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+        </svg>
+    </div>
+
+
+
+    <!-- Conversation Sidebar -->
+    <div id="conversationSidebar" class="conversation-sidebar">
+        <div class="conversation-header">
+            <h3 class="text-lg font-semibold">AI Assistant</h3>
+            <button id="newSessionBtn" class="new-session-btn" title="Start New Session">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                </svg>
+                New Session
+            </button>
+        </div>
+
+        <!-- Conversation Container -->
+        <div id="conversationContainer" class="conversation-container">
+            <div class="agent-response">
+                <div class="text-sm text-gray-400 mb-2">🤖 AI Assistant</div>
+                <div class="text-white">
+                    Welcome to Agentic Code! I'm your AI coding assistant with capabilities similar to Augment.
+                    <br><br>
+                    <strong>What I can do:</strong>
+                    <ul class="mt-2 ml-4 list-disc text-sm text-gray-300">
+                        <li>Generate code from your descriptions</li>
+                        <li>Modify existing code based on your requests</li>
+                        <li>Explain what I'm planning to do</li>
+                        <li>Show step-by-step progress updates</li>
+                        <li>Iterate on code until you're satisfied</li>
+                    </ul>
+                    <br>
+                    Start by describing what you want to create, then use follow-up prompts to refine and improve the code!
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation Input -->
+        <div class="conversation-footer">
+            <div class="conversation-input-container">
+                <textarea
+                    id="conversationInput"
+                    class="conversation-input"
+                    placeholder="Ask me to modify the code, add features, fix issues, or explain something..."
+                    rows="3"
+                ></textarea>
+
+                <!-- File Upload Button -->
+                <button id="fileUploadBtn" class="file-upload-btn" title="Upload file or image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.49"></path>
+                    </svg>
+                </button>
+
+                <!-- Send Button -->
+                <button id="conversationSendBtn" class="conversation-send-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 2L11 13"></path>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+
+                <!-- Hidden File Input -->
+                <input type="file" id="fileInput" class="file-input" accept="image/*,.txt,.py,.js,.html,.css,.json,.md,.pdf,.doc,.docx" multiple>
+
+                <!-- File Preview -->
+                <div id="filePreview" class="file-preview">
+                    <!-- File previews will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="fixed-preview-container">
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <button id="codeTab" class="tab-button active">Code</button>
+        <button id="previewTab" class="tab-button">Preview</button>
+
+        <!-- Preview Action Buttons (positioned on right side) -->
+        <div class="action-buttons">
+            <!-- Export/Download Button -->
+            <button class="download-preview-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Export/Download">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+            </button>
+
+            <!-- Open in New Window Button -->
+            <button class="open-preview-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Open in new window">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+            </button>
+
+            <!-- Share Button -->
+            <button class="share-preview-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Share">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Code Editor Container -->
+    <div id="codeEditorContainer" class="code-editor-container">
+        <!-- Floating Copy Button -->
+        <button class="copy-code-btn floating-copy-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Copy code">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+        </button>
+
+        <textarea id="codeEditor" placeholder="Your generated code will appear here...
+
+Start by describing what you want to create in the AI Assistant panel on the left.
+
+Examples:
+- 'Create a responsive landing page for a tech startup'
+- 'Build a todo app with React'
+- 'Make a CSS animation for a loading spinner'
+- 'Create a Python script to analyze data'
+
+Then use follow-up prompts to refine and improve the code!"></textarea>
+    </div>
+
+    <!-- Preview Container -->
+    <div id="previewContainer" class="preview-container hidden">
+        <div id="previewContent">
+            <p class="text-center p-8 text-gray-500">Your code preview will appear here</p>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- CodeMirror JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+<script src="/static/js/universal_file_upload.js"></script>
+<!-- Note: History functionality is provided by professional_history.js in layout.html -->
+<script src="{{ url_for('static', filename='js/agentic_code.js') }}?v=1.0"></script>
+{% endblock %}

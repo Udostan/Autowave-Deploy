@@ -1,0 +1,832 @@
+{% extends "layout.html" %}
+
+{% block title %}Deep Research - AutoWave{% endblock %}
+
+{% block header %}Deep Academic Research{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dark theme styles */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    #main-content {
+        background-color: #121212;
+    }
+
+    main {
+        background-color: #121212;
+    }
+
+    .bg-white {
+        background-color: #121212 !important;
+    }
+
+    .text-gray-700 {
+        color: #e0e0e0 !important;
+    }
+
+    .border-gray-200 {
+        border-color: #333 !important;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Research container styles */
+    .research-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Input styles */
+    .research-input {
+        background-color: #2d2d2d;
+        border: 1px solid #444;
+        color: #e0e0e0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        width: 100%;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .research-input:focus {
+        border-color: #555;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(80, 80, 80, 0.3);
+    }
+
+    /* Button styles */
+    .research-button {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .research-button:hover {
+        background-color: #3d3d3d;
+    }
+
+    .research-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(80, 80, 80, 0.3);
+    }
+
+    /* Results styles */
+    .research-results {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .research-step {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+    }
+
+    .step-icon {
+        margin-right: 12px;
+        color: #888;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+    }
+
+    .step-text {
+        color: #ccc;
+    }
+
+    /* Loading animation */
+    .loading-dots {
+        display: inline-flex;
+    }
+
+    .loading-dots span {
+        width: 6px;
+        height: 6px;
+        margin: 0 2px;
+        background-color: #888;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+
+    .loading-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .loading-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 0.4;
+        }
+        50% {
+            opacity: 1;
+        }
+    }
+
+    /* Final research report */
+    .research-report {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-top: 20px;
+        line-height: 1.6;
+        position: relative;
+    }
+
+    .research-report h1,
+    .research-report h2,
+    .research-report h3 {
+        color: #e0e0e0;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+    }
+
+    .research-report p {
+        margin-bottom: 1em;
+        color: #ccc;
+    }
+
+    .research-report ul,
+    .research-report ol {
+        margin-bottom: 1em;
+        padding-left: 1.5em;
+        color: #ccc;
+    }
+
+    .research-report blockquote {
+        border-left: 3px solid #444;
+        padding-left: 1em;
+        margin-left: 0;
+        margin-right: 0;
+        color: #aaa;
+    }
+
+    /* Feedback and download icons */
+    .research-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #333;
+    }
+
+    .action-button {
+        background-color: #2d2d2d;
+        color: #aaa;
+        border: 1px solid #444;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .action-button:hover {
+        background-color: #3d3d3d;
+        color: #e0e0e0;
+    }
+
+    .action-button.liked {
+        color: #4CAF50;
+        border-color: #4CAF50;
+    }
+
+    .action-button.disliked {
+        color: #F44336;
+        border-color: #F44336;
+    }
+
+    .action-button {
+        font-size: 18px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Fixed input container at bottom */
+    .fixed-input-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #121212;
+        padding: 16px;
+        border-top: 1px solid #333;
+        z-index: 100;
+        margin-left: 16rem; /* Match sidebar width */
+        transition: margin-left 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+        .fixed-input-container {
+            margin-left: 0;
+        }
+    }
+
+    /* Adjust main content to prevent overlap with fixed input */
+    .content-wrapper {
+        padding-bottom: 80px;
+    }
+
+    /* Collapsed sidebar adjustment */
+    body.collapsed-sidebar .fixed-input-container {
+        margin-left: 4rem;
+    }
+
+    /* File upload styles */
+    .file-preview {
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem;
+        background-color: #2d2d2d;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #333;
+    }
+
+    .file-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
+
+    .file-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-right: 0.75rem;
+        color: #60a5fa;
+    }
+
+    .file-details {
+        flex: 1;
+    }
+
+    .file-name {
+        font-weight: 500;
+        color: #e0e0e0;
+        font-size: 0.875rem;
+    }
+
+    .file-size {
+        color: #9ca3af;
+        font-size: 0.75rem;
+    }
+
+    .file-remove {
+        background: none;
+        border: none;
+        color: #ef4444;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+        transition: background-color 0.2s;
+    }
+
+    .file-remove:hover {
+        background-color: #333;
+    }
+
+    .file-image-preview {
+        width: 3rem;
+        height: 3rem;
+        object-fit: cover;
+        border-radius: 0.375rem;
+        margin-right: 0.75rem;
+        border: 1px solid #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="research-container">
+        <h2 class="text-xl font-semibold mb-4">Academic Research Assistant</h2>
+        <p class="mb-4">Enter a research topic to generate a comprehensive, PhD-level analysis with citations and academic insights.</p>
+    </div>
+
+    <div id="researchResults" class="research-results hidden">
+        <div id="researchSteps" class="mb-4">
+            <!-- Research steps will be added here dynamically -->
+        </div>
+    </div>
+
+    <div id="finalReport" class="research-report hidden">
+        <!-- Final research report will be added here -->
+        <div class="research-actions">
+            <button id="likeButton" class="action-button" title="Like this research">
+                👍
+            </button>
+            <button id="dislikeButton" class="action-button" title="Dislike this research">
+                👎
+            </button>
+            <button id="downloadButton" class="action-button" title="Download as PDF">
+                📥
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="fixed-input-container">
+    <div class="flex">
+        <div class="relative flex-1 mr-2">
+            <input type="text" id="researchQuery" class="research-input w-full pr-12" placeholder="Enter a research topic (e.g., 'Quantum computing applications in cryptography')">
+
+            <!-- File Upload Button -->
+            <button id="researchFileUploadBtn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors duration-200 bg-transparent border-0" title="Upload file or image">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.49"></path>
+                </svg>
+            </button>
+
+            <!-- Hidden File Input -->
+            <input type="file" id="researchFileInput" class="hidden" accept="image/*,.txt,.py,.js,.html,.css,.json,.md,.pdf,.doc,.docx" multiple>
+
+            <!-- File Preview -->
+            <div id="researchFilePreview" class="file-preview mt-2" style="display: none;">
+                <!-- File previews will be added here dynamically -->
+            </div>
+        </div>
+        <button id="searchButton" class="research-button">Research</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Add html2pdf.js for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="/static/js/universal_file_upload.js"></script>
+<!-- Note: History functionality is provided by professional_history.js in layout.html -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const researchQuery = document.getElementById('researchQuery');
+        const searchButton = document.getElementById('searchButton');
+        const researchResults = document.getElementById('researchResults');
+        const researchSteps = document.getElementById('researchSteps');
+        const finalReport = document.getElementById('finalReport');
+        const likeButton = document.getElementById('likeButton');
+        const dislikeButton = document.getElementById('dislikeButton');
+        const downloadButton = document.getElementById('downloadButton');
+
+        let currentResearchQuery = '';
+        let currentResearchResults = '';
+
+        // Check if sidebar is collapsed and add class to body
+        function updateSidebarState() {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.body.classList.add('collapsed-sidebar');
+            } else {
+                document.body.classList.remove('collapsed-sidebar');
+            }
+        }
+
+        // Initial check
+        updateSidebarState();
+
+        // Listen for sidebar state changes
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'sidebarCollapsed') {
+                updateSidebarState();
+            }
+        });
+
+        // Research steps simulation
+        const researchStepTexts = [
+            "Analyzing research topic and generating key questions...",
+            "Searching academic databases for relevant literature...",
+            "Identifying key theories and frameworks in the field...",
+            "Analyzing methodological approaches in recent studies...",
+            "Examining empirical evidence and research findings...",
+            "Identifying gaps in current research literature...",
+            "Synthesizing information from multiple academic sources...",
+            "Evaluating the strength of evidence across studies...",
+            "Formulating academic insights and conclusions...",
+            "Compiling comprehensive research report with citations..."
+        ];
+
+        let currentStep = 0;
+        let stepInterval;
+        let researchInProgress = false;
+
+        function addResearchStep(text) {
+            const stepElement = document.createElement('div');
+            stepElement.className = 'research-step';
+            stepElement.innerHTML = `
+                <div class="step-icon">
+                    ⏳
+                </div>
+                <div class="step-text">${text}</div>
+            `;
+            researchSteps.appendChild(stepElement);
+
+            // Scroll to the bottom of the steps
+            researchSteps.scrollTop = researchSteps.scrollHeight;
+
+            return stepElement;
+        }
+
+        function startResearchSimulation() {
+            if (researchInProgress) return;
+
+            researchInProgress = true;
+            currentStep = 0;
+            researchSteps.innerHTML = '';
+            researchResults.classList.remove('hidden');
+            finalReport.classList.add('hidden');
+
+            // Add first step immediately
+            const firstStep = addResearchStep(researchStepTexts[currentStep]);
+            currentStep++;
+
+            // Add subsequent steps with delay
+            stepInterval = setInterval(() => {
+                if (currentStep < researchStepTexts.length) {
+                    addResearchStep(researchStepTexts[currentStep]);
+                    currentStep++;
+                } else {
+                    clearInterval(stepInterval);
+                }
+            }, 2000);
+        }
+
+        function stopResearchSimulation() {
+            clearInterval(stepInterval);
+            researchInProgress = false;
+
+            // Complete all steps
+            while (currentStep < researchStepTexts.length) {
+                addResearchStep(researchStepTexts[currentStep]);
+                currentStep++;
+            }
+
+            // Mark all steps as completed
+            const steps = researchSteps.querySelectorAll('.research-step');
+            steps.forEach(step => {
+                const iconDiv = step.querySelector('.step-icon');
+                iconDiv.innerHTML = '✅';
+                iconDiv.style.color = '#4CAF50';
+            });
+        }
+
+        // Handle search button click
+        searchButton.addEventListener('click', function() {
+            const query = researchQuery.value.trim();
+            if (!query) return;
+
+            // Get uploaded files if available
+            let fileContent = '';
+            if (window.universalFileUpload) {
+                fileContent = window.universalFileUpload.getFileContentForAI('research');
+            }
+
+            // Start research simulation
+            startResearchSimulation();
+
+            // Make API call to backend
+            fetch('/api/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query + fileContent })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Stop simulation
+                stopResearchSimulation();
+
+                // Display final report
+                finalReport.innerHTML = data.results || 'No results found.';
+                finalReport.classList.remove('hidden');
+
+                // Track activity in enhanced history
+                if (window.trackActivity) {
+                    try {
+                        // Get uploaded files if available
+                        let currentUploadedFiles = [];
+                        if (window.universalFileUpload) {
+                            currentUploadedFiles = window.universalFileUpload.getFiles('research') || [];
+                        }
+
+                        window.trackActivity('research_lab', 'research', {
+                            query: query,
+                            files: currentUploadedFiles
+                        }, {
+                            results: data.results || 'No results found.',
+                            research_type: 'academic_research'
+                        });
+                    } catch (trackError) {
+                        console.warn('Error tracking activity:', trackError);
+                        // Don't throw error, just log it
+                    }
+                }
+
+                // Clear uploaded files after successful research
+                if (window.universalFileUpload) {
+                    window.universalFileUpload.clearFiles('research');
+                }
+
+                // Convert markdown to HTML
+                if (window.markdownit) {
+                    const md = window.markdownit({
+                        html: true,
+                        linkify: true,
+                        typographer: true,
+                        highlight: function (str, lang) {
+                            if (lang && Prism.languages[lang]) {
+                                try {
+                                    return Prism.highlight(str, Prism.languages[lang], lang);
+                                } catch (__) {}
+                            }
+                            return ''; // use external default escaping
+                        }
+                    });
+
+                    finalReport.innerHTML = md.render(data.results || 'No results found.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                stopResearchSimulation();
+                finalReport.innerHTML = `<p>Error: ${error.message || 'An error occurred during research.'}</p>`;
+                finalReport.classList.remove('hidden');
+
+                // Track failed activity
+                if (window.trackActivity) {
+                    try {
+                        // Get uploaded files if available
+                        let currentUploadedFiles = [];
+                        if (window.universalFileUpload) {
+                            currentUploadedFiles = window.universalFileUpload.getFiles('research') || [];
+                        }
+
+                        window.trackActivity('research_lab', 'research', {
+                            query: query,
+                            files: currentUploadedFiles
+                        }, null, null, false, error.message || 'Research request failed');
+                    } catch (trackError) {
+                        console.warn('Error tracking failed activity:', trackError);
+                        // Don't throw error, just log it
+                    }
+                }
+            });
+        });
+
+        // Handle Enter key in input field
+        researchQuery.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchButton.click();
+            }
+        });
+
+        // Handle like button click
+        likeButton.addEventListener('click', function() {
+            if (likeButton.classList.contains('liked')) {
+                // Already liked, remove like
+                likeButton.classList.remove('liked');
+            } else {
+                // Add like and remove dislike if present
+                likeButton.classList.add('liked');
+                dislikeButton.classList.remove('disliked');
+
+                // Send feedback to server
+                sendFeedback('like', currentResearchQuery, currentResearchResults);
+
+                // Show feedback message
+                showFeedbackMessage('Thank you for your feedback! We\'ll use it to improve future research.');
+            }
+        });
+
+        // Handle dislike button click
+        dislikeButton.addEventListener('click', function() {
+            if (dislikeButton.classList.contains('disliked')) {
+                // Already disliked, remove dislike
+                dislikeButton.classList.remove('disliked');
+            } else {
+                // Add dislike and remove like if present
+                dislikeButton.classList.add('disliked');
+                likeButton.classList.remove('liked');
+
+                // Send feedback to server
+                sendFeedback('dislike', currentResearchQuery, currentResearchResults);
+
+                // Show feedback message
+                showFeedbackMessage('Thank you for your feedback! We\'ll use it to improve future research.');
+            }
+        });
+
+        // Handle download button click
+        downloadButton.addEventListener('click', function() {
+            // Create a clone of the report without the action buttons
+            const reportContent = finalReport.cloneNode(true);
+            const actionsDiv = reportContent.querySelector('.research-actions');
+            if (actionsDiv) {
+                reportContent.removeChild(actionsDiv);
+            }
+
+            // Generate filename from research query
+            const filename = currentResearchQuery.toLowerCase()
+                .replace(/[^\w\s]/gi, '')  // Remove special characters
+                .replace(/\s+/g, '_')      // Replace spaces with underscores
+                .substring(0, 50) + '_research.pdf';
+
+            // Configure PDF options
+            const options = {
+                margin: 10,
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generate and download PDF
+            html2pdf().from(reportContent).set(options).save();
+
+            // Show download message
+            showFeedbackMessage('Research report downloaded as PDF.');
+        });
+
+        // Function to send feedback to server
+        function sendFeedback(type, query, results) {
+            fetch('/api/research-feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    feedback_type: type,
+                    query: query,
+                    results: results
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Feedback sent successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error sending feedback:', error);
+            });
+        }
+
+        // Function to show feedback message
+        function showFeedbackMessage(message) {
+            // Create message element
+            const messageElement = document.createElement('div');
+            messageElement.className = 'feedback-message';
+            messageElement.style.position = 'fixed';
+            messageElement.style.bottom = '100px';
+            messageElement.style.left = '50%';
+            messageElement.style.transform = 'translateX(-50%)';
+            messageElement.style.backgroundColor = '#2d2d2d';
+            messageElement.style.color = '#e0e0e0';
+            messageElement.style.padding = '10px 20px';
+            messageElement.style.borderRadius = '4px';
+            messageElement.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+            messageElement.style.zIndex = '1000';
+            messageElement.textContent = message;
+
+            // Add to document
+            document.body.appendChild(messageElement);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                document.body.removeChild(messageElement);
+            }, 3000);
+        }
+
+        // Update the API call to store the current query and results
+        const originalFetch = window.fetch;
+        searchButton.addEventListener('click', function() {
+            const query = researchQuery.value.trim();
+            if (!query) return;
+
+            // Store current query
+            currentResearchQuery = query;
+
+            // Reset feedback buttons
+            likeButton.classList.remove('liked');
+            dislikeButton.classList.remove('disliked');
+
+            // Start research simulation
+            startResearchSimulation();
+
+            // Make API call to backend
+            fetch('/api/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Store current results
+                currentResearchResults = data.results || '';
+
+                // Stop simulation
+                stopResearchSimulation();
+
+                // Display final report
+                finalReport.innerHTML = data.results || 'No results found.';
+
+                // Add back the action buttons
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'research-actions';
+                actionsDiv.innerHTML = `
+                    <button id="likeButton" class="action-button" title="Like this research">
+                        👍
+                    </button>
+                    <button id="dislikeButton" class="action-button" title="Dislike this research">
+                        👎
+                    </button>
+                    <button id="downloadButton" class="action-button" title="Download as PDF">
+                        📥
+                    </button>
+                `;
+                finalReport.appendChild(actionsDiv);
+
+                // Re-attach event listeners to the new buttons
+                document.getElementById('likeButton').addEventListener('click', likeButton.onclick);
+                document.getElementById('dislikeButton').addEventListener('click', dislikeButton.onclick);
+                document.getElementById('downloadButton').addEventListener('click', downloadButton.onclick);
+
+                finalReport.classList.remove('hidden');
+
+                // Convert markdown to HTML
+                if (window.markdownit) {
+                    const md = window.markdownit({
+                        html: true,
+                        linkify: true,
+                        typographer: true,
+                        highlight: function (str, lang) {
+                            if (lang && Prism.languages[lang]) {
+                                try {
+                                    return Prism.highlight(str, Prism.languages[lang], lang);
+                                } catch (__) {}
+                            }
+                            return ''; // use external default escaping
+                        }
+                    });
+
+                    // Replace content but preserve action buttons
+                    const actionsDiv = finalReport.querySelector('.research-actions');
+                    finalReport.innerHTML = md.render(data.results || 'No results found.');
+                    finalReport.appendChild(actionsDiv);
+
+                    // Re-attach event listeners again
+                    document.getElementById('likeButton').addEventListener('click', likeButton.onclick);
+                    document.getElementById('dislikeButton').addEventListener('click', dislikeButton.onclick);
+                    document.getElementById('downloadButton').addEventListener('click', downloadButton.onclick);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                stopResearchSimulation();
+                finalReport.innerHTML = `<p>Error: ${error.message || 'An error occurred during research.'}</p>`;
+                finalReport.classList.remove('hidden');
+            });
+        });
+    });
+</script>
+{% endblock %}

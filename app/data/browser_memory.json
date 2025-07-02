@@ -1,0 +1,104 @@
+{
+  "tasks": [
+    {
+      "id": "b54f44bd-abbf-4448-b3fa-bbdb2ba53470",
+      "type": "natural_language",
+      "data": {
+        "task": "go to google and search for amazon.com, check the price of watches in amazon site"
+      },
+      "timestamp": 1746345985.68147,
+      "url_before": null,
+      "result": {
+        "success": false,
+        "url": null,
+        "message": "Task 'Search for amazon.com on Google, navigate to the site, and check the price of watches.' completed with 0 successful steps out of 7",
+        "steps_results": [
+          {
+            "step": 1,
+            "action": "navigate",
+            "url": "https://www.google.com",
+            "success": false,
+            "message": ""
+          }
+        ],
+        "extracted_data": {}
+      },
+      "url_after": null,
+      "screenshot": null
+    },
+    {
+      "id": "6ec63b3d-8725-47a5-b596-5361f15fc679",
+      "type": "natural_language",
+      "data": {
+        "task": "go to google and search for amazon.com, check the price of watches in amazon site"
+      },
+      "timestamp": 1746345985.683072,
+      "url_before": null,
+      "result": {
+        "success": false,
+        "url": null,
+        "message": "Task 'Search for amazon.com on Google, then navigate to Amazon and search for watches, checking their prices.' completed with 0 successful steps out of 8",
+        "steps_results": [
+          {
+            "step": 1,
+            "action": "navigate",
+            "url": "https://www.google.com",
+            "success": false,
+            "message": ""
+          }
+        ],
+        "extracted_data": {}
+      },
+      "url_after": null,
+      "screenshot": null
+    },
+    {
+      "id": "1d2c3fef-0d14-4723-9bde-806be07cece5",
+      "type": "natural_language",
+      "data": {
+        "task": "go to google and search for amazon.com, check the price of watches in amazon site"
+      },
+      "timestamp": 1746346016.199237,
+      "url_before": null,
+      "result": {
+        "success": true,
+        "url": null,
+        "message": "Search for 'go to google and search for amazon.com, check the price of watches in amazon site' completed"
+      },
+      "url_after": null,
+      "screenshot": null
+    },
+    {
+      "id": "6a6f82f6-6e48-4811-9022-38106a2208a2",
+      "type": "natural_language",
+      "data": {
+        "task": "go to google and search for amazon.com, check the price of watches in amazon site"
+      },
+      "timestamp": 1746346016.189889,
+      "url_before": null,
+      "result": {
+        "success": false,
+        "url": null,
+        "message": "Task 'Search for amazon.com on Google, then navigate to Amazon and search for watches, checking their prices.' completed with 0 successful steps out of 8",
+        "steps_results": [
+          {
+            "step": 1,
+            "action": "navigate",
+            "url": "https://www.google.com",
+            "success": false,
+            "message": ""
+          }
+        ],
+        "extracted_data": {}
+      },
+      "url_after": null,
+      "screenshot": null
+    }
+  ],
+  "data": {
+    "extracted_data": {}
+  },
+  "preferences": {},
+  "context": {},
+  "last_updated": 1746346025.847504
+}

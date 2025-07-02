@@ -1,0 +1,446 @@
+{% extends "layout.html" %}
+
+{% block title %}Call Assistant - AutoWave{% endblock %}
+
+{% block header %}Call Assistant{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dark theme styles */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    #main-content {
+        background-color: #121212;
+    }
+
+    main {
+        background-color: #121212;
+    }
+
+    .bg-white {
+        background-color: #121212 !important;
+    }
+
+    .text-gray-700 {
+        color: #e0e0e0 !important;
+    }
+
+    .border-gray-200 {
+        border-color: #333 !important;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Call Assistant container styles */
+    .call-assistant-container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Call interface styles */
+    .call-interface {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Phone input styles */
+    .phone-dialer {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .dialer-input {
+        width: 100%;
+        background-color: #1e1e1e;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 16px;
+        color: #e0e0e0;
+        font-size: 20px;
+        text-align: center;
+        font-family: monospace;
+        transition: all 0.3s ease;
+    }
+
+    .dialer-input:focus {
+        border-color: #666;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        outline: none;
+    }
+
+    .dialer-input::placeholder {
+        color: #888;
+    }
+
+    /* Call logs styles */
+    .call-logs {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .call-logs-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .call-logs-list {
+        max-height: 300px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .call-log-item {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .call-log-item:hover {
+        background-color: #3d3d3d;
+    }
+
+    .call-log-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .call-log-number {
+        font-size: 16px;
+        color: #e0e0e0;
+    }
+
+    .call-log-time {
+        font-size: 12px;
+        color: #aaa;
+    }
+
+    .call-log-duration {
+        font-size: 14px;
+        color: #ccc;
+    }
+
+    /* Phone display styles */
+    .phone-display {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .phone-number {
+        font-size: 24px;
+        color: #e0e0e0;
+        font-family: monospace;
+    }
+
+    .call-status {
+        font-size: 14px;
+        color: #aaa;
+    }
+
+    .call-timer {
+        font-size: 14px;
+        color: #aaa;
+        font-family: monospace;
+    }
+
+    /* Call controls styles */
+    .call-controls {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .control-button {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 24px;
+    }
+
+    .control-button:hover {
+        background-color: #3d3d3d;
+    }
+
+    .control-button.call {
+        background-color: #4CAF50;
+    }
+
+    .control-button.call.active {
+        background-color: #F44336;
+    }
+
+    .control-button.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Knowledge base styles */
+    .knowledge-base-section {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+    }
+
+    .knowledge-items {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .knowledge-item {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .knowledge-item-text {
+        color: #ccc;
+    }
+
+    .knowledge-item-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .knowledge-item-button {
+        background-color: transparent;
+        color: #aaa;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .knowledge-item-button:hover {
+        color: #e0e0e0;
+        background-color: #3d3d3d;
+    }
+
+    .knowledge-input {
+        display: flex;
+        gap: 10px;
+    }
+
+    .knowledge-input-field {
+        flex: 1;
+        background-color: #2d2d2d;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 12px;
+        color: #e0e0e0;
+        font-size: 14px;
+    }
+
+    .knowledge-input-field:focus {
+        outline: none;
+        border-color: #555;
+    }
+
+    .knowledge-add-button {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 0 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .knowledge-add-button:hover {
+        background-color: #3d3d3d;
+    }
+
+    /* Call transcript styles */
+    .call-transcript {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 20px;
+        margin-top: 20px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .transcript-message {
+        margin-bottom: 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+    }
+
+    .transcript-message.ai {
+        background-color: #2d2d2d;
+        color: #ccc;
+        align-self: flex-start;
+        border-top-left-radius: 0;
+    }
+
+    .transcript-message.user {
+        background-color: #3d3d3d;
+        color: #e0e0e0;
+        align-self: flex-end;
+        border-top-right-radius: 0;
+        text-align: right;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 8px 12px;
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        border-top-left-radius: 0;
+        width: fit-content;
+    }
+
+    .typing-indicator .dot {
+        width: 8px;
+        height: 8px;
+        background-color: #aaa;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+
+    .typing-indicator .dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-indicator .dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 0.4;
+        }
+        50% {
+            opacity: 1;
+        }
+    }
+
+    /* Content wrapper to prevent overlap with fixed input */
+    .content-wrapper {
+        padding-bottom: 80px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="call-assistant-container">
+        <h2 class="text-xl font-semibold mb-4">Call Assistant</h2>
+        <p class="mb-4">Make direct phone calls for customer service assistance with human-like voice synthesis. The assistant can access the knowledge base below during calls.</p>
+    </div>
+
+    <!-- Phone Number Input -->
+    <div class="phone-dialer">
+        <input type="text" id="phoneNumberInput" class="dialer-input" value="+1 (555) 123-4567" placeholder="Enter phone number">
+    </div>
+
+    <!-- Call Interface -->
+    <div class="call-interface">
+        <div class="phone-display">
+            <div class="phone-number" id="phoneDisplay">+1 (555) 123-4567</div>
+            <div class="call-status" id="callStatus">Ready to call</div>
+            <div class="call-timer hidden" id="callTimer">00:00</div>
+        </div>
+
+        <div class="call-controls">
+            <button id="callButton" class="control-button call" title="Start/End Call">
+                📞
+            </button>
+            <button id="muteButton" class="control-button disabled" title="Mute Call">
+                🔇
+            </button>
+            <button id="speakerButton" class="control-button disabled" title="Speaker">
+                🔊
+            </button>
+        </div>
+    </div>
+
+    <!-- Call Logs -->
+    <div class="call-logs">
+        <div class="call-logs-header">
+            <h3 class="text-lg font-semibold">Call History</h3>
+            <button id="clearLogsButton" class="knowledge-add-button">Clear All</button>
+        </div>
+        <div class="call-logs-list" id="callLogsList">
+            <!-- Call logs will be added here dynamically -->
+            <div class="call-log-item empty-logs">No call history yet</div>
+        </div>
+    </div>
+
+    <div class="call-transcript hidden" id="callTranscript">
+        <!-- Call transcript will be added here dynamically -->
+    </div>
+
+    <div class="knowledge-base-section">
+        <h3 class="text-lg font-semibold mb-4">Knowledge Base</h3>
+        <div class="knowledge-items" id="knowledgeItems">
+            <!-- Knowledge items will be added here dynamically -->
+        </div>
+        <div class="knowledge-input">
+            <input type="text" id="newKnowledgeItem" class="knowledge-input-field" placeholder="Add new information to the knowledge base...">
+            <button id="addKnowledgeButton" class="knowledge-add-button">Add</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/call_assistant.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,259 @@
+{% extends "layout.html" %}
+
+{% block title %}Profile - AutoWave{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* AutoWave Theme Colors */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    #main-content {
+        background-color: #121212;
+    }
+
+    main {
+        background-color: #121212;
+    }
+
+    .profile-container {
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px auto;
+        max-width: 600px;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #333;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2d2d2d, #3d3d3d);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 32px;
+        color: #e0e0e0;
+    }
+
+    .profile-info {
+        margin-bottom: 24px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #333;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #aaa;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #e0e0e0;
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-verified {
+        background-color: rgba(34, 197, 94, 0.2);
+        color: #86efac;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-pending {
+        background-color: rgba(251, 191, 36, 0.2);
+        color: #fcd34d;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .action-button {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        flex: 1;
+    }
+
+    .action-button:hover {
+        background-color: #3d3d3d;
+        border-color: #555;
+    }
+
+    .action-button.danger {
+        border-color: rgba(239, 68, 68, 0.5);
+        color: #fca5a5;
+    }
+
+    .action-button.danger:hover {
+        background-color: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.7);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <h1 class="text-2xl font-bold mb-2">Your Profile</h1>
+        <p class="text-gray-400">Manage your AutoWave account</p>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="profile-info">
+        <div class="info-item">
+            <span class="info-label">
+                <i class="fas fa-envelope mr-2"></i>
+                Email
+            </span>
+            <span class="info-value">{{ user.email }}</span>
+        </div>
+
+        <div class="info-item">
+            <span class="info-label">
+                <i class="fas fa-shield-alt mr-2"></i>
+                Email Status
+            </span>
+            <span class="status-badge {{ 'status-verified' if user.email_confirmed else 'status-pending' }}">
+                {% if user.email_confirmed %}
+                    <i class="fas fa-check mr-1"></i>Verified
+                {% else %}
+                    <i class="fas fa-clock mr-1"></i>Pending Verification
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="info-item">
+            <span class="info-label">
+                <i class="fas fa-id-card mr-2"></i>
+                User ID
+            </span>
+            <span class="info-value">{{ user.id[:8] }}...</span>
+        </div>
+
+        <div class="info-item">
+            <span class="info-label">
+                <i class="fas fa-calendar mr-2"></i>
+                Member Since
+            </span>
+            <span class="info-value">{{ moment().format('MMMM YYYY') }}</span>
+        </div>
+    </div>
+
+    <!-- Profile Actions -->
+    <div class="profile-actions">
+        <a href="/" class="action-button">
+            <i class="fas fa-home mr-2"></i>
+            Back to AutoWave
+        </a>
+        <button onclick="logout()" class="action-button danger">
+            <i class="fas fa-sign-out-alt mr-2"></i>
+            Sign Out
+        </button>
+    </div>
+
+    {% if not user.email_confirmed %}
+    <!-- Email Verification Notice -->
+    <div style="background-color: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 16px; margin-top: 24px;">
+        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+            <i class="fas fa-exclamation-triangle" style="color: #fcd34d; margin-right: 8px;"></i>
+            <strong style="color: #fcd34d;">Email Verification Required</strong>
+        </div>
+        <p style="color: #fbbf24; margin-bottom: 12px;">
+            Please check your email and click the verification link to fully activate your account.
+        </p>
+        <button onclick="resendVerification()" class="action-button" style="width: auto; margin: 0;">
+            <i class="fas fa-paper-plane mr-2"></i>
+            Resend Verification Email
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    async function logout() {
+        if (confirm('Are you sure you want to sign out?')) {
+            try {
+                const response = await fetch('/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/auth/login';
+                } else {
+                    alert('Error signing out. Please try again.');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Error signing out. Please try again.');
+            }
+        }
+    }
+
+    async function resendVerification() {
+        try {
+            const response = await fetch('/auth/resend-verification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('Verification email sent! Please check your inbox.');
+            } else {
+                alert(result.error || 'Failed to send verification email.');
+            }
+        } catch (error) {
+            console.error('Resend verification error:', error);
+            alert('Error sending verification email. Please try again.');
+        }
+    }
+</script>
+{% endblock %}

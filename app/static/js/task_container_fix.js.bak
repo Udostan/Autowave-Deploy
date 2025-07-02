@@ -1,0 +1,880 @@
+/**
+ * Task Container Fix
+ * This script fixes the issue where the agent freezes after executing the first task
+ * by completely overriding the task execution function
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Task Container Fix loaded');
+
+    // Log to server for debugging
+    fetch('/api/log', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            message: 'Task Container Fix loaded'
+        })
+    }).catch(e => console.error('Error logging to server:', e));
+
+    // Wait for all scripts to load
+    setTimeout(function() {
+        // Get elements
+        const executeTaskBtn = document.getElementById('executeTaskBtn');
+        const taskDescription = document.getElementById('taskDescription');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const taskProgress = document.getElementById('taskProgress');
+        const taskSummaryContainer = document.getElementById('taskSummaryContainer');
+        const useAdvancedBrowser = document.getElementById('useAdvancedBrowser');
+        const progressFill = document.getElementById('progressFill');
+        const stepDescription = document.getElementById('stepDescription');
+        const processingIndicator = document.getElementById('processingIndicator');
+        const thinkingContainers = document.getElementById('thinkingContainers');
+        const summaryContainers = document.getElementById('summaryContainers');
+
+        // If any of the required elements are missing, log an error and return
+        if (!executeTaskBtn || !taskDescription || !resultsContainer || !thinkingContainers || !summaryContainers) {
+            console.error('Required elements not found for task container fix');
+            return;
+        }
+
+        console.log('All required elements found, overriding task execution function');
+
+        // Task counter for unique IDs
+        let taskCounter = 0;
+
+        // Function to reset the task execution state
+        function resetTaskExecutionState() {
+            console.log('Resetting task execution state');
+
+            // Re-enable the button
+            if (executeTaskBtn) {
+                executeTaskBtn.disabled = false;
+                executeTaskBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                executeTaskBtn.innerHTML = `
+                    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Execute Task`;
+            }
+
+            // Mark the processing indicator as completed
+            if (processingIndicator) {
+                processingIndicator.classList.add('completed');
+            }
+
+            // Clear any polling intervals
+            if (window.taskPollingInterval) {
+                clearInterval(window.taskPollingInterval);
+                window.taskPollingInterval = null;
+            }
+
+            // Clear the task description
+            if (taskDescription) {
+                taskDescription.value = '';
+            }
+        }
+
+        // Function to create a new thinking container
+        function createThinkingContainer(taskId) {
+            console.log('Creating new thinking container for task:', taskId);
+
+            const container = document.createElement('div');
+            container.className = 'thinking-container mt-4';
+            container.id = `thinking-container-${taskId}`;
+
+            container.innerHTML = `
+                <div class="bg-gray-50 px-4 py-3 rounded-t-md border border-gray-200 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <button class="toggle-thinking-btn p-1 mr-2 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Toggle thinking process" data-container-id="thinking-container-${taskId}">
+                            <svg class="w-4 h-4 transform rotate-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <h4 class="font-medium text-gray-700">Thinking Process</h4>
+                    </div>
+                    <div class="flex space-x-1">
+                        <button class="goto-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Go to summary" data-task-id="summary-container-${taskId}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="thinking-process bg-gray-50 p-4 rounded-b-md border-l border-r border-b border-gray-200 h-64 overflow-auto">
+                    <div id="thinking-content-${taskId}" class="prose prose-sm max-w-none text-sm text-gray-500">
+                        <p class="typing-cursor">Starting analysis and planning process...</p>
+                    </div>
+                </div>
+            `;
+
+            return container;
+        }
+
+        // Function to create a new summary container
+        function createSummaryContainer(taskId) {
+            console.log('Creating new summary container for task:', taskId);
+
+            const container = document.createElement('div');
+            container.className = 'summary-container mt-4'; // Added mt-4 for margin-top
+            container.id = `summary-container-${taskId}`;
+
+            container.innerHTML = `
+                <div class="bg-gray-50 px-4 py-3 rounded-t-md border border-gray-200 flex justify-between items-center summary-container-header">
+                    <h4 class="font-medium text-gray-700">Task Summary</h4>
+                    <div class="flex space-x-1">
+                        <!-- Download Icon -->
+                        <button class="download-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Download summary" data-task-id="summary-container-${taskId}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                        </button>
+                        <!-- Copy Icon -->
+                        <button class="copy-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Copy to clipboard" data-task-id="summary-container-${taskId}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                            </svg>
+                        </button>
+                        <!-- Share Icon -->
+                        <button class="share-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Share summary" data-task-id="summary-container-${taskId}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="summary-container-content prose prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto prose-img:max-w-full p-4 border-l border-r border-b border-gray-200 rounded-b-md">
+                    <p class="text-center text-gray-500">Task results will appear here</p>
+                </div>
+            `;
+
+            return container;
+        }
+
+        // Function to simulate thinking process
+        function simulateThinking() {
+            console.log('Simulating thinking process');
+
+            // Reset progress bar
+            if (progressFill) {
+                progressFill.style.width = '0%';
+
+                // Animate progress bar
+                setTimeout(() => {
+                    progressFill.style.width = '30%';
+                    if (stepDescription) stepDescription.textContent = 'Analyzing your request and preparing execution plan';
+                }, 500);
+
+                setTimeout(() => {
+                    progressFill.style.width = '60%';
+                    if (stepDescription) stepDescription.textContent = 'Executing task and gathering information';
+                }, 3000);
+
+                setTimeout(() => {
+                    progressFill.style.width = '90%';
+                    if (stepDescription) stepDescription.textContent = 'Finalizing results and preparing summary';
+                }, 6000);
+            }
+        }
+
+        // Function to poll for task status
+        function pollTaskStatus(sessionId, currentThinkingContent, currentSummaryContainer) {
+            console.log('Polling for task status with session ID:', sessionId);
+
+            // Clear any existing polling interval
+            if (window.taskPollingInterval) {
+                clearInterval(window.taskPollingInterval);
+                window.taskPollingInterval = null;
+            }
+
+            // Set a maximum polling time (5 minutes) to prevent endless polling
+            const maxPollingTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+            const startTime = Date.now();
+            let pollingCount = 0;
+
+            // Log to server for debugging
+            fetch('/api/log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `Starting to poll for task status with session ID: ${sessionId}`
+                })
+            }).catch(e => console.error('Error logging to server:', e));
+
+            // Start polling
+            window.taskPollingInterval = setInterval(() => {
+                pollingCount++;
+                console.log(`Polling attempt ${pollingCount} for session ${sessionId}`);
+
+                // Check if we've exceeded the maximum polling time
+                if (Date.now() - startTime > maxPollingTime) {
+                    console.warn(`Exceeded maximum polling time (5 minutes) for session ${sessionId}. Stopping polling.`);
+                    clearInterval(window.taskPollingInterval);
+                    window.taskPollingInterval = null;
+
+                    // Update the thinking process with a timeout message
+                    if (currentThinkingContent) {
+                        const timeoutP = document.createElement('div');
+                        timeoutP.classList.add('text-yellow-600', 'mt-4', 'thinking-step');
+                        timeoutP.innerHTML = '<strong>⚠️ Task processing took longer than expected. Please check the results or try again.</strong>';
+                        currentThinkingContent.appendChild(timeoutP);
+
+                        // Stop the thinking process animation
+                        if (window.stopThinkingProcess) {
+                            window.stopThinkingProcess();
+                        }
+                    }
+
+                    // Re-enable the execute task button
+                    resetTaskExecutionState();
+                    return;
+                }
+
+                // Make API request to get task status
+                fetch(`/api/super-agent/task-status?session_id=${sessionId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Task status response:', data);
+
+                        // Check if the task is complete (handle both "complete" and "completed" status values)
+                        // Also check for success flag as a fallback
+                        const isComplete =
+                            data.status === 'complete' ||
+                            data.status === 'completed' ||
+                            (data.result && data.result.success === true);
+
+                        // Log to server for debugging
+                        fetch('/api/log', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: `Task status check: isComplete=${isComplete}, status=${data.status}, sessionId=${sessionId}`
+                            })
+                        }).catch(e => console.error('Error logging to server:', e));
+
+                        if (isComplete) {
+                            console.log('Task completed! Stopping polling and updating UI.');
+
+                            // Log to server for debugging
+                            fetch('/api/log', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    message: `Task completed for session ID: ${sessionId}`
+                                })
+                            }).catch(e => console.error('Error logging to server:', e));
+
+                            clearInterval(window.taskPollingInterval);
+                            window.taskPollingInterval = null;
+
+                            // Update the thinking process
+                            if (currentThinkingContent) {
+                                const completionP = document.createElement('div');
+                                completionP.classList.add('text-green-600', 'mt-4', 'thinking-step');
+                                completionP.innerHTML = '<strong>✓ Task completed!</strong>';
+                                currentThinkingContent.appendChild(completionP);
+
+                                // Stop the thinking process animation
+                                if (window.stopThinkingProcess) {
+                                    console.log('Stopping thinking process for completed task');
+                                    window.stopThinkingProcess();
+                                }
+                            }
+
+                            // Update the task summary
+                            if (currentSummaryContainer && data.result) {
+                                const summaryContentDiv = currentSummaryContainer.querySelector('.summary-container-content');
+                                if (summaryContentDiv && data.result.task_summary) {
+                                    // Process the task summary as Markdown and convert it to HTML
+                                    let processedHtml = window.markdownit ? window.markdownit().render(data.result.task_summary) : data.result.task_summary;
+
+                                    // Update the summary container
+                                    summaryContentDiv.innerHTML = processedHtml;
+                                    console.log('Updated summary container with task results');
+
+                                    // Log to server for debugging
+                                    fetch('/api/log', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            message: `Updated summary container for session ID: ${sessionId}, summary length: ${data.result.task_summary.length}`
+                                        })
+                                    }).catch(e => console.error('Error logging to server:', e));
+
+                                    // Dispatch an event to notify that the task summary has been updated
+                                    document.dispatchEvent(new CustomEvent('taskSummaryUpdated', {
+                                        detail: {
+                                            containerId: currentSummaryContainer.id,
+                                            sessionId: sessionId
+                                        }
+                                    }));
+
+                                    // Clear the task input field
+                                    if (taskDescription) {
+                                        taskDescription.value = '';
+                                    }
+                                } else {
+                                    console.warn('Summary container or task_summary not found in result:', data.result);
+
+                                    // Log to server for debugging
+                                    fetch('/api/log', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            message: `Summary container or task_summary not found for session ID: ${sessionId}, result: ${JSON.stringify(data.result)}`
+                                        })
+                                    }).catch(e => console.error('Error logging to server:', e));
+
+                                    // If there's a result but no task_summary, try to use the result itself
+                                    if (data.result && typeof data.result === 'object') {
+                                        let resultText = '';
+
+                                        // Check for common result fields
+                                        if (data.result.success === false && data.result.error) {
+                                            resultText = `Error: ${data.result.error}`;
+                                        } else if (data.result.source_urls && Array.isArray(data.result.source_urls)) {
+                                            // If we have source URLs but no summary, create a basic summary
+                                            resultText = '## Task Completed\n\n';
+                                            resultText += 'The task has been completed, but no detailed summary is available.\n\n';
+
+                                            if (data.result.source_urls.length > 0) {
+                                                resultText += '## Sources\n\n';
+                                                data.result.source_urls.forEach((url, index) => {
+                                                    resultText += `${index + 1}. [Source ${index + 1}](${url})\n`;
+                                                });
+                                            }
+                                        } else {
+                                            // If we have any result data, create a basic summary
+                                            resultText = '## Task Completed\n\n';
+                                            resultText += 'The task has been completed. Here is the result:\n\n';
+                                            resultText += '```json\n' + JSON.stringify(data.result, null, 2) + '\n```';
+                                        }
+
+                                        if (resultText) {
+                                            let processedHtml = window.markdownit ? window.markdownit().render(resultText) : resultText;
+                                            summaryContentDiv.innerHTML = processedHtml;
+                                            console.log('Created basic summary from result data');
+
+                                            // Log to server for debugging
+                                            fetch('/api/log', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify({
+                                                    message: `Created basic summary from result data for session ID: ${sessionId}`
+                                                })
+                                            }).catch(e => console.error('Error logging to server:', e));
+
+                                            // Dispatch an event to notify that the task summary has been updated
+                                            document.dispatchEvent(new CustomEvent('taskSummaryUpdated', {
+                                                detail: {
+                                                    containerId: currentSummaryContainer.id,
+                                                    sessionId: sessionId
+                                                }
+                                            }));
+                                        }
+                                    }
+                                }
+                            } else {
+                                console.warn('Summary container not found or no result data available');
+
+                                // Log to server for debugging
+                                fetch('/api/log', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        message: `Summary container not found or no result data available for session ID: ${sessionId}`
+                                    })
+                                }).catch(e => console.error('Error logging to server:', e));
+
+                                // Try to find the summary container if it wasn't provided
+                                if (data.result) {
+                                    // IMPORTANT: Only use the Initial Summary Container for task results
+                                    const initialSummaryContainer = document.querySelector('#summary-container-initial');
+                                    if (initialSummaryContainer) {
+                                        const summaryContentDiv = initialSummaryContainer.querySelector('.summary-container-content');
+                                        if (summaryContentDiv && data.result.task_summary) {
+                                            // Process the task summary as Markdown and convert it to HTML
+                                            let processedHtml = window.markdownit ? window.markdownit().render(data.result.task_summary) : data.result.task_summary;
+
+                                            // Update the summary container
+                                            summaryContentDiv.innerHTML = processedHtml;
+                                            console.log('Updated Initial Summary Container with task results');
+
+                                            // Update the header with the task description
+                                            const headerElement = initialSummaryContainer.querySelector('.summary-container-header h4');
+                                            if (headerElement) {
+                                                // Try to get the task description from the data
+                                                const taskDesc = data.result.task_description || sessionId;
+                                                headerElement.textContent = `Task Summary: ${taskDesc.length > 50 ? taskDesc.substring(0, 50) + '...' : taskDesc}`;
+                                            }
+
+                                            // Log to server for debugging
+                                            fetch('/api/log', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify({
+                                                    message: `Updated Initial Summary Container for session ID: ${sessionId}`
+                                                })
+                                            }).catch(e => console.error('Error logging to server:', e));
+
+                                            // Dispatch an event to notify that the task summary has been updated
+                                            document.dispatchEvent(new CustomEvent('taskSummaryUpdated', {
+                                                detail: {
+                                                    containerId: initialSummaryContainer.id,
+                                                    sessionId: sessionId
+                                                }
+                                            }));
+
+                                            // Remove any additional summary containers (except the Initial Summary Container)
+                                            const summaryContainers = document.getElementById('summaryContainers');
+                                            if (summaryContainers) {
+                                                const extraContainers = summaryContainers.querySelectorAll('.summary-container:not(#summary-container-initial)');
+                                                for (let i = 0; i < extraContainers.length; i++) {
+                                                    console.log('Removing extra summary container:', extraContainers[i].id);
+                                                    extraContainers[i].remove();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Update the processing indicator
+                            if (processingIndicator) {
+                                processingIndicator.classList.add('completed');
+                            }
+
+                            // Re-enable the execute task button
+                            resetTaskExecutionState();
+                        } else {
+                            console.log(`Task still in progress. Status: ${data.status}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error polling for task status:', error);
+
+                        // Log to server for debugging
+                        fetch('/api/log', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: `Error polling for task status: ${error.message}, session ID: ${sessionId}, attempt: ${pollingCount}`
+                            })
+                        }).catch(e => console.error('Error logging to server:', e));
+
+                        // If we've had multiple consecutive errors, stop polling
+                        if (pollingCount > 10) {
+                            console.error('Too many polling errors. Stopping polling.');
+
+                            // Log to server for debugging
+                            fetch('/api/log', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    message: `Too many polling errors. Stopping polling for session ID: ${sessionId}`
+                                })
+                            }).catch(e => console.error('Error logging to server:', e));
+
+                            clearInterval(window.taskPollingInterval);
+                            window.taskPollingInterval = null;
+
+                            // Update the thinking process with an error message
+                            if (currentThinkingContent) {
+                                const errorP = document.createElement('div');
+                                errorP.classList.add('text-red-600', 'mt-4', 'thinking-step');
+                                errorP.innerHTML = '<strong>❌ Error:</strong> Unable to get task status. Please try again.';
+                                currentThinkingContent.appendChild(errorP);
+
+                                // Stop the thinking process animation
+                                if (window.stopThinkingProcess) {
+                                    window.stopThinkingProcess();
+                                }
+                            }
+
+                            resetTaskExecutionState();
+                        }
+                    });
+            }, 2000); // 2 seconds
+        }
+
+        // Store the original click handler
+        const originalClickHandler = executeTaskBtn.onclick;
+
+        // Override the click handler
+        executeTaskBtn.onclick = function(event) {
+            console.log('Execute Task button clicked (overridden handler)');
+
+            // Get the task description
+            const description = taskDescription.value.trim();
+            if (!description) {
+                alert('Please enter a task description');
+                return;
+            }
+
+            // Show results container with progress tracking
+            if (resultsContainer) resultsContainer.classList.remove('hidden');
+            if (taskProgress) taskProgress.classList.remove('hidden');
+            if (taskSummaryContainer) taskSummaryContainer.classList.remove('hidden');
+
+            // Create new task ID
+            taskCounter++;
+            const newTaskId = `task-${taskCounter}`;
+
+            // Clear any existing polling intervals from previous tasks
+            if (window.taskPollingInterval) {
+                console.log('Clearing existing polling interval');
+                clearInterval(window.taskPollingInterval);
+                window.taskPollingInterval = null;
+            }
+
+            // Stop any existing thinking process animation
+            if (window.stopThinkingProcess) {
+                console.log('Stopping existing thinking process');
+                window.stopThinkingProcess();
+            }
+
+            // Remove all thinking containers except the last one
+            const existingThinkingContainers = thinkingContainers.querySelectorAll('.thinking-container');
+            if (existingThinkingContainers.length > 0) {
+                // Remove all existing thinking containers
+                for (let i = 0; i < existingThinkingContainers.length; i++) {
+                    existingThinkingContainers[i].remove();
+                }
+            }
+
+            // Create new thinking container
+            const newThinkingContainer = createThinkingContainer(newTaskId);
+            thinkingContainers.appendChild(newThinkingContainer);
+
+            // Get the current thinking content
+            const currentThinkingContainer = document.getElementById(`thinking-container-${newTaskId}`);
+            const currentThinkingContent = document.getElementById(`thinking-content-${newTaskId}`);
+
+            // First, try to find the Initial Summary Container by ID
+            let currentSummaryContainer = document.getElementById('summary-container-initial');
+
+            // If the Initial Summary Container exists, use it
+            if (currentSummaryContainer) {
+                console.log('Using Initial Summary Container for task:', newTaskId);
+
+                // Update the header with the task description
+                const headerElement = currentSummaryContainer.querySelector('.summary-container-header h4');
+                if (headerElement) {
+                    headerElement.textContent = `Task Summary: ${description.length > 50 ? description.substring(0, 50) + '...' : description}`;
+                }
+
+                // Remove any additional summary containers (except the Initial Summary Container)
+                const extraContainers = summaryContainers.querySelectorAll('.summary-container:not(#summary-container-initial)');
+                for (let i = 0; i < extraContainers.length; i++) {
+                    console.log('Removing extra summary container:', extraContainers[i].id);
+                    extraContainers[i].remove();
+                }
+            } else {
+                // Fallback to the original behavior if the Initial Summary Container doesn't exist
+                console.warn('Initial Summary Container not found, falling back to original behavior');
+
+                const existingSummaryContainers = summaryContainers.querySelectorAll('.summary-container');
+
+                if (existingSummaryContainers.length > 0) {
+                    // Keep only the first summary container (which is the functional one)
+                    currentSummaryContainer = existingSummaryContainers[0];
+
+                    // Remove any additional summary containers
+                    for (let i = 1; i < existingSummaryContainers.length; i++) {
+                        existingSummaryContainers[i].remove();
+                    }
+                } else {
+                    // Create a new summary container if none exists
+                    console.log('Creating new summary container for task:', newTaskId);
+                    const newSummaryContainer = createSummaryContainer(newTaskId);
+                    summaryContainers.appendChild(newSummaryContainer);
+                    currentSummaryContainer = document.getElementById(`summary-container-${newTaskId}`);
+                }
+            }
+
+            // Initialize the content
+            const summaryContentDiv = currentSummaryContainer.querySelector('.summary-container-content');
+            if (summaryContentDiv) {
+                summaryContentDiv.innerHTML = '<p class="text-center text-gray-500">Processing task, results will appear here...</p>';
+            }
+
+            // Log to server for debugging
+            fetch('/api/log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `Prepared summary container for task: ${description}`
+                })
+            }).catch(e => console.error('Error logging to server:', e));
+
+            // Start thinking process animation
+            simulateThinking();
+
+            // Start the thinking process display
+            if (window.startThinkingProcess) {
+                console.log('Starting thinking process with description:', description);
+                window.startThinkingProcess(description, currentThinkingContent);
+            } else {
+                console.error('startThinkingProcess function not found');
+            }
+
+            // Disable button during request
+            executeTaskBtn.disabled = true;
+            executeTaskBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            executeTaskBtn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...`;
+
+            // Prepare request data
+            const requestData = {
+                task_description: description,  // Changed from 'task' to 'task_description' to match backend expectation
+                use_advanced_browser: useAdvancedBrowser ? useAdvancedBrowser.checked : false,
+                use_browser_use: false,
+                use_simple_orchestrator: true
+            };
+
+            console.log('Making API request with data:', requestData);
+
+            // Log to server for debugging
+            fetch('/api/log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `Making API request with data: ${JSON.stringify(requestData)}`
+                })
+            }).catch(e => console.error('Error logging to server:', e));
+
+            // Make API request
+            fetch('/api/super-agent/execute-task', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                console.log('API response status:', response.status);
+
+                // Log to server for debugging
+                fetch('/api/log', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `API response status: ${response.status}`
+                    })
+                }).catch(e => console.error('Error logging to server:', e));
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}, Status Text: ${response.statusText}`);
+                }
+
+                return response.json();
+            })
+            .then(data => {
+                console.log('API response data:', data);
+
+                // Log to server for debugging
+                fetch('/api/log', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `API response data: ${JSON.stringify(data)}`
+                    })
+                }).catch(e => console.error('Error logging to server:', e));
+
+                // Store the session ID for polling
+                const sessionId = data.session_id;
+                if (sessionId) {
+                    console.log('Starting task status polling with session ID:', sessionId);
+
+                    // Log to server for debugging
+                    fetch('/api/log', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Starting task status polling with session ID: ${sessionId}`
+                        })
+                    }).catch(e => console.error('Error logging to server:', e));
+
+                    // Store the session ID in the thinking container for reference
+                    if (currentThinkingContainer) {
+                        currentThinkingContainer.dataset.sessionId = sessionId;
+                    }
+
+                    // Store the session ID in the summary container for reference
+                    if (currentSummaryContainer) {
+                        currentSummaryContainer.dataset.sessionId = sessionId;
+                    }
+
+                    // Start polling for task status
+                    pollTaskStatus(sessionId, currentThinkingContent, currentSummaryContainer);
+                } else {
+                    console.error('No session ID returned from API');
+
+                    // Log to server for debugging
+                    fetch('/api/log', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'No session ID returned from API'
+                        })
+                    }).catch(e => console.error('Error logging to server:', e));
+
+                    // Show error in thinking content
+                    if (currentThinkingContent) {
+                        const errorP = document.createElement('div');
+                        errorP.classList.add('text-red-600', 'mt-4', 'thinking-step');
+                        errorP.innerHTML = '<strong>Error:</strong> No session ID returned from API';
+                        currentThinkingContent.appendChild(errorP);
+                    }
+
+                    // Re-enable the button
+                    resetTaskExecutionState();
+                    return;
+                }
+
+                // Handle error response
+                if (data.error) {
+                    // Display error in the current summary container
+                    if (currentSummaryContainer) {
+                        const summaryContentDiv = currentSummaryContainer.querySelector('.summary-container-content');
+                        if (summaryContentDiv) {
+                            summaryContentDiv.innerHTML = `
+                                <div class="bg-white rounded-lg shadow-sm border border-red-200 overflow-hidden">
+                                    <div class="bg-red-50 px-6 py-4 border-b border-red-200">
+                                        <h3 class="text-lg font-semibold text-red-700 flex items-center">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                            </svg>
+                                            Error
+                                        </h3>
+                                    </div>
+                                    <div class="p-6 text-red-700">
+                                        ${data.error}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    // Re-enable the execute task button
+                    resetTaskExecutionState();
+                }
+            })
+            .catch(error => {
+                console.error('Error executing task:', error);
+
+                // Log to server for debugging
+                fetch('/api/log', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Error executing task: ${error.message}`
+                    })
+                }).catch(e => console.error('Error logging to server:', e));
+
+                // Show error in thinking content
+                if (currentThinkingContent) {
+                    const errorP = document.createElement('div');
+                    errorP.classList.add('text-red-600', 'mt-4', 'thinking-step');
+                    errorP.innerHTML = `<strong>Error:</strong> ${error.message || 'Unknown error'}`;
+                    currentThinkingContent.appendChild(errorP);
+                }
+
+                // Display error in the current summary container
+                if (currentSummaryContainer) {
+                    const summaryContentDiv = currentSummaryContainer.querySelector('.summary-container-content');
+                    if (summaryContentDiv) {
+                        summaryContentDiv.innerHTML = `
+                            <div class="bg-white rounded-lg shadow-sm border border-red-200 overflow-hidden">
+                                <div class="bg-red-50 px-6 py-4 border-b border-red-200">
+                                    <h3 class="text-lg font-semibold text-red-700 flex items-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                        </svg>
+                                        Error
+                                    </h3>
+                                </div>
+                                <div class="p-6 text-red-700">
+                                    ${error.message || 'An error occurred while executing the task. Please try again.'}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Re-enable the execute task button
+                resetTaskExecutionState();
+            });
+        };
+
+        // Add a global error handler for fetch calls
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+
+            // If this is a fetch error, reset the task execution state
+            if (event.reason instanceof TypeError && event.reason.message.includes('fetch')) {
+                console.log('Fetch error detected, resetting task execution state');
+                resetTaskExecutionState();
+            }
+        });
+
+        // Add a periodic check to ensure the button is not stuck in disabled state
+        setInterval(function() {
+            if (executeTaskBtn && executeTaskBtn.disabled) {
+                // Check if there's any active polling
+                const isPolling = window.taskPollingInterval !== null;
+
+                // If there's no active polling, reset the state
+                if (!isPolling) {
+                    console.log('Execute Task button stuck in disabled state, resetting');
+                    resetTaskExecutionState();
+                }
+            }
+        }, 30000); // Check every 30 seconds
+    }, 1000); // Wait 1 second for all scripts to load
+});

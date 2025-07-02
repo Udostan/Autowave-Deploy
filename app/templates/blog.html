@@ -1,0 +1,212 @@
+{% extends "layout.html" %}
+
+{% block title %}Blog - AutoWave{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dark theme styles consistent with homepage */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    #main-content {
+        background-color: #121212;
+    }
+
+    main {
+        background-color: #121212;
+    }
+
+    .bg-white {
+        background-color: #121212 !important;
+    }
+
+    .text-gray-700, .text-gray-800 {
+        color: #e0e0e0 !important;
+    }
+
+    .text-gray-600 {
+        color: #aaa !important;
+    }
+
+    .text-gray-500 {
+        color: #888 !important;
+    }
+
+    .border-gray-200 {
+        border-color: #333 !important;
+    }
+
+    /* Content container */
+    .content-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        line-height: 1.6;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #e0e0e0;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .page-subtitle {
+        color: #aaa;
+        font-size: 1.1rem;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    /* Blog post styles */
+    .blog-post {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .blog-post:hover {
+        border-color: #444;
+        transform: translateY(-2px);
+    }
+
+    .post-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #e0e0e0;
+        margin-bottom: 0.5rem;
+    }
+
+    .post-meta {
+        color: #888;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .post-excerpt {
+        color: #ccc;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .read-more {
+        color: #4a9eff;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .read-more:hover {
+        color: #6bb6ff;
+        text-decoration: underline;
+    }
+
+    .coming-soon {
+        text-align: center;
+        color: #888;
+        font-style: italic;
+        margin: 2rem 0;
+        padding: 2rem;
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+    }
+
+    /* Footer navigation */
+    .footer-nav {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        align-items: center;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #333;
+    }
+
+    .footer-link {
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 400;
+        transition: color 0.3s ease;
+        padding: 8px 0;
+    }
+
+    .footer-link:hover {
+        color: #aaa;
+        text-decoration: none;
+    }
+
+    .footer-link.current {
+        color: #aaa;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1 class="page-title">AutoWave Blog</h1>
+    <p class="page-subtitle">Insights, updates, and thoughts on AI technology</p>
+    
+    <!-- Featured Blog Post -->
+    <article class="blog-post">
+        <h2 class="post-title">The Future of AI-Powered Productivity</h2>
+        <div class="post-meta">January 15, 2025 • 5 min read</div>
+        <p class="post-excerpt">
+            Artificial intelligence is transforming how we work, create, and solve problems. AutoWave represents the next generation of AI tools, designed to enhance human productivity while maintaining the creative spark that makes us uniquely human. In this post, we explore how AI can become your most valuable collaborator.
+        </p>
+        <a href="#" class="read-more">Read more →</a>
+    </article>
+
+    <!-- Blog Post 2 -->
+    <article class="blog-post">
+        <h2 class="post-title">Building Secure AI Applications</h2>
+        <div class="post-meta">January 10, 2025 • 7 min read</div>
+        <p class="post-excerpt">
+            Security and privacy are paramount when developing AI applications. Learn about the security measures we've implemented in AutoWave, including data encryption, secure authentication, and privacy-first design principles that protect user information without compromising functionality.
+        </p>
+        <a href="#" class="read-more">Read more →</a>
+    </article>
+
+    <!-- Blog Post 3 -->
+    <article class="blog-post">
+        <h2 class="post-title">The Evolution of Conversational AI</h2>
+        <div class="post-meta">January 5, 2025 • 6 min read</div>
+        <p class="post-excerpt">
+            From simple chatbots to sophisticated AI assistants, conversational AI has come a long way. We dive into the technology behind AutoWave's advanced conversation capabilities and how modern language models are changing the way we interact with computers.
+        </p>
+        <a href="#" class="read-more">Read more →</a>
+    </article>
+
+    <!-- Blog Post 4 -->
+    <article class="blog-post">
+        <h2 class="post-title">AI in Web Development and Code Generation</h2>
+        <div class="post-meta">December 28, 2024 • 8 min read</div>
+        <p class="post-excerpt">
+            Discover how AI is revolutionizing software development. From automated code generation to intelligent debugging, explore the tools and techniques that are making developers more productive and helping bring ideas to life faster than ever before.
+        </p>
+        <a href="#" class="read-more">Read more →</a>
+    </article>
+
+    <!-- Coming Soon Notice -->
+    <div class="coming-soon">
+        <p>More articles coming soon. Stay tuned for insights on AI technology, productivity tips, and platform updates.</p>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+        <a href="/about" class="footer-link">About Us</a>
+        <a href="/blog" class="footer-link current">Blog</a>
+        <a href="/privacy" class="footer-link">Privacy</a>
+        <a href="/terms" class="footer-link">Terms</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+
+<script>
+// This script fixes the issue with the thinking containers
+// It ensures that only one thinking container is created per task
+// and removes any previous thinking containers
+
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("Thinking container fix loaded");
+    
+    // Get the original executeTask function
+    const originalExecuteTask = window.executeTask;
+    
+    // Override the executeTask function
+    window.executeTask = function() {
+        console.log("Overridden executeTask function called");
+        
+        // Call the original function
+        originalExecuteTask.apply(this, arguments);
+        
+        // Get the thinking containers element
+        const thinkingContainers = document.getElementById("thinkingContainers");
+        
+        // If we have thinking containers
+        if (thinkingContainers) {
+            console.log("Found thinking containers element");
+            
+            // Get all thinking containers except the initial one
+            const containers = thinkingContainers.querySelectorAll(".thinking-container:not(#thinking-container-initial)");
+            
+            // If we have more than one container
+            if (containers.length > 1) {
+                console.log(`Found ${containers.length} thinking containers, removing all but the last one`);
+                
+                // Keep only the last container
+                for (let i = 0; i < containers.length - 1; i++) {
+                    containers[i].remove();
+                }
+            }
+        }
+    };
+});
+</script>

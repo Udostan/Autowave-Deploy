@@ -1,0 +1,516 @@
+/* Super Agent Custom Styles */
+
+/* Import modern fonts */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+
+/* Task Summary Styling */
+.task-summary {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    max-width: 100%;
+    margin: 0 auto;
+    max-height: 600px; /* Reduced height for more concise display */
+    overflow: hidden;
+    position: relative;
+    letter-spacing: 0.01em;
+}
+
+.task-summary::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    pointer-events: none;
+}
+
+[data-theme="dark"] .task-summary::after {
+    background: linear-gradient(to bottom, rgba(31, 31, 31, 0), rgba(31, 31, 31, 1));
+}
+
+.task-summary.expanded {
+    max-height: none;
+    overflow: visible;
+}
+
+.task-summary.expanded::after {
+    display: none;
+}
+
+/* Headings */
+.task-summary h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    color: var(--primary-color);
+    border-bottom: none;
+    padding-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.task-summary h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    border-bottom: none;
+    padding-bottom: 0.25rem;
+    letter-spacing: -0.01em;
+}
+
+.task-summary h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--primary-color);
+    letter-spacing: -0.01em;
+}
+
+/* Paragraphs */
+.task-summary p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    font-size: 1.05rem;
+    color: var(--text-color);
+}
+
+/* Lists */
+.task-summary ul,
+.task-summary ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.25rem;
+}
+
+.task-summary li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+    font-size: 1.05rem;
+    position: relative;
+}
+
+.task-summary ul li {
+    list-style-type: none;
+    padding-left: 0.5rem;
+}
+
+.task-summary ul li::before {
+    content: '•';
+    position: absolute;
+    left: -1rem;
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.task-summary ol li {
+    list-style-type: decimal;
+    padding-left: 0.25rem;
+}
+
+/* Images */
+.task-summary img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.75rem;
+    margin: 1.25rem auto;
+    display: block;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.task-summary img:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Removed image container styles to display images directly */
+.task-summary .image-caption {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--dark-gray);
+    text-align: center;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Links */
+.task-summary a {
+    color: var(--accent-color);
+    text-decoration: none;
+    border-bottom: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.task-summary a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--accent-color);
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease;
+}
+
+.task-summary a:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+/* Blockquotes */
+.task-summary blockquote {
+    border-left: 3px solid var(--accent-color);
+    padding: 0.75rem 1.25rem;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    color: var(--dark-gray);
+    background-color: rgba(0, 123, 255, 0.05);
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+/* Code blocks */
+.task-summary pre {
+    background-color: var(--light-gray);
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.task-summary code {
+    font-family: 'SF Mono', 'Consolas', 'Monaco', 'Andale Mono', monospace;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+
+
+/* Tables */
+.task-summary table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.task-summary th {
+    background-color: var(--light-gray);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--medium-gray);
+    font-family: 'Outfit', sans-serif;
+}
+
+.task-summary td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.task-summary tr:last-child td {
+    border-bottom: none;
+}
+
+.task-summary tr:nth-child(even) {
+    background-color: var(--light-gray);
+}
+
+.task-summary tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Key findings section */
+.task-summary .key-points {
+    background-color: rgba(0, 123, 255, 0.05);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.75rem;
+    border-left: 3px solid var(--accent-color);
+}
+
+.task-summary .key-points h2 {
+    margin-top: 0;
+    border-bottom: none;
+    color: var(--accent-color);
+}
+
+.task-summary .key-points ul {
+    margin-bottom: 0;
+}
+
+/* Sources section */
+.task-summary .sources {
+    background-color: var(--light-gray);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0.75rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    border: 1px solid var(--medium-gray);
+}
+
+.task-summary .sources h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    border-bottom: none;
+    font-family: 'Outfit', sans-serif;
+    color: var(--primary-color);
+}
+
+.task-summary .sources ol {
+    margin-bottom: 0;
+}
+
+/* Add a special highlight for important content */
+.task-summary .highlight {
+    background: linear-gradient(120deg, rgba(0, 123, 255, 0.1), rgba(0, 123, 255, 0.05));
+    padding: 0.1em 0.3em;
+    border-radius: 0.25em;
+    font-weight: 500;
+}
+
+/* Add a nice style for the first paragraph after headings */
+.task-summary h2 + p {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+/* Conclusion section styling */
+.task-summary h2:last-of-type {
+    margin-top: 2rem;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.task-summary h2:last-of-type + p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--primary-color);
+    background-color: rgba(0, 123, 255, 0.03);
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid var(--accent-color);
+    margin-bottom: 1.5rem;
+}
+
+[data-theme="dark"] .task-summary h2:last-of-type + p {
+    background-color: rgba(59, 156, 255, 0.08);
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .task-summary .key-points {
+    background-color: rgba(59, 156, 255, 0.1);
+    border-left: 3px solid var(--accent-color);
+}
+
+[data-theme="dark"] .task-summary .sources {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+}
+
+[data-theme="dark"] .task-summary pre {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+}
+
+[data-theme="dark"] .task-summary blockquote {
+    background-color: rgba(59, 156, 255, 0.1);
+    border-left-color: var(--accent-color);
+}
+
+[data-theme="dark"] .task-summary table {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .task-summary tr:hover {
+    background-color: rgba(59, 156, 255, 0.1);
+}
+
+[data-theme="dark"] .task-summary .highlight {
+    background: linear-gradient(120deg, rgba(59, 156, 255, 0.15), rgba(59, 156, 255, 0.05));
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .task-summary h1 {
+        font-size: 1.75rem;
+    }
+
+    .task-summary h2 {
+        font-size: 1.35rem;
+    }
+
+    .task-summary h3 {
+        font-size: 1.15rem;
+    }
+}
+
+/* Code Generation Styles */
+.typing-dots {
+    display: flex;
+    align-items: center;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    margin: 0 2px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    display: inline-block;
+    animation: typing-dot 1.4s infinite ease-in-out both;
+}
+
+.typing-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes typing-dot {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+/* File tabs styling */
+.active-file-tab {
+    color: var(--primary-color);
+    border-bottom-color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* File card styling */
+.file-card {
+    border: 1px solid var(--medium-gray);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    transition: all 0.2s ease;
+}
+
+.file-card:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.file-card .file-icon {
+    color: var(--accent-color);
+    margin-right: 0.5rem;
+}
+
+.file-card .file-name {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.file-card .file-size {
+    font-size: 0.75rem;
+    color: var(--dark-gray);
+}
+
+/* Code editor styling */
+#codeEditor {
+    font-family: 'SF Mono', 'Consolas', 'Monaco', 'Andale Mono', monospace;
+    line-height: 1.5;
+    tab-size: 4;
+}
+
+/* Syntax highlighting */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #708090;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.token.namespace {
+    opacity: 0.7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #dd4a68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}

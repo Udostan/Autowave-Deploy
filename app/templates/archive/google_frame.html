@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Search</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #202124;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        .header {
+            padding: 15px;
+            background-color: #202124;
+            border-bottom: 1px solid #3c4043;
+            display: flex;
+            align-items: center;
+        }
+        .logo {
+            height: 30px;
+            margin-right: 20px;
+        }
+        .search-box {
+            flex-grow: 1;
+            background-color: #303134;
+            border-radius: 24px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            max-width: 600px;
+        }
+        .search-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            width: 100%;
+            padding: 0 10px;
+        }
+        .search-icon {
+            color: #9aa0a6;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+        .search-result {
+            margin-bottom: 25px;
+        }
+        .result-title {
+            color: #8ab4f8;
+            font-size: 18px;
+            margin-bottom: 5px;
+            text-decoration: none;
+        }
+        .result-title:hover {
+            text-decoration: underline;
+        }
+        .result-url {
+            color: #9aa0a6;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .result-snippet {
+            color: #bdc1c6;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .message {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .message h2 {
+            color: #8ab4f8;
+            margin-bottom: 10px;
+        }
+        .message p {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .button {
+            background-color: #8ab4f8;
+            color: #202124;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .button:hover {
+            background-color: #aecbfa;
+        }
+        .status-text {
+            font-weight: bold;
+        }
+        .status-loading {
+            color: #8ab4f8;
+        }
+        .status-success {
+            color: #81c995;
+        }
+        .status-error {
+            color: #f28b82;
+        }
+        .screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        .browser-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #303134;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .browser-url {
+            color: #9aa0a6;
+            font-size: 14px;
+            max-width: 70%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .browser-title {
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .no-results {
+            color: #9aa0a6;
+            font-style: italic;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+    <!-- Include Socket.IO client -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_light_color_92x30dp.png" alt="Google" class="logo">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search Google" id="search-input">
+            </div>
+        </div>
+        <div class="content">
+            <div class="message">
+                <h2>Google Search is Working</h2>
+                <p>The browser is currently searching Google for your query. This process is happening in the background.</p>
+                <p>While Google cannot be displayed directly in this frame due to security restrictions, the AI agent is able to interact with Google and retrieve the information you need.</p>
+                <p><strong>Status:</strong> <span id="status-text" class="status-text status-loading">Connecting to browser...</span></p>
+                <button class="button" id="refresh-btn">Refresh Status</button>
+            </div>
+
+            <div class="browser-info hidden" id="browser-info">
+                <div>
+                    <div class="browser-title" id="browser-title">Google</div>
+                    <div class="browser-url" id="browser-url">https://www.google.com</div>
+                </div>
+            </div>
+
+            <img id="browser-screenshot" class="screenshot hidden" alt="Browser Screenshot" />
+
+            <div id="search-results">
+                <!-- Search results will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Include browser events script -->
+    <script src="/static/js/browser_events.js"></script>
+
+    <script>
+        // Default search results (shown if no real results are available)
+        const defaultSearchResults = [
+            {
+                title: "Rolex Official Website - Swiss Luxury Watches",
+                url: "https://www.rolex.com/",
+                snippet: "Discover the Rolex collection on the Official Rolex Website. Rolex offers a wide assortment of Classic and Professional watch models to suit any wrist."
+            },
+            {
+                title: "Rolex Watches - Authorized Retailer",
+                url: "https://www.tourneau.com/rolex/",
+                snippet: "Shop authentic Rolex watches at authorized retailers. Browse the latest collections of luxury timepieces including Submariner, Datejust, and Daytona models."
+            },
+            {
+                title: "Rolex Watch Prices 2023 - Current Market Values",
+                url: "https://www.bobswatches.com/rolex-prices",
+                snippet: "See current Rolex prices and values for popular models. Market prices for Submariner, Daytona, GMT-Master II, and other Rolex watches updated regularly."
+            }
+        ];
+
+        // Function to display default search results
+        function displayDefaultSearchResults() {
+            const resultsContainer = document.getElementById('search-results');
+
+            // Check if we already have real search results
+            if (browserState && browserState.searchResults && browserState.searchResults.length > 0) {
+                return;
+            }
+
+            resultsContainer.innerHTML = '';
+
+            defaultSearchResults.forEach(result => {
+                const resultElement = document.createElement('div');
+                resultElement.className = 'search-result';
+                resultElement.innerHTML = `
+                    <a href="${result.url}" class="result-title" target="_blank">${result.title}</a>
+                    <div class="result-url">${result.url}</div>
+                    <div class="result-snippet">${result.snippet}</div>
+                `;
+                resultsContainer.appendChild(resultElement);
+            });
+        }
+
+        // Display default search results after a delay
+        setTimeout(displayDefaultSearchResults, 3000);
+
+        // Add event listener to refresh button
+        document.getElementById('refresh-btn').addEventListener('click', function() {
+            const statusElement = document.getElementById('status-text');
+            statusElement.textContent = 'Refreshing status...';
+            statusElement.className = 'status-text status-loading';
+
+            // Check browser status
+            if (socket && isConnected) {
+                socket.emit('browser_event', {
+                    type: 'status_request',
+                    timestamp: Date.now()
+                });
+            } else {
+                // If not connected, try to reconnect
+                if (typeof connectSocket === 'function') {
+                    connectSocket();
+                }
+
+                // Update status after a delay
+                setTimeout(() => {
+                    statusElement.textContent = isConnected ? 'Connected to browser' : 'Not connected to browser';
+                    statusElement.className = `status-text ${isConnected ? 'status-success' : 'status-error'}`;
+                }, 1000);
+            }
+        });
+
+        // Add event listener to search input
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    // Update status
+                    const statusElement = document.getElementById('status-text');
+                    statusElement.textContent = `Searching for "${query}"...`;
+                    statusElement.className = 'status-text status-loading';
+
+                    // Send search event
+                    if (socket && isConnected) {
+                        socket.emit('browser_event', {
+                            type: 'search_request',
+                            query: query,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
+            }
+        });
+
+        // Override browser state update function
+        function updateUI() {
+            // Update URL and title
+            const browserInfoElement = document.getElementById('browser-info');
+            const urlElement = document.getElementById('browser-url');
+            const titleElement = document.getElementById('browser-title');
+
+            if (browserState.url) {
+                if (urlElement) urlElement.textContent = browserState.url;
+                if (browserInfoElement) browserInfoElement.classList.remove('hidden');
+            }
+
+            if (browserState.title) {
+                if (titleElement) titleElement.textContent = browserState.title;
+                if (browserInfoElement) browserInfoElement.classList.remove('hidden');
+            }
+
+            // Update screenshot
+            const screenshotElement = document.getElementById('browser-screenshot');
+            if (screenshotElement && browserState.screenshot) {
+                screenshotElement.src = browserState.screenshot;
+                screenshotElement.classList.remove('hidden');
+            }
+
+            // Update search results
+            updateSearchResults();
+        }
+    </script>
+</body>
+</html>

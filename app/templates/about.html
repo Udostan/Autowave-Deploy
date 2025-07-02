@@ -1,0 +1,177 @@
+{% extends "layout.html" %}
+
+{% block title %}About Us - AutoWave{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dark theme styles consistent with homepage */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    #main-content {
+        background-color: #121212;
+    }
+
+    main {
+        background-color: #121212;
+    }
+
+    .bg-white {
+        background-color: #121212 !important;
+    }
+
+    .text-gray-700, .text-gray-800 {
+        color: #e0e0e0 !important;
+    }
+
+    .text-gray-600 {
+        color: #aaa !important;
+    }
+
+    .text-gray-500 {
+        color: #888 !important;
+    }
+
+    .border-gray-200 {
+        border-color: #333 !important;
+    }
+
+    /* Content container */
+    .content-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        line-height: 1.6;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #e0e0e0;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #e0e0e0;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .content-text {
+        color: #ccc;
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .highlight {
+        color: #e0e0e0;
+        font-weight: 500;
+    }
+
+    .company-link {
+        color: #4a9eff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .company-link:hover {
+        color: #6bb6ff;
+        text-decoration: underline;
+    }
+
+    /* Footer navigation */
+    .footer-nav {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        align-items: center;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #333;
+    }
+
+    .footer-link {
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 400;
+        transition: color 0.3s ease;
+        padding: 8px 0;
+    }
+
+    .footer-link:hover {
+        color: #aaa;
+        text-decoration: none;
+    }
+
+    .footer-link.current {
+        color: #aaa;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <h1 class="page-title">About AutoWave</h1>
+    
+    <div class="content-text">
+        AutoWave is an advanced AI-powered platform that revolutionizes how you interact with artificial intelligence. Built with cutting-edge technology and designed for both professionals and everyday users, AutoWave provides a comprehensive suite of AI tools and capabilities.
+    </div>
+
+    <h2 class="section-title">Our Mission</h2>
+    <div class="content-text">
+        We believe that artificial intelligence should be accessible, powerful, and intuitive. Our mission is to democratize AI technology by providing a platform that combines the latest advancements in machine learning with an elegant, user-friendly interface.
+    </div>
+
+    <h2 class="section-title">What We Offer</h2>
+    <div class="content-text">
+        <span class="highlight">Advanced AI Chat:</span> Engage with state-of-the-art language models for complex conversations, problem-solving, and creative tasks.
+    </div>
+    <div class="content-text">
+        <span class="highlight">Web Browsing & Research:</span> Our AI can browse the internet, analyze web content, and provide real-time information.
+    </div>
+    <div class="content-text">
+        <span class="highlight">Document Generation:</span> Create professional documents, reports, and content with AI assistance.
+    </div>
+    <div class="content-text">
+        <span class="highlight">Code Development:</span> Get help with programming, code review, and software development tasks.
+    </div>
+    <div class="content-text">
+        <span class="highlight">Visual Analysis:</span> Upload and analyze images, screenshots, and visual content.
+    </div>
+
+    <h2 class="section-title">Our Technology</h2>
+    <div class="content-text">
+        AutoWave is powered by Google's Gemini AI models, GPT AI model, Groq AI model, Anthropic AI Claude model, Meta Llama AI model, Qwen AI model and Deepseek AI model, providing exceptional performance in natural language understanding, reasoning, and generation. Our platform integrates multiple AI services and tools to deliver a comprehensive AI experience.
+    </div>
+
+    <h2 class="section-title">Our Company</h2>
+    <div class="content-text">
+        AutoWave is developed by <a href="https://botrex.pro" class="company-link" target="_blank">Botrex Technology</a>, a forward-thinking technology company dedicated to creating innovative AI solutions. Botrex Technology specializes in developing cutting-edge artificial intelligence platforms and tools that empower users to achieve more.
+    </div>
+
+    <h2 class="section-title">Privacy & Security</h2>
+    <div class="content-text">
+        We take your privacy and data security seriously. AutoWave implements enterprise-grade security measures to protect your information and ensure your interactions remain confidential. We do not store personal conversations or use your data to train AI models without explicit consent.
+    </div>
+
+    <h2 class="section-title">Contact Us</h2>
+    <div class="content-text">
+        Have questions or feedback? We'd love to hear from you. Reach out to us through our support channels or visit <a href="https://botrex.pro" class="company-link" target="_blank">botrex.pro</a> to learn more about our company and other products.
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+        <a href="/about" class="footer-link current">About Us</a>
+        <a href="/blog" class="footer-link">Blog</a>
+        <a href="/privacy" class="footer-link">Privacy</a>
+        <a href="/terms" class="footer-link">Terms</a>
+    </div>
+</div>
+{% endblock %}

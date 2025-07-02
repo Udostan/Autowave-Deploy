@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoWave - Referral Link Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%); }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">🔗 Referral Link Generator</h1>
+            <p class="text-gray-400">Create and manage referral links for AutoWave partners</p>
+        </div>
+
+        <!-- Current Partners -->
+        <div class="glass rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">📊 Current Partners</h2>
+            <div id="partners-list" class="space-y-4">
+                <!-- Partners will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Generate New Link -->
+        <div class="glass rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">➕ Generate New Referral Link</h2>
+            <form id="generate-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Partner Name</label>
+                        <input type="text" id="partner-name" placeholder="e.g., Tech Partner D" 
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">UTM Source</label>
+                        <input type="text" id="utm-source" placeholder="e.g., TechPartnerD" 
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Discount Percentage</label>
+                        <input type="number" id="discount" placeholder="20" min="0" max="100"
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Bonus Credits</label>
+                        <input type="number" id="bonus-credits" placeholder="100" min="0"
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Commission Rate (%)</label>
+                        <input type="number" id="commission" placeholder="10" min="0" max="100" step="0.1"
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">UTM Medium</label>
+                        <select id="utm-medium" class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:border-blue-500">
+                            <option value="Youtube">YouTube</option>
+                            <option value="Twitter">Twitter</option>
+                            <option value="Podcast">Podcast</option>
+                            <option value="Newsletter">Newsletter</option>
+                            <option value="Blog">Blog</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+                    🚀 Generate Referral Link
+                </button>
+            </form>
+        </div>
+
+        <!-- Generated Link -->
+        <div id="generated-link" class="glass rounded-xl p-6" style="display: none;">
+            <h2 class="text-2xl font-semibold mb-4">✅ Generated Referral Link</h2>
+            <div class="bg-gray-800 p-4 rounded-lg mb-4">
+                <div class="flex items-center justify-between">
+                    <code id="referral-url" class="text-green-400 break-all"></code>
+                    <button onclick="copyToClipboard()" class="ml-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm">
+                        📋 Copy
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-gray-800 p-3 rounded">
+                    <div class="text-gray-400">Customer Discount</div>
+                    <div id="customer-discount" class="text-xl font-bold text-green-400"></div>
+                </div>
+                <div class="bg-gray-800 p-3 rounded">
+                    <div class="text-gray-400">Bonus Credits</div>
+                    <div id="customer-credits" class="text-xl font-bold text-blue-400"></div>
+                </div>
+                <div class="bg-gray-800 p-3 rounded">
+                    <div class="text-gray-400">Partner Commission</div>
+                    <div id="partner-commission" class="text-xl font-bold text-yellow-400"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load existing partners
+        async function loadPartners() {
+            try {
+                const response = await fetch('/referral/partners');
+                const data = await response.json();
+                
+                const partnersList = document.getElementById('partners-list');
+                if (data.success && data.partners.length > 0) {
+                    partnersList.innerHTML = data.partners.map(partner => `
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-semibold">${partner.name}</h3>
+                                    <p class="text-sm text-gray-400">UTM: ${partner.utm_source}</p>
+                                    <p class="text-sm text-green-400">${partner.discount_percentage}% off + ${partner.bonus_credits} credits</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm text-yellow-400">${partner.commission_rate}% commission</div>
+                                    <div class="text-xs text-gray-500">${partner.total_referrals} referrals</div>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <code class="text-xs text-blue-400 bg-gray-900 px-2 py-1 rounded">
+                                    https://autowave.pro/?utm_source=${partner.utm_source}&utm_medium=Youtube&utm_campaign=partnership
+                                </code>
+                                <button onclick="copyPartnerLink('${partner.utm_source}')" class="ml-2 text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    partnersList.innerHTML = '<p class="text-gray-400">No partners found. Create your first referral link below!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading partners:', error);
+                document.getElementById('partners-list').innerHTML = '<p class="text-red-400">Error loading partners</p>';
+            }
+        }
+
+        // Generate new referral link
+        document.getElementById('generate-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('partner-name').value,
+                utm_source: document.getElementById('utm-source').value,
+                discount_percentage: parseFloat(document.getElementById('discount').value),
+                bonus_credits: parseInt(document.getElementById('bonus-credits').value),
+                commission_rate: parseFloat(document.getElementById('commission').value),
+                utm_medium: document.getElementById('utm-medium').value
+            };
+
+            try {
+                const response = await fetch('/referral/create-partner', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show generated link
+                    const generatedDiv = document.getElementById('generated-link');
+                    const baseUrl = window.location.origin;
+                    const referralUrl = `${baseUrl}/?utm_source=${formData.utm_source}&utm_medium=${formData.utm_medium}&utm_campaign=partnership`;
+                    
+                    document.getElementById('referral-url').textContent = referralUrl;
+                    document.getElementById('customer-discount').textContent = `${formData.discount_percentage}%`;
+                    document.getElementById('customer-credits').textContent = formData.bonus_credits;
+                    document.getElementById('partner-commission').textContent = `${formData.commission_rate}%`;
+                    
+                    generatedDiv.style.display = 'block';
+                    generatedDiv.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Reload partners list
+                    loadPartners();
+                    
+                    // Reset form
+                    document.getElementById('generate-form').reset();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error generating link:', error);
+                alert('Failed to generate referral link');
+            }
+        });
+
+        // Copy functions
+        function copyToClipboard() {
+            const url = document.getElementById('referral-url').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Referral link copied to clipboard!');
+            });
+        }
+
+        function copyPartnerLink(utmSource) {
+            const url = `https://autowave.pro/?utm_source=${utmSource}&utm_medium=Youtube&utm_campaign=partnership`;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Partner link copied to clipboard!');
+            });
+        }
+
+        // Load partners on page load
+        loadPartners();
+    </script>
+</body>
+</html>

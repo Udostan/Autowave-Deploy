@@ -1,0 +1,192 @@
+{% extends "layout.html" %}
+
+{% block title %}Agen911 - History{% endblock %}
+
+{% block header %}Welcome to History{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <div class="history-description">
+        <p>View your past searches and conversations. Click on any item to view the full results.</p>
+    </div>
+
+    <div class="history-tabs">
+        <button class="tab-button active" data-tab="searches">Searches</button>
+        <button class="tab-button" data-tab="chats">Chats</button>
+    </div>
+
+    <div class="tab-content" id="searches-content">
+        <div class="history-list">
+            {% if search_history %}
+                {% for item in search_history %}
+                <div class="history-item">
+                    <div class="history-item-content">
+                        <div class="history-item-title">{{ item.query }}</div>
+                        <div class="history-item-date">{{ item.date }}</div>
+                    </div>
+                    <div class="history-item-actions">
+                        <a href="/search?query={{ item.query }}" class="history-action">Repeat</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>You haven't made any searches yet.</p>
+                    <a href="/search" class="action-button">Start Researching</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="tab-content" id="chats-content" style="display: none;">
+        <div class="history-list">
+            {% if chat_history %}
+                {% for item in chat_history %}
+                <div class="history-item">
+                    <div class="history-item-content">
+                        <div class="history-item-title">{{ item.message }}</div>
+                        <div class="history-item-date">{{ item.date }}</div>
+                    </div>
+                    <div class="history-item-actions">
+                        <a href="/chat?message={{ item.message }}" class="history-action">Continue</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>You haven't had any chats yet.</p>
+                    <a href="/chat" class="action-button">Start Chatting</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .history-page {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .history-description {
+        margin-bottom: 25px;
+        color: var(--dark-gray);
+        font-size: 17px;
+    }
+
+    .history-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--medium-gray);
+        margin-bottom: 20px;
+    }
+
+    .tab-button {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--dark-gray);
+        transition: all 0.3s ease;
+    }
+
+    .tab-button:hover {
+        color: var(--primary-color);
+    }
+
+    .tab-button.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background-color: var(--light-gray);
+        border-radius: 8px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .history-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .history-item-title {
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+
+    .history-item-date {
+        font-size: 14px;
+        color: var(--dark-gray);
+    }
+
+    .history-action {
+        background-color: var(--background-color);
+        border: 1px solid var(--medium-gray);
+        border-radius: 5px;
+        padding: 5px 10px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+
+    .history-action:hover {
+        background-color: var(--medium-gray);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        color: var(--dark-gray);
+    }
+
+    .empty-state .action-button {
+        display: inline-block;
+        margin-top: 15px;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+    .empty-state .action-button:hover {
+        background-color: var(--secondary-color);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Hide all tab contents
+                tabContents.forEach(content => content.style.display = 'none');
+
+                // Show the selected tab content
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(`${tabId}-content`).style.display = 'block';
+            });
+        });
+    });
+</script>
+{% endblock %}

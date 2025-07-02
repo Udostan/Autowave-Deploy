@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chrome Browser Simulation</title>
+    <style>
+        /* Reset and base styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            background-color: #f1f3f4;
+            overflow: hidden;
+        }
+
+        /* Chrome browser container */
+        .chrome-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: 100vh;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Chrome header */
+        .chrome-header {
+            display: flex;
+            flex-direction: column;
+            background-color: #f1f3f4;
+            border-bottom: 1px solid #dadce0;
+        }
+
+        /* Tab bar */
+        .tab-bar {
+            display: flex;
+            align-items: center;
+            height: 36px;
+            padding: 0 8px;
+            background-color: #dee1e6;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            height: 32px;
+            padding: 0 10px;
+            background-color: #f1f3f4;
+            border-radius: 8px 8px 0 0;
+            font-size: 12px;
+            color: #5f6368;
+            margin-right: 1px;
+            max-width: 200px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .tab.active {
+            background-color: #fff;
+            color: #202124;
+        }
+
+        .tab-favicon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .tab-title {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Address bar */
+        .address-bar {
+            display: flex;
+            align-items: center;
+            height: 48px;
+            padding: 8px 16px;
+            background-color: #f1f3f4;
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            margin-right: 16px;
+        }
+
+        .nav-button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+            margin-right: 8px;
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            font-size: 18px;
+        }
+
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .url-bar {
+            flex: 1;
+            height: 36px;
+            background-color: #fff;
+            border-radius: 18px;
+            border: 1px solid #dadce0;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 14px;
+            color: #202124;
+            overflow: hidden;
+        }
+
+        .url-bar-favicon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .url-bar-text {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .url-bar-secure {
+            color: #188038;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .menu-buttons {
+            display: flex;
+            align-items: center;
+            margin-left: 16px;
+        }
+
+        .menu-button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+            margin-left: 8px;
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            font-size: 18px;
+        }
+
+        .menu-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Browser content */
+        .chrome-content {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        .browser-screenshot {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Loading indicator */
+        .loading-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #f1f3f4;
+            overflow: hidden;
+            display: none;
+        }
+
+        .loading-indicator.active {
+            display: block;
+        }
+
+        .loading-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #1a73e8;
+            animation: loading 2s infinite ease-in-out;
+        }
+
+        @keyframes loading {
+            0% { width: 0%; left: 0; }
+            50% { width: 50%; left: 25%; }
+            100% { width: 0%; left: 100%; }
+        }
+
+        /* Status message */
+        .status-message {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            padding: 12px 16px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 100;
+        }
+
+        .status-message.active {
+            display: block;
+        }
+
+        /* Fallback message */
+        .fallback-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 80%;
+            padding: 24px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none;
+        }
+
+        .fallback-message.active {
+            display: block;
+        }
+
+        .fallback-message h2 {
+            margin-bottom: 16px;
+            color: #202124;
+        }
+
+        .fallback-message p {
+            margin-bottom: 12px;
+            color: #5f6368;
+        }
+
+        .fallback-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #1a73e8;
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-top: 16px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .fallback-button:hover {
+            background-color: #1765cc;
+        }
+
+        /* Utility classes */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="chrome-container">
+        <!-- Chrome Header -->
+        <div class="chrome-header">
+            <!-- Tab Bar -->
+            <div class="tab-bar">
+                <div class="tab active">
+                    <div class="tab-favicon" id="tab-favicon" style="background-image: url('https://www.google.com/favicon.ico');"></div>
+                    <div class="tab-title" id="tab-title">Google</div>
+                </div>
+            </div>
+
+            <!-- Address Bar -->
+            <div class="address-bar">
+                <div class="nav-buttons">
+                    <button class="nav-button" id="back-button" title="Back">←</button>
+                    <button class="nav-button" id="forward-button" title="Forward" disabled>→</button>
+                    <button class="nav-button" id="refresh-button" title="Refresh">↻</button>
+                </div>
+
+                <div class="url-bar">
+                    <div class="url-bar-secure" id="url-secure">🔒</div>
+                    <div class="url-bar-favicon" id="url-favicon" style="background-image: url('https://www.google.com/favicon.ico');"></div>
+                    <div class="url-bar-text" id="url-text">https://www.google.com</div>
+                </div>
+
+                <div class="menu-buttons">
+                    <button class="menu-button" title="Extensions">⋮</button>
+                    <button class="menu-button" title="Menu">⋮</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chrome Content -->
+        <div class="chrome-content">
+            <!-- Loading Indicator -->
+            <div class="loading-indicator" id="loading-indicator">
+                <div class="loading-bar"></div>
+            </div>
+
+            <!-- Browser Screenshot -->
+            <img src="/static/images/google_homepage.png" alt="Browser Screenshot" class="browser-screenshot" id="browser-screenshot">
+
+            <!-- Status Message -->
+            <div class="status-message" id="status-message">
+                Navigating to Google...
+            </div>
+
+            <!-- Fallback Message -->
+            <div class="fallback-message" id="fallback-message">
+                <h2>Browser Automation in Progress</h2>
+                <p>The browser is currently navigating to <span id="fallback-url">Google</span>.</p>
+                <p>This process is happening in the background and screenshots will be displayed here.</p>
+                <button class="fallback-button" id="fallback-refresh">Refresh View</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Browser state
+        const browserState = {
+            url: 'https://www.google.com',
+            title: 'Google',
+            favicon: 'https://www.google.com/favicon.ico',
+            isLoading: false,
+            isSecure: true,
+            canGoBack: false,
+            canGoForward: false,
+            screenshotUrl: '/static/images/google_homepage.png',
+            statusMessage: '',
+            showFallback: false
+        };
+
+        // DOM elements
+        const tabFavicon = document.getElementById('tab-favicon');
+        const tabTitle = document.getElementById('tab-title');
+        const urlSecure = document.getElementById('url-secure');
+        const urlFavicon = document.getElementById('url-favicon');
+        const urlText = document.getElementById('url-text');
+        const backButton = document.getElementById('back-button');
+        const forwardButton = document.getElementById('forward-button');
+        const refreshButton = document.getElementById('refresh-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const browserScreenshot = document.getElementById('browser-screenshot');
+        const statusMessage = document.getElementById('status-message');
+        const fallbackMessage = document.getElementById('fallback-message');
+        const fallbackUrl = document.getElementById('fallback-url');
+        const fallbackRefresh = document.getElementById('fallback-refresh');
+
+        // Update browser UI based on state
+        function updateBrowserUI() {
+            // Update tab
+            if (tabFavicon) tabFavicon.style.backgroundImage = `url('${browserState.favicon}')`;
+            if (tabTitle) tabTitle.textContent = browserState.title;
+
+            // Update address bar
+            if (urlSecure) {
+                if (browserState.isSecure) {
+                    urlSecure.textContent = '🔒';
+                    urlSecure.style.color = '#188038';
+                } else {
+                    urlSecure.textContent = 'ⓘ';
+                    urlSecure.style.color = '#5f6368';
+                }
+            }
+
+            if (urlFavicon) urlFavicon.style.backgroundImage = `url('${browserState.favicon}')`;
+            if (urlText) urlText.textContent = browserState.url;
+
+            // Update navigation buttons
+            if (backButton) backButton.disabled = !browserState.canGoBack;
+            if (forwardButton) forwardButton.disabled = !browserState.canGoForward;
+
+            // Update loading indicator
+            if (loadingIndicator) {
+                if (browserState.isLoading) {
+                    loadingIndicator.classList.add('active');
+                } else {
+                    loadingIndicator.classList.remove('active');
+                }
+            }
+
+            // Update screenshot
+            if (browserScreenshot && browserState.screenshotUrl) {
+                browserScreenshot.src = browserState.screenshotUrl;
+            }
+
+            // Update status message
+            if (statusMessage) {
+                if (browserState.statusMessage) {
+                    statusMessage.textContent = browserState.statusMessage;
+                    statusMessage.classList.add('active');
+
+                    // Hide status message after 3 seconds
+                    setTimeout(() => {
+                        statusMessage.classList.remove('active');
+                    }, 3000);
+                } else {
+                    statusMessage.classList.remove('active');
+                }
+            }
+
+            // Update fallback message
+            if (fallbackMessage) {
+                if (browserState.showFallback) {
+                    fallbackMessage.classList.add('active');
+                    if (fallbackUrl) fallbackUrl.textContent = browserState.url;
+                } else {
+                    fallbackMessage.classList.remove('active');
+                }
+            }
+        }
+
+        // Simulate browser navigation
+        function navigateTo(url) {
+            // Update browser state
+            browserState.url = url;
+            browserState.isLoading = true;
+            browserState.statusMessage = `Navigating to ${url}...`;
+
+            // Update UI
+            updateBrowserUI();
+
+            // Simulate loading
+            setTimeout(() => {
+                // Update browser state after loading
+                browserState.isLoading = false;
+                browserState.canGoBack = true;
+
+                // Determine title and favicon based on URL
+                if (url.includes('google.com')) {
+                    browserState.title = 'Google';
+                    browserState.favicon = 'https://www.google.com/favicon.ico';
+                } else if (url.includes('example.com')) {
+                    browserState.title = 'Example Domain';
+                    browserState.favicon = 'https://example.com/favicon.ico';
+                } else {
+                    browserState.title = url;
+                    browserState.favicon = '/static/images/globe.png';
+                }
+
+                // Update status message
+                browserState.statusMessage = `Loaded ${url}`;
+
+                // Update UI
+                updateBrowserUI();
+
+                // Request screenshot from server
+                requestScreenshot();
+            }, 1500);
+        }
+
+        // Request screenshot from server
+        function requestScreenshot() {
+            // In a real implementation, this would make an API call to get the latest screenshot
+            // For now, we'll just simulate it
+
+            // Check if we're on Google
+            if (browserState.url.includes('google.com')) {
+                browserState.screenshotUrl = '/static/images/google_homepage.png';
+            } else if (browserState.url.includes('example.com')) {
+                browserState.screenshotUrl = '/static/images/example_com.png';
+            } else {
+                // If we don't have a screenshot, show fallback
+                browserState.showFallback = true;
+            }
+
+            // Update UI
+            updateBrowserUI();
+        }
+
+        // Set up event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Back button
+            if (backButton) {
+                backButton.addEventListener('click', function() {
+                    if (browserState.canGoBack) {
+                        browserState.canGoForward = true;
+                        browserState.canGoBack = false; // Simplified for demo
+                        navigateTo('https://www.google.com');
+                    }
+                });
+            }
+
+            // Forward button
+            if (forwardButton) {
+                forwardButton.addEventListener('click', function() {
+                    if (browserState.canGoForward) {
+                        browserState.canGoForward = false;
+                        navigateTo('https://www.example.com');
+                    }
+                });
+            }
+
+            // Refresh button
+            if (refreshButton) {
+                refreshButton.addEventListener('click', function() {
+                    navigateTo(browserState.url);
+                });
+            }
+
+            // Fallback refresh button
+            if (fallbackRefresh) {
+                fallbackRefresh.addEventListener('click', function() {
+                    requestScreenshot();
+                });
+            }
+
+            // URL bar
+            const urlBar = document.querySelector('.url-bar');
+            if (urlBar) {
+                urlBar.addEventListener('click', function() {
+                    // In a real implementation, this would focus an input field
+                    alert('URL bar clicked. In a real implementation, this would allow you to edit the URL.');
+                });
+            }
+
+            // Initial UI update
+            updateBrowserUI();
+
+            // Set up WebSocket connection for real-time updates
+            setupWebSocket();
+        });
+
+        // Set up WebSocket connection
+        function setupWebSocket() {
+            // Connect to the WebSocket server
+            connectToWebSocket();
+
+            // Listen for messages from the parent window
+            window.addEventListener('message', function(event) {
+                // Make sure the message is from our parent
+                if (event.source === window.parent) {
+                    const data = event.data;
+                    console.log('Received message from parent:', data);
+
+                    // Handle different message types
+                    if (data.type === 'navigate') {
+                        // Navigate to the specified URL
+                        navigateTo(data.url);
+                    }
+                }
+            });
+
+            // Check if we have a URL in localStorage
+            const targetUrl = localStorage.getItem('browserTargetUrl');
+            if (targetUrl) {
+                console.log('Found target URL in localStorage:', targetUrl);
+                navigateTo(targetUrl);
+            }
+
+            // Set up polling for screenshots
+            startScreenshotPolling();
+        }
+
+        // Connect to WebSocket server
+        function connectToWebSocket() {
+            // In a real implementation, this would connect to a WebSocket server
+            console.log('Connecting to WebSocket server...');
+
+            // For now, we'll just simulate a connection
+            setTimeout(() => {
+                console.log('Connected to WebSocket server');
+                browserState.statusMessage = 'Connected to browser server';
+                updateBrowserUI();
+            }, 1000);
+        }
+
+        // Start polling for screenshots
+        function startScreenshotPolling() {
+            console.log('Starting screenshot polling...');
+
+            // Poll for screenshots every 1 second
+            const pollInterval = setInterval(() => {
+                // Make an API call to get the latest screenshot
+                fetch('/api/live-browser/screenshot')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Received screenshot data:', data);
+
+                        if (data.success && data.screenshot) {
+                            // Add timestamp to prevent caching
+                            const screenshotUrl = `${data.screenshot}?t=${data.timestamp || Date.now()}`;
+
+                            // Update browser state
+                            browserState.screenshotUrl = screenshotUrl;
+                            browserState.showFallback = false;
+
+                            // Update UI
+                            updateBrowserUI();
+
+                            // Send message to parent window
+                            sendMessageToParent({
+                                type: 'screenshot_update',
+                                screenshot: screenshotUrl,
+                                timestamp: data.timestamp || Date.now()
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error polling for screenshots:', error);
+                    });
+
+                // Also get browser status to update URL and title
+                fetch('/api/live-browser/status')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Received browser status:', data);
+
+                        if (data.success) {
+                            // Check if we have a URL
+                            if (data.current_url) {
+                                // Update browser state
+                                browserState.url = data.current_url;
+
+                                // Try to get the domain for the title
+                                try {
+                                    const domain = new URL(data.current_url).hostname;
+                                    browserState.title = domain;
+
+                                    // Set favicon based on domain
+                                    if (domain.includes('google.com')) {
+                                        browserState.favicon = 'https://www.google.com/favicon.ico';
+                                    } else if (domain.includes('example.com')) {
+                                        browserState.favicon = 'https://example.com/favicon.ico';
+                                    } else {
+                                        browserState.favicon = '/static/images/globe.png';
+                                    }
+                                } catch (e) {
+                                    browserState.title = 'Browser';
+                                }
+
+                                // Update UI
+                                updateBrowserUI();
+
+                                // Send message to parent window
+                                sendMessageToParent({
+                                    type: 'navigation_complete',
+                                    url: browserState.url,
+                                    title: browserState.title
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error getting browser status:', error);
+                    });
+            }, 1000);
+
+            // Request a new screenshot immediately
+            requestNewScreenshot();
+        }
+
+        // Request a new screenshot
+        function requestNewScreenshot() {
+            fetch('/api/live-browser/screenshot?new=true')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Requested new screenshot:', data);
+
+                    if (data.success && data.screenshot) {
+                        // Add timestamp to prevent caching
+                        const screenshotUrl = `${data.screenshot}?t=${data.timestamp || Date.now()}`;
+
+                        // Update browser state
+                        browserState.screenshotUrl = screenshotUrl;
+                        browserState.showFallback = false;
+
+                        // Update UI
+                        updateBrowserUI();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error requesting new screenshot:', error);
+                });
+        }
+
+        // Simulate screenshots for testing
+        function simulateScreenshots() {
+            // Simulate receiving a screenshot update after 2 seconds
+            setTimeout(() => {
+                // Update browser state
+                browserState.screenshotUrl = '/static/images/google_search.png';
+                browserState.title = 'Rolex watch prices - Google Search';
+                browserState.url = 'https://www.google.com/search?q=Rolex+watch+prices';
+                browserState.statusMessage = 'Received new screenshot';
+
+                // Update UI
+                updateBrowserUI();
+
+                // Send message to parent window
+                sendMessageToParent({
+                    type: 'navigation_complete',
+                    url: browserState.url,
+                    title: browserState.title
+                });
+            }, 2000);
+
+            // Simulate receiving another screenshot update after 5 seconds
+            setTimeout(() => {
+                // Update browser state
+                browserState.screenshotUrl = '/static/images/rolex_website.png';
+                browserState.title = 'Rolex Official Website - Swiss Luxury Watches';
+                browserState.url = 'https://www.rolex.com/';
+                browserState.favicon = 'https://www.rolex.com/favicon.ico';
+                browserState.statusMessage = 'Navigated to Rolex website';
+
+                // Update UI
+                updateBrowserUI();
+
+                // Send message to parent window
+                sendMessageToParent({
+                    type: 'navigation_complete',
+                    url: browserState.url,
+                    title: browserState.title
+                });
+            }, 5000);
+        }
+
+        // Send message to parent window
+        function sendMessageToParent(message) {
+            try {
+                window.parent.postMessage(message, '*');
+                console.log('Sent message to parent:', message);
+            } catch (e) {
+                console.error('Error sending message to parent:', e);
+            }
+        }
+    </script>
+</body>
+</html>

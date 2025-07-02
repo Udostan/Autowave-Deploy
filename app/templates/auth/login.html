@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - AutoWave</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* AutoWave Theme Colors */
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .auth-container {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-input {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            width: 100%;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-input:focus {
+            border-color: #555;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(80, 80, 80, 0.3);
+        }
+
+        .auth-input::placeholder {
+            color: #888;
+        }
+
+        .auth-button {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .auth-button:hover {
+            background-color: #3d3d3d;
+            border-color: #555;
+        }
+
+        .auth-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(80, 80, 80, 0.3);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .google-button {
+            background-color: #1e1e1e;
+            border: 1px solid #444;
+            color: #e0e0e0;
+        }
+
+        .google-button:hover {
+            background-color: #2d2d2d;
+        }
+
+        .auth-link {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .auth-link:hover {
+            color: #e0e0e0;
+        }
+
+        .error-message {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .success-message {
+            background-color: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .loading-spinner {
+            border: 2px solid #333;
+            border-top: 2px solid #e0e0e0;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .brand-logo {
+            background: linear-gradient(135deg, #e0e0e0, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="auth-container w-full max-w-md p-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center space-x-3 mb-4">
+                <img src="/static/images/autowave-logo.png" alt="AutoWave Logo" class="w-12 h-12" onerror="this.style.display='none'">
+                <h1 class="brand-logo">AutoWave</h1>
+            </div>
+            <p class="text-gray-400">Sign in to your account</p>
+        </div>
+
+        <!-- Messages -->
+        <div id="message-container"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
+            <!-- Email Input -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+                    Email Address
+                </label>
+                <div class="relative">
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="auth-input pl-10"
+                        placeholder="Enter your email"
+                        required
+                    >
+                    <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                </div>
+            </div>
+
+            <!-- Password Input -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+                    Password
+                </label>
+                <div class="relative">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="auth-input pl-10 pr-10"
+                        placeholder="Enter your password"
+                        required
+                    >
+                    <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                    <button
+                        type="button"
+                        id="togglePassword"
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                    >
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="flex items-center justify-between">
+                <label class="flex items-center">
+                    <input type="checkbox" id="remember" class="mr-2 rounded bg-gray-700 border-gray-600">
+                    <span class="text-sm text-gray-400">Remember me</span>
+                </label>
+                <button type="button" id="forgotPassword" class="text-sm auth-link">
+                    Forgot password?
+                </button>
+            </div>
+
+            <!-- Sign In Button -->
+            <button type="submit" id="signInBtn" class="auth-button">
+                <span id="signInText">Sign In</span>
+                <div id="signInSpinner" class="loading-spinner mx-auto hidden"></div>
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="my-6 flex items-center">
+            <div class="flex-1 border-t border-gray-600"></div>
+            <span class="px-4 text-sm text-gray-500">or</span>
+            <div class="flex-1 border-t border-gray-600"></div>
+        </div>
+
+        <!-- Google Sign In -->
+        <button id="googleSignIn" class="auth-button google-button mb-6">
+            <i class="fab fa-google mr-2"></i>
+            Continue with Google
+        </button>
+
+        <!-- Sign Up Link -->
+        <div class="text-center">
+            <p class="text-gray-400">
+                Don't have an account?
+                <a href="/auth/register" class="auth-link font-medium">Sign up</a>
+            </p>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-6">
+            <a href="/" class="text-sm auth-link">
+                <i class="fas fa-arrow-left mr-1"></i>
+                Back to AutoWave
+            </a>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4">
+        <div class="auth-container w-full max-w-sm p-6">
+            <h3 class="text-lg font-semibold mb-4">Reset Password</h3>
+            <p class="text-gray-400 text-sm mb-4">Enter your email to receive a password reset link.</p>
+
+            <form id="resetPasswordForm">
+                <div class="mb-4">
+                    <input
+                        type="email"
+                        id="resetEmail"
+                        class="auth-input"
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
+                <div class="flex space-x-3">
+                    <button type="button" id="cancelReset" class="auth-button flex-1 bg-gray-600 hover:bg-gray-700">
+                        Cancel
+                    </button>
+                    <button type="submit" id="sendResetBtn" class="auth-button flex-1">
+                        <span id="resetText">Send Reset Link</span>
+                        <div id="resetSpinner" class="loading-spinner mx-auto hidden"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const signInBtn = document.getElementById('signInBtn');
+        const signInText = document.getElementById('signInText');
+        const signInSpinner = document.getElementById('signInSpinner');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const forgotPasswordBtn = document.getElementById('forgotPassword');
+        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+        const resetPasswordForm = document.getElementById('resetPasswordForm');
+        const cancelReset = document.getElementById('cancelReset');
+        const googleSignIn = document.getElementById('googleSignIn');
+        const messageContainer = document.getElementById('message-container');
+
+        // Show message function
+        function showMessage(message, type = 'error') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'} mr-2"></i>${message}`;
+
+            messageContainer.innerHTML = '';
+            messageContainer.appendChild(messageDiv);
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // Toggle password visibility
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            const icon = togglePassword.querySelector('i');
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+
+        // Handle login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(loginForm);
+            const email = formData.get('email');
+            const password = formData.get('password');
+
+            // Show loading state
+            signInBtn.disabled = true;
+            signInText.classList.add('hidden');
+            signInSpinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(result.message || 'Login successful!', 'success');
+                    setTimeout(() => {
+                        window.location.href = result.redirect_url || '/';
+                    }, 1000);
+                } else {
+                    showMessage(result.error || 'Login failed');
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.');
+            } finally {
+                // Reset loading state
+                signInBtn.disabled = false;
+                signInText.classList.remove('hidden');
+                signInSpinner.classList.add('hidden');
+            }
+        });
+
+        // Handle Google sign in
+        googleSignIn.addEventListener('click', () => {
+            window.location.href = '/auth/google';
+        });
+
+        // Handle forgot password
+        forgotPasswordBtn.addEventListener('click', () => {
+            forgotPasswordModal.classList.remove('hidden');
+            forgotPasswordModal.classList.add('flex');
+        });
+
+        cancelReset.addEventListener('click', () => {
+            forgotPasswordModal.classList.add('hidden');
+            forgotPasswordModal.classList.remove('flex');
+        });
+
+        // Handle password reset
+        resetPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('resetEmail').value;
+            const sendResetBtn = document.getElementById('sendResetBtn');
+            const resetText = document.getElementById('resetText');
+            const resetSpinner = document.getElementById('resetSpinner');
+
+            // Show loading state
+            sendResetBtn.disabled = true;
+            resetText.classList.add('hidden');
+            resetSpinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/auth/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(result.message || 'Password reset email sent!', 'success');
+                    forgotPasswordModal.classList.add('hidden');
+                    forgotPasswordModal.classList.remove('flex');
+                } else {
+                    showMessage(result.error || 'Failed to send reset email');
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.');
+            } finally {
+                // Reset loading state
+                sendResetBtn.disabled = false;
+                resetText.classList.remove('hidden');
+                resetSpinner.classList.add('hidden');
+            }
+        });
+
+        // Close modal when clicking outside
+        forgotPasswordModal.addEventListener('click', (e) => {
+            if (e.target === forgotPasswordModal) {
+                forgotPasswordModal.classList.add('hidden');
+                forgotPasswordModal.classList.remove('flex');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1231 @@
+{% extends "layout.html" %}
+{# ⚠️ PRIMARY TEMPLATE - ONLY WORK ON THIS TEMPLATE ⚠️ #}
+{# ⚠️ DO NOT CREATE ANY NEW TEMPLATES OR MODIFY ARCHIVED TEMPLATES ⚠️ #}
+{# ⚠️ ALL DEVELOPMENT MUST FOCUS EXCLUSIVELY ON THIS TEMPLATE ⚠️ #}
+
+{% block title %}AutoWave - AI Assistant{% endblock %}
+
+{% block header %}AutoWave{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/super_agent.css">
+<link rel="stylesheet" href="/static/css/booking_results.css">
+{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <!-- Developer Reminder Banner - Only visible during development and hidden in HTML -->
+    <!--
+    ⚠️ DEVELOPER REMINDER: This is the AUTOWAVE template - the ONLY template that should be modified ⚠️
+    All UI development must be done in this template file only. Do not create new templates.
+    -->
+
+    <div class="mb-6 bg-gradient-to-r from-gray-900 to-gray-800 p-4 rounded-lg border-l-4 border-gray-600 shadow-sm">
+        <p class="text-gray-300">Prime Agent can browse the web, book travel, generate code, and complete complex tasks - all with enhanced AI capabilities.</p>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="border-b border-gray-700 mb-6">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-white text-white" data-tab="task">
+                <span class="flex items-center">
+                    <svg class="-ml-0.5 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Task
+                </span>
+            </button>
+            <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-400 hover:text-white hover:border-gray-500" data-tab="code">
+                <span class="flex items-center">
+                    <svg class="-ml-0.5 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    Code
+                </span>
+            </button>
+
+            <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-400 hover:text-white hover:border-gray-500" data-tab="history">
+                <span class="flex items-center">
+                    <svg class="-ml-0.5 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    History
+                </span>
+            </button>
+
+            <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-400 hover:text-white hover:border-gray-500" data-tab="live-browser">
+                <span class="flex items-center">
+                    <svg class="-ml-0.5 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                    Live Browser
+                </span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Task Tab -->
+    <div class="tab-content" id="task-content">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Execute a Task</h3>
+                <p class="text-gray-600 mb-4">Describe a task for the agent to perform. The agent will break it down into steps and execute them.</p>
+                <div class="mb-6">
+                    <textarea id="taskDescription" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 min-h-[120px]" placeholder="Example: Go to wikipedia.org, search for 'artificial intelligence', and find the section about machine learning"></textarea>
+                </div>
+
+                <div class="space-y-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 class="font-medium text-gray-700 mb-2">Advanced Options</h4>
+
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="useAdvancedBrowser" type="checkbox" class="focus:ring-black h-4 w-4 text-black border-gray-300 rounded">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="useAdvancedBrowser" class="font-medium text-gray-700">Use advanced browser (Playwright/Selenium with screenshots)</label>
+                            <p class="text-gray-500">Enable this option for tasks that require visual browsing and screenshots. Works best for booking flights, ordering rides, etc.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-2">
+                    <button id="executeTaskBtn" class="inline-flex items-center px-6 py-3 border border-gray-600 text-base font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200" onclick="executeTask()">
+                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Execute Task
+                    </button>
+                    <button id="resetStateBtn" class="inline-flex items-center px-4 py-3 border border-red-600 text-base font-medium rounded-md shadow-sm text-white bg-red-800 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Progress and Results Container -->
+        <div class="mt-8 hidden" id="resultsContainer">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left Column: Task Progress -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Task Progress</h3>
+                        <div class="flex space-x-2">
+                            <!-- Clear All Button -->
+                            <button id="clearAllTasksBtn" class="p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Clear all tasks">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <!-- Progress Bar -->
+                        <div class="mb-6" id="taskProgress">
+                            <div class="relative pt-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <div id="processingIndicator" class="relative inline-block">
+                                            <div class="h-8 w-8 rounded-full bg-gray-700 animate-spin border-4 border-gray-500 border-t-transparent"></div>
+                                            <span class="checkmark absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-sm">✓</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
+                                    <div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gray-400 transition-all duration-500 ease-in-out" id="progressFill" style="width: 0%"></div>
+                                </div>
+                                <p id="stepDescription" class="text-sm text-gray-400">Analyzing your request and preparing execution plan</p>
+                            </div>
+                        </div>
+
+                        <!-- Thinking Process Container -->
+                        <div id="thinkingContainers" class="space-y-6">
+                            <!-- Initial thinking process container -->
+                            <div class="thinking-container" id="thinking-container-initial">
+                                <div class="bg-gray-50 px-4 py-3 rounded-t-md border border-gray-200 flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <button class="toggle-thinking-btn p-1 mr-2 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Toggle thinking process" data-container-id="thinking-container-initial">
+                                            <svg class="w-4 h-4 transform rotate-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </button>
+                                        <h4 class="font-medium text-gray-700">Thinking Process</h4>
+                                    </div>
+                                    <div class="flex space-x-1">
+                                        <button class="goto-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Go to summary" data-task-id="summary-container-initial">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="thinking-process bg-gray-50 p-4 rounded-b-md border-l border-r border-b border-gray-200 h-64 overflow-auto">
+                                    <div id="thinkingContent" class="prose prose-sm max-w-none text-sm text-gray-500">
+                                        <p class="typing-cursor">Starting analysis and planning process...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Task Summary -->
+                <div id="taskSummaryContainer" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Task Summary</h3>
+                        <div class="flex space-x-2">
+                            <!-- Expand Icon -->
+                            <button id="expandSummaryBtn" class="p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Expand to full screen" onclick="document.getElementById('summaryModal').classList.remove('hidden'); console.log('Expand button clicked directly');">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6 overflow-y-scroll h-[800px]" id="summaryContainers">
+                        <!-- Initial summary container -->
+                        <div class="summary-container" id="summary-container-initial">
+                            <div class="bg-gray-50 px-4 py-3 rounded-t-md border border-gray-200 flex justify-between items-center summary-container-header">
+                                <h4 class="font-medium text-gray-700">Task Summary</h4>
+                                <div class="flex space-x-1">
+                                    <!-- Download Icon -->
+                                    <button class="download-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Download summary" data-task-id="summary-container-initial">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                        </svg>
+                                    </button>
+                                    <!-- Copy Icon -->
+                                    <button class="copy-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Copy to clipboard" data-task-id="summary-container-initial">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                        </svg>
+                                    </button>
+                                    <!-- Share Icon -->
+                                    <button class="share-summary-btn p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Share summary" data-task-id="summary-container-initial">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                        </svg>
+                                    </button>
+                                    <!-- Mobile Menu Button (only visible on small screens) -->
+                                    <button class="mobile-menu-btn md:hidden p-1 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" data-task-id="summary-container-initial">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <!-- Mobile Dropdown Menu -->
+                                <div class="mobile-dropdown absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden" data-task-id="summary-container-initial" style="top: 2.5rem;">
+                                    <button class="download-summary-btn block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" data-task-id="summary-container-initial">Download</button>
+                                    <button class="copy-summary-btn block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" data-task-id="summary-container-initial">Copy to clipboard</button>
+                                    <button class="share-summary-btn block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left" data-task-id="summary-container-initial">Share</button>
+                                </div>
+                            </div>
+                            <div class="summary-container-content prose prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto prose-img:max-w-full p-4 border-l border-r border-b border-gray-200 rounded-b-md">
+                                <p class="text-center text-gray-500">Task results will appear here</p>
+                            </div>
+                        </div>
+                        <!-- Non-functional container removed -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Browse Tab Removed -->
+
+    <!-- Code Tab -->
+    <div class="tab-content hidden" id="code-content">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Build with Code</h3>
+                <p class="text-gray-600 mb-4">Describe what you want to build, and the agent will create it for you with live code generation.</p>
+                <div class="mb-6">
+                    <textarea id="codePrompt" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 min-h-[120px]" placeholder="Example: Create a to-do list app with HTML, CSS, and JavaScript"></textarea>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                    <div class="flex items-center">
+                        <label for="projectType" class="block text-sm font-medium text-gray-700 mr-2">Project Type:</label>
+                        <select id="projectType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-black focus:border-black rounded-md">
+                            <option value="web">Web Application</option>
+                            <option value="script">Script/Program</option>
+                            <option value="api">API/Backend</option>
+                            <option value="data">Data Analysis</option>
+                            <option value="mobile">Mobile App</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center ml-4">
+                        <label for="complexity" class="block text-sm font-medium text-gray-700 mr-2">Complexity:</label>
+                        <select id="complexity" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-black focus:border-black rounded-md">
+                            <option value="simple">Simple</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="complex">Complex</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="buildProjectBtn" class="inline-flex items-center px-6 py-3 border border-gray-600 text-base font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
+                    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    Build Project
+                </button>
+            </div>
+        </div>
+
+        <!-- Code Generation Process -->
+        <div class="mt-8 hidden" id="codeGenerationProcess">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left Column: Code Generation -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            Code Generation
+                        </h3>
+                        <div class="flex space-x-2">
+                            <button id="copyAllCodeBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none" title="Copy All Code">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                            </button>
+                            <button id="downloadCodeBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none" title="Download Code">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-0 overflow-hidden">
+                        <!-- File Tabs -->
+                        <div class="bg-gray-100 border-b border-gray-200 overflow-x-auto whitespace-nowrap" id="fileTabs">
+                            <!-- Tabs will be dynamically added here -->
+                            <button class="px-4 py-2 text-sm font-medium text-gray-700 border-b-2 border-transparent hover:text-black hover:border-gray-300 active-file-tab" data-file="main.js">main.js</button>
+                        </div>
+                        <!-- Code Editor -->
+                        <div class="p-0 relative">
+                            <pre id="codeEditor" class="language-javascript text-sm p-4 m-0 h-[500px] overflow-auto bg-gray-50 font-mono"><code id="codeContent">// Code will appear here as it's being generated...</code></pre>
+                            <div id="typingIndicator" class="absolute bottom-4 left-4 flex items-center">
+                                <div class="typing-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Preview -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            Preview
+                        </h3>
+                        <div class="flex space-x-2">
+                            <button id="refreshPreviewBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none" title="Refresh Preview">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                            <button id="openPreviewBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none" title="Open in New Window">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-0 h-[542px] overflow-hidden">
+                        <iframe id="previewFrame" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-forms" srcdoc="<html><body><div style='display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;color:#666;'>Preview will appear here when code is ready</div></body></html>"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Files List -->
+        <div class="mt-6 hidden" id="projectFilesList">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
+                        Project Files
+                    </h3>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="filesList">
+                        <!-- Files will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- History Tab -->
+    <div class="tab-content hidden" id="history-content">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Session History</h3>
+                    <button id="clearHistoryBtn" class="inline-flex items-center px-4 py-2 border border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
+                        <svg class="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Clear History
+                    </button>
+                </div>
+
+                <div id="historyResults" class="text-center text-gray-500">
+                    <p>Session history will appear here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Live Browser Tab -->
+    {% include 'live_browser_tab.html' %}
+</div>
+
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/markdown-it@12.0.6/dist/markdown-it.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/static/css/task_summary_enhanced.css">
+<link rel="stylesheet" href="/static/css/screenshot_styles.css">
+<script src="/static/js/markdown_processor.js"></script>
+<script src="/static/js/task_container_handlers.js"></script>
+<script src="/static/js/simple_input_fixed.js"></script>
+<script src="/static/js/code_generator.js"></script>
+<script src="/static/js/execute_python.js"></script>
+<script src="/static/js/history.js"></script>
+<script src="/static/js/tab_switcher.js"></script>
+<script src="/static/js/modal_handlers.js"></script>
+<script src="/static/js/design_task_preview.js"></script>
+<script src="/static/js/image_processor.js"></script>
+<script src="/static/js/screenshot_handler.js"></script>
+<script src="/static/js/caption_cleaner.js"></script>
+<script src="/static/js/dom_inspector.js"></script>
+<script src="/static/js/autowave_thinking_process.js"></script>
+
+<script src="/static/js/live_browser.js"></script>
+
+<!-- Caption handling is now managed by the caption_cleaner.js script -->
+<script>
+    // Automatically remove captions without showing a button
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to remove captions
+        function removeCaptions() {
+            // Get all image captions
+            const captions = document.querySelectorAll('.image-caption');
+
+            // Remove all captions
+            captions.forEach(caption => {
+                if (caption.parentNode) {
+                    caption.parentNode.removeChild(caption);
+                }
+            });
+        }
+
+        // Run automatically after a delay
+        setTimeout(removeCaptions, 1000);
+
+        // And run periodically
+        setInterval(function() {
+            const captions = document.querySelectorAll('.image-caption');
+            if (captions.length > 0) {
+                removeCaptions();
+            }
+        }, 5000);
+    });
+
+    // Direct execute task function
+    function executeTask() {
+        console.log('Execute Task function called directly');
+
+        // Get elements
+        const taskDescription = document.getElementById('taskDescription');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const taskProgress = document.getElementById('taskProgress');
+        const useAdvancedBrowser = document.getElementById('useAdvancedBrowser');
+        const progressFill = document.getElementById('progressFill');
+        const stepDescription = document.getElementById('stepDescription');
+        const processingIndicator = document.getElementById('processingIndicator');
+        const thinkingContainers = document.getElementById('thinkingContainers');
+        const executeTaskBtn = document.getElementById('executeTaskBtn');
+
+        // Validate input
+        if (!taskDescription) {
+            console.error('Task description element not found');
+            return;
+        }
+
+        const description = taskDescription.value.trim();
+        if (!description) {
+            alert('Please enter a task description');
+            return;
+        }
+
+        // Clear the input field immediately
+        taskDescription.value = '';
+
+        // Show results container
+        if (resultsContainer) resultsContainer.classList.remove('hidden');
+        if (taskProgress) taskProgress.classList.remove('hidden');
+
+        // Create a new thinking container
+        const taskId = 'task-' + Date.now();
+        const newThinkingContainer = document.createElement('div');
+        newThinkingContainer.className = 'thinking-container mt-4';
+        newThinkingContainer.id = `thinking-container-${taskId}`;
+
+        newThinkingContainer.innerHTML = `
+            <div class="bg-gray-50 px-4 py-3 rounded-t-md border border-gray-200 flex justify-between items-center">
+                <div class="flex items-center">
+                    <button class="toggle-thinking-btn p-1 mr-2 rounded-md text-gray-500 hover:text-black hover:bg-gray-100" title="Toggle thinking process" data-container-id="thinking-container-${taskId}">
+                        <svg class="w-4 h-4 transform rotate-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <h4 class="font-medium text-gray-700">Thinking Process</h4>
+                </div>
+            </div>
+            <div class="thinking-process bg-gray-50 p-4 rounded-b-md border-l border-r border-b border-gray-200 h-64 overflow-auto">
+                <div id="thinking-content-${taskId}" class="prose prose-sm max-w-none text-sm text-gray-500">
+                    <p class="typing-cursor">Starting analysis and planning process...</p>
+                </div>
+            </div>
+        `;
+
+        // Clear any previous thinking containers except the initial one
+        const existingContainers = thinkingContainers.querySelectorAll(".thinking-container:not(#thinking-container-initial)");
+        existingContainers.forEach(container => {
+            container.remove();
+        });
+
+        // Clear any previous thinking containers except the initial one
+        const existingContainers = thinkingContainers.querySelectorAll(".thinking-container:not(#thinking-container-initial)");
+        existingContainers.forEach(container => {
+            container.remove();
+        });
+
+        thinkingContainers.appendChild(newThinkingContainer);
+
+        // Disable button during request
+        executeTaskBtn.disabled = true;
+        executeTaskBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        executeTaskBtn.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...`;
+
+        // Animate progress bar
+        if (progressFill) {
+            progressFill.style.width = '0%';
+            setTimeout(() => { progressFill.style.width = '30%'; }, 500);
+            setTimeout(() => { progressFill.style.width = '60%'; }, 3000);
+            setTimeout(() => { progressFill.style.width = '90%'; }, 6000);
+        }
+
+        if (stepDescription) {
+            stepDescription.textContent = 'Analyzing your request and preparing execution plan';
+        }
+
+        // Start thinking process animation
+        const thinkingContent = document.getElementById(`thinking-content-${taskId}`);
+        if (window.startThinkingProcess && thinkingContent) {
+            window.startThinkingProcess(description, thinkingContent);
+        }
+
+        // Make API request
+        const requestData = {
+            task_description: description,
+            use_advanced_browser: useAdvancedBrowser ? useAdvancedBrowser.checked : true
+        };
+
+        fetch('/api/super-agent/execute-task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('API response:', data);
+
+            // Poll for task status
+            if (data.session_id) {
+                pollTaskStatus(data.session_id, taskId);
+            }
+        })
+        .catch(error => {
+            console.error('Error executing task:', error);
+
+            // Re-enable button
+            executeTaskBtn.disabled = false;
+            executeTaskBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            executeTaskBtn.innerHTML = `
+                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Execute Task`;
+
+            // Add error message to thinking container
+            if (thinkingContent) {
+                const errorP = document.createElement('div');
+                errorP.classList.add('text-red-600', 'mt-4', 'thinking-step');
+                errorP.style.fontSize = '1rem';
+                errorP.style.fontWeight = 'bold';
+                errorP.style.padding = '10px';
+                errorP.style.borderRadius = '4px';
+                errorP.style.backgroundColor = 'rgba(220, 38, 38, 0.1)';
+                errorP.style.border = '1px solid rgba(220, 38, 38, 0.2)';
+                errorP.style.textAlign = 'center';
+                errorP.innerHTML = '<strong>❌ Error: ' + (error.message || 'Failed to execute task') + '</strong>';
+                thinkingContent.appendChild(errorP);
+            }
+        });
+    }
+
+    // Function to poll for task status
+    function pollTaskStatus(sessionId, taskId) {
+        console.log('Polling for task status with session ID:', sessionId);
+
+        const executeTaskBtn = document.getElementById('executeTaskBtn');
+        const thinkingContent = document.getElementById(`thinking-content-${taskId}`);
+        const processingIndicator = document.getElementById('processingIndicator');
+
+        const interval = setInterval(() => {
+            fetch(`/api/super-agent/task-status?session_id=${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Task status:', data);
+
+                    // If the task is complete, update the UI and stop polling
+                    if (data.status === 'complete') {
+                        console.log('Task completed! Stopping polling and updating UI');
+
+                        // Stop polling
+                        clearInterval(interval);
+
+                        // Re-enable button
+                        if (executeTaskBtn) {
+                            executeTaskBtn.disabled = false;
+                            executeTaskBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            executeTaskBtn.innerHTML = `
+                                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Execute Task`;
+                        }
+
+                        // Add completion message to thinking container
+                        if (thinkingContent) {
+                            const completionP = document.createElement('div');
+                            completionP.classList.add('text-green-600', 'mt-4', 'thinking-step', 'successful-message');
+                            completionP.style.fontSize = '1rem';
+                            completionP.style.fontWeight = 'bold';
+                            completionP.style.padding = '10px';
+                            completionP.style.borderRadius = '4px';
+                            completionP.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                            completionP.style.border = '1px solid rgba(16, 185, 129, 0.2)';
+                            completionP.style.textAlign = 'center';
+                            completionP.innerHTML = '<strong>✓ Successful</strong>';
+                            thinkingContent.appendChild(completionP);
+
+                            // Scroll to bottom
+                            const thinkingProcess = thinkingContent.closest('.thinking-process');
+                            if (thinkingProcess) {
+                                thinkingProcess.scrollTop = thinkingProcess.scrollHeight;
+                            }
+                        }
+
+                        // Update the processing indicator
+                        if (processingIndicator) {
+                            processingIndicator.classList.add('completed');
+                        }
+                    }
+
+                    // Check for progress updates
+                    if (data.progress && data.progress.length > 0 && thinkingContent) {
+                        // Get the latest progress message
+                        const latestProgress = data.progress[data.progress.length - 1];
+
+                        // If this is a thinking step, update the thinking process
+                        if (latestProgress.status === 'thinking') {
+                            // Add the message to the thinking process
+                            const message = latestProgress.message;
+                            const thinkingStep = document.createElement('p');
+                            thinkingStep.classList.add('thinking-step');
+                            thinkingStep.textContent = message;
+                            thinkingContent.appendChild(thinkingStep);
+
+                            // Scroll to bottom
+                            const thinkingProcess = thinkingContent.closest('.thinking-process');
+                            if (thinkingProcess) {
+                                thinkingProcess.scrollTop = thinkingProcess.scrollHeight;
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error polling for task status:', error);
+                });
+        }, 2000); // Poll every 2 seconds
+
+        // Set a timeout to stop polling after 2 minutes
+        setTimeout(() => {
+            if (interval) {
+                clearInterval(interval);
+
+                // Re-enable button
+                if (executeTaskBtn) {
+                    executeTaskBtn.disabled = false;
+                    executeTaskBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    executeTaskBtn.innerHTML = `
+                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Execute Task`;
+                }
+
+                // Add timeout message to thinking container
+                if (thinkingContent) {
+                    const timeoutP = document.createElement('div');
+                    timeoutP.classList.add('text-yellow-600', 'mt-4', 'thinking-step');
+                    timeoutP.style.fontSize = '1rem';
+                    timeoutP.style.fontWeight = 'bold';
+                    timeoutP.style.padding = '10px';
+                    timeoutP.style.borderRadius = '4px';
+                    timeoutP.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                    timeoutP.style.border = '1px solid rgba(245, 158, 11, 0.2)';
+                    timeoutP.style.textAlign = 'center';
+                    timeoutP.innerHTML = '<strong>⚠️ Task taking longer than expected. You can try again.</strong>';
+                    thinkingContent.appendChild(timeoutP);
+
+                    // Scroll to bottom
+                    const thinkingProcess = thinkingContent.closest('.thinking-process');
+                    if (thinkingProcess) {
+                        thinkingProcess.scrollTop = thinkingProcess.scrollHeight;
+                    }
+                }
+            }
+        }, 120000); // 2 minutes timeout
+    }
+</script>
+
+<style>
+    /* Processing indicator styles */
+    #processingIndicator.completed .checkmark {
+        display: block;
+    }
+
+    #processingIndicator.completed .animate-spin {
+        animation: none;
+    }
+
+    #processingIndicator .checkmark {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 0.75rem;
+    }
+
+    /* Thinking content styles */
+    #thinkingContent p {
+        margin-bottom: 0.75rem;
+        line-height: 1.5;
+        animation: fadeIn 0.5s ease-in-out;
+        color: #4b5563;
+    }
+
+    #thinkingContent .thinking-step {
+        margin-bottom: 0.75rem;
+        line-height: 1.5;
+        animation: fadeIn 0.5s ease-in-out;
+        color: #4b5563;
+    }
+
+    #thinkingContent ul {
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
+        padding-left: 1.5rem;
+        list-style-type: disc;
+    }
+
+    #thinkingContent li {
+        margin-bottom: 0.25rem;
+        line-height: 1.5;
+    }
+
+    #thinkingContent strong {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    #thinkingContent h1, #thinkingContent h2, #thinkingContent h3, #thinkingContent h4 {
+        font-weight: 600;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    #thinkingContent code {
+        font-family: monospace;
+        background-color: #f3f4f6;
+        padding: 0.1rem 0.2rem;
+        border-radius: 0.25rem;
+    }
+
+    /* Task summary styles */
+    #taskResults {
+        overflow-y: scroll !important;
+        height: 800px !important;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+    }
+
+    #taskResults::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #taskResults::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    #taskResults::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+    }
+
+    #taskResults .task-summary {
+        overflow: visible;
+    }
+
+    #taskResults img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        margin: 1rem auto;
+        display: block;
+    }
+
+    /* Screenshot container styles */
+    .screenshot-container {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .screenshot-container img {
+        border: 1px solid #e5e7eb;
+        max-height: 500px;
+        object-fit: contain;
+    }
+
+    .screenshot-zoom-btn, .screenshot-download-btn {
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+        transition: all 0.2s;
+    }
+
+    .screenshot-zoom-btn:hover, .screenshot-download-btn:hover {
+        background-color: #f3f4f6;
+    }
+
+    /* Multiple container styles */
+    .thinking-container, .summary-container {
+        margin-bottom: 1.5rem;
+        position: relative;
+        background-color: white;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .thinking-container:last-child, .summary-container:last-child {
+        margin-bottom: 0;
+    }
+
+    .thinking-container:hover, .summary-container:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .summary-container-header {
+        position: relative;
+    }
+
+    .mobile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        z-index: 10;
+    }
+
+    .highlight-container {
+        animation: highlight-pulse 2s ease-in-out;
+    }
+
+    @keyframes highlight-pulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        }
+        50% {
+            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    #taskResults h1, #taskResults h2, #taskResults h3, #taskResults h4 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+
+    #taskResults p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    #taskResults ul, #taskResults ol {
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+    }
+
+    #taskResults li {
+        margin-bottom: 0.5rem;
+    }
+
+    .typing-cursor::after {
+        content: '|';
+        display: inline-block;
+        animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+        from, to { opacity: 1; }
+        50% { opacity: 0; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Animation classes */
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    /* Modal animation */
+    #summaryModal {
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+
+    #summaryModal.hidden {
+        opacity: 0;
+        transform: scale(0.95);
+        pointer-events: none;
+    }
+
+    #summaryModal:not(.hidden) {
+        opacity: 1;
+        transform: scale(1);
+    }
+</style>
+
+        });
+    });
+</script>
+<!-- Full Screen Modal for Task Summary -->
+<div id="summaryModal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden">
+    <div class="bg-gray-900 rounded-lg shadow-xl w-11/12 max-w-6xl max-h-[90vh] flex flex-col border border-gray-700">
+        <div class="bg-gray-800 px-6 py-4 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-white">Task Summary</h3>
+            <button id="closeSummaryModal" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700" onclick="document.getElementById('summaryModal').classList.add('hidden'); console.log('Close button clicked directly');">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="flex-1 p-6 overflow-auto bg-gray-900 text-gray-200" id="modalTaskResults" style="background-color: #111827 !important;">
+            <div class="prose prose-invert max-w-none task-summary dark-mode-content" style="overflow: visible;"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Dark mode styles for modal content */
+    .dark-mode-content {
+        color: #e5e7eb !important; /* Light gray text */
+    }
+
+    .dark-mode-content h1,
+    .dark-mode-content h2,
+    .dark-mode-content h3,
+    .dark-mode-content h4,
+    .dark-mode-content h5,
+    .dark-mode-content h6 {
+        color: #f3f4f6 !important; /* Lighter gray for headings */
+    }
+
+    .dark-mode-content p,
+    .dark-mode-content li,
+    .dark-mode-content blockquote {
+        color: #d1d5db !important; /* Medium gray for paragraphs */
+    }
+
+    .dark-mode-content a {
+        color: #93c5fd !important; /* Light blue for links */
+    }
+
+    .dark-mode-content strong {
+        color: #f9fafb !important; /* Almost white for bold text */
+        font-weight: 600;
+    }
+
+    .dark-mode-content code {
+        background-color: #1f2937 !important; /* Dark gray for code background */
+        color: #e5e7eb !important; /* Light gray for code text */
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+    }
+
+    .dark-mode-content pre {
+        background-color: #1f2937 !important; /* Dark gray for pre background */
+        border: 1px solid #374151 !important; /* Border for pre blocks */
+    }
+
+    .dark-mode-content pre code {
+        background-color: transparent !important;
+    }
+
+    .dark-mode-content blockquote {
+        border-left-color: #4b5563 !important; /* Medium gray for blockquote border */
+        background-color: #1f2937 !important; /* Dark gray for blockquote background */
+        padding: 1rem;
+    }
+
+    .dark-mode-content table {
+        border-color: #4b5563 !important; /* Medium gray for table borders */
+    }
+
+    .dark-mode-content th {
+        background-color: #1f2937 !important; /* Dark gray for table header */
+        color: #f3f4f6 !important; /* Light gray for table header text */
+    }
+
+    .dark-mode-content td {
+        background-color: #111827 !important; /* Very dark gray for table cells */
+        color: #d1d5db !important; /* Medium gray for table cell text */
+    }
+
+    .dark-mode-content hr {
+        border-color: #4b5563 !important; /* Medium gray for horizontal rules */
+    }
+
+    /* Fix any white backgrounds that might be in the content */
+    .dark-mode-content * {
+        background-color: transparent !important;
+    }
+
+    .dark-mode-content .summary-container,
+    .dark-mode-content .summary-container-content,
+    .dark-mode-content .summary-container-header {
+        background-color: #111827 !important; /* Very dark gray for containers */
+        border-color: #374151 !important; /* Dark gray for borders */
+    }
+
+    .dark-mode-content .summary-container h4 {
+        color: #f3f4f6 !important; /* Light gray for container headers */
+    }
+
+    /* Additional styles for dark summary sections */
+    .dark-summary-section {
+        margin-bottom: 2rem;
+        padding: 0;
+        background-color: #111827 !important;
+        border-radius: 0.5rem;
+        border: 1px solid #374151;
+        overflow: hidden;
+    }
+
+    .dark-summary-section .section-header {
+        background-color: white !important;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #374151;
+    }
+
+    .dark-summary-section .section-header h2 {
+        color: #111827 !important;
+        font-weight: bold;
+        margin: 0;
+        font-size: 1.125rem;
+    }
+
+    .dark-summary-section .section-content {
+        padding: 1rem;
+    }
+
+    .dark-summary-content {
+        color: #e5e7eb !important;
+    }
+
+    .dark-summary-content p {
+        color: #d1d5db !important;
+        margin-bottom: 1rem;
+    }
+
+    .dark-summary-content a {
+        color: #93c5fd !important;
+        text-decoration: underline;
+    }
+
+    .dark-summary-content strong {
+        color: #f9fafb !important;
+        font-weight: 600;
+    }
+
+    .dark-summary-content ul,
+    .dark-summary-content ol {
+        color: #d1d5db !important;
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .dark-summary-content li {
+        color: #d1d5db !important;
+        margin-bottom: 0.5rem;
+    }
+
+    .dark-summary-content h1,
+    .dark-summary-content h2,
+    .dark-summary-content h3,
+    .dark-summary-content h4,
+    .dark-summary-content h5,
+    .dark-summary-content h6 {
+        color: #f3f4f6 !important;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .dark-summary-content code {
+        background-color: #1f2937 !important;
+        color: #e5e7eb !important;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+    }
+
+    .dark-summary-content pre {
+        background-color: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        overflow-x: auto;
+    }
+
+    .dark-summary-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    /* Override any white backgrounds or black text */
+    #summaryModal * {
+        background-color: transparent;
+    }
+
+    #summaryModal .bg-white,
+    #summaryModal .bg-gray-50,
+    #summaryModal .bg-gray-100,
+    #summaryModal .bg-gray-200 {
+        background-color: #111827 !important;
+    }
+
+    #summaryModal .text-black,
+    #summaryModal .text-gray-900,
+    #summaryModal .text-gray-800 {
+        color: #e5e7eb !important;
+    }
+
+    /* Fix for white glitch in the middle */
+    #summaryModal .task-summary > * {
+        background-color: #111827 !important;
+    }
+
+    #summaryModal .task-summary > .dark-summary-section .section-header {
+        background-color: white !important;
+    }
+
+    #summaryModal .task-summary > .dark-summary-section .section-content {
+        background-color: #111827 !important;
+    }
+
+    /* Ensure no white backgrounds in the content */
+    #summaryModal .dark-summary-content * {
+        background-color: #111827 !important;
+    }
+
+    #summaryModal .dark-summary-content p,
+    #summaryModal .dark-summary-content div,
+    #summaryModal .dark-summary-content span,
+    #summaryModal .dark-summary-content li,
+    #summaryModal .dark-summary-content a {
+        background-color: #111827 !important;
+    }
+
+    /* Additional fixes for specific elements */
+    #summaryModal .task-summary li,
+    #summaryModal .task-summary p,
+    #summaryModal .task-summary a,
+    #summaryModal .task-summary span {
+        background-color: #111827 !important;
+    }
+
+    /* Fix for links and text with white backgrounds */
+    #summaryModal a[href],
+    #summaryModal a[href] * {
+        background-color: #111827 !important;
+    }
+
+    /* Fix for inline styles */
+    #summaryModal [style*="background"] {
+        background-color: #111827 !important;
+        background: #111827 !important;
+    }
+</style>
+
+{% endblock %}

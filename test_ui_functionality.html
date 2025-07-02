@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Functionality Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .test-section {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Code Wave UI Functionality Test</h1>
+    
+    <div class="test-container">
+        <h2>Test Results</h2>
+        <div id="testResults"></div>
+        <button onclick="runAllTests()">🚀 Run All Tests</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Individual Tests</h3>
+        <button onclick="testMainCodeGeneration()">Test Main Code Generation</button>
+        <button onclick="testChatFunctionality()">Test Chat Functionality</button>
+        <button onclick="testTabSwitching()">Test Tab Switching</button>
+        <button onclick="testSidebarToggle()">Test Sidebar Toggle</button>
+    </div>
+
+    <script>
+        const results = [];
+
+        function addResult(test, status, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            results.push({
+                test,
+                status,
+                message,
+                timestamp
+            });
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const container = document.getElementById('testResults');
+            container.innerHTML = results.map(result => `
+                <div class="test-result ${result.status}">
+                    <strong>[${result.timestamp}] ${result.test}:</strong> ${result.message}
+                </div>
+            `).join('');
+        }
+
+        function clearResults() {
+            results.length = 0;
+            updateDisplay();
+        }
+
+        async function testMainCodeGeneration() {
+            addResult('Main Code Generation', 'pending', 'Testing main code generation API...');
+            
+            try {
+                const response = await fetch('/api/code/generate-stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: 'Create a simple HTML button with blue background'
+                    })
+                });
+
+                if (response.ok) {
+                    addResult('Main Code Generation', 'success', 'Main code generation API is working! ✅');
+                } else {
+                    addResult('Main Code Generation', 'error', `API returned status: ${response.status}`);
+                }
+            } catch (error) {
+                addResult('Main Code Generation', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        async function testChatFunctionality() {
+            addResult('Chat Functionality', 'pending', 'Testing chat API...');
+            
+            try {
+                const response = await fetch('/api/code-wave/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: 'Test chat functionality',
+                        current_code: '<button>Test</button>',
+                        session_id: 'test_ui_' + Date.now(),
+                        conversation_history: []
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        addResult('Chat Functionality', 'success', 'Chat API is working! ✅');
+                    } else {
+                        addResult('Chat Functionality', 'error', 'Chat API returned success: false');
+                    }
+                } else {
+                    addResult('Chat Functionality', 'error', `API returned status: ${response.status}`);
+                }
+            } catch (error) {
+                addResult('Chat Functionality', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        function testTabSwitching() {
+            addResult('Tab Switching', 'pending', 'Testing tab switching functionality...');
+            
+            // Open Code Wave page in new tab to test
+            const codeWaveWindow = window.open('/code-wave', '_blank');
+            
+            setTimeout(() => {
+                if (codeWaveWindow) {
+                    addResult('Tab Switching', 'success', 'Code Wave page opened successfully! Check the new tab for tab switching functionality. ✅');
+                    codeWaveWindow.focus();
+                } else {
+                    addResult('Tab Switching', 'error', 'Failed to open Code Wave page (popup blocked?)');
+                }
+            }, 1000);
+        }
+
+        function testSidebarToggle() {
+            addResult('Sidebar Toggle', 'pending', 'Testing sidebar toggle functionality...');
+            
+            // Open Code Wave page in new tab to test
+            const codeWaveWindow = window.open('/code-wave', '_blank');
+            
+            setTimeout(() => {
+                if (codeWaveWindow) {
+                    addResult('Sidebar Toggle', 'success', 'Code Wave page opened successfully! Check the new tab for sidebar toggle functionality. ✅');
+                    codeWaveWindow.focus();
+                } else {
+                    addResult('Sidebar Toggle', 'error', 'Failed to open Code Wave page (popup blocked?)');
+                }
+            }, 1000);
+        }
+
+        async function runAllTests() {
+            clearResults();
+            addResult('Test Suite', 'pending', 'Starting comprehensive UI functionality test...');
+            
+            await testMainCodeGeneration();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testChatFunctionality();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            testTabSwitching();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            testSidebarToggle();
+            
+            addResult('Test Suite', 'success', 'All automated tests completed! Check individual results above. ✅');
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            addResult('Page Load', 'success', 'Test page loaded successfully! ✅');
+        });
+    </script>
+</body>
+</html>

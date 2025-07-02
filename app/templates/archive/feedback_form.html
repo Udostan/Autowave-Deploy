@@ -1,0 +1,167 @@
+<!-- Feedback Form Template -->
+<div id="feedback-container" class="fixed bottom-4 right-4 z-50 hidden">
+    <div class="bg-gray-900 rounded-lg shadow-lg p-4 w-80 border border-gray-700">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="text-white text-sm font-medium">Provide Feedback</h3>
+            <button id="close-feedback" class="text-gray-400 hover:text-white">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <form id="feedback-form">
+            <!-- Feature Selection -->
+            <div class="mb-3">
+                <label class="block text-gray-300 text-xs font-medium mb-1">Which feature are you providing feedback on?</label>
+                <select id="feedback-feature" class="w-full bg-gray-800 text-gray-200 text-xs rounded py-2 px-3 focus:outline-none focus:ring-1 focus:ring-gray-600">
+                    <option value="visual_recognition">Visual Recognition (OCR)</option>
+                    <option value="task_chain">Task Chaining</option>
+                    <option value="error_recovery">Error Recovery</option>
+                    <option value="general">General Feedback</option>
+                </select>
+            </div>
+            
+            <!-- Rating -->
+            <div class="mb-3">
+                <label class="block text-gray-300 text-xs font-medium mb-1">How would you rate this feature?</label>
+                <div class="flex space-x-2">
+                    <div class="flex items-center">
+                        <input type="radio" id="rating-1" name="rating" value="1" class="mr-1">
+                        <label for="rating-1" class="text-gray-300 text-xs">1</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="rating-2" name="rating" value="2" class="mr-1">
+                        <label for="rating-2" class="text-gray-300 text-xs">2</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="rating-3" name="rating" value="3" class="mr-1">
+                        <label for="rating-3" class="text-gray-300 text-xs">3</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="rating-4" name="rating" value="4" class="mr-1">
+                        <label for="rating-4" class="text-gray-300 text-xs">4</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="rating-5" name="rating" value="5" class="mr-1" checked>
+                        <label for="rating-5" class="text-gray-300 text-xs">5</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feedback Text -->
+            <div class="mb-3">
+                <label class="block text-gray-300 text-xs font-medium mb-1">Your feedback</label>
+                <textarea id="feedback-text" class="w-full bg-gray-800 text-gray-200 text-xs rounded py-2 px-3 focus:outline-none focus:ring-1 focus:ring-gray-600" rows="3" placeholder="Please share your experience with this feature..."></textarea>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" id="submit-feedback" class="w-full bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium py-2 px-3 rounded transition-colors">
+                Submit Feedback
+            </button>
+        </form>
+        
+        <!-- Success Message (hidden by default) -->
+        <div id="feedback-success" class="hidden mt-3 p-2 bg-green-800 bg-opacity-50 rounded text-green-200 text-xs">
+            Thank you for your feedback! We appreciate your input.
+        </div>
+        
+        <!-- Error Message (hidden by default) -->
+        <div id="feedback-error" class="hidden mt-3 p-2 bg-red-800 bg-opacity-50 rounded text-red-200 text-xs">
+            There was an error submitting your feedback. Please try again.
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Button -->
+<div id="feedback-button" class="fixed bottom-4 right-4 z-40">
+    <button class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-medium py-2 px-3 rounded-full shadow-lg transition-colors flex items-center">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+        </svg>
+        Feedback
+    </button>
+</div>
+
+<!-- Feedback JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const feedbackButton = document.getElementById('feedback-button');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const closeFeedback = document.getElementById('close-feedback');
+        const feedbackForm = document.getElementById('feedback-form');
+        const feedbackSuccess = document.getElementById('feedback-success');
+        const feedbackError = document.getElementById('feedback-error');
+        
+        // Show feedback form when button is clicked
+        feedbackButton.addEventListener('click', function() {
+            feedbackButton.classList.add('hidden');
+            feedbackContainer.classList.remove('hidden');
+        });
+        
+        // Hide feedback form when close button is clicked
+        closeFeedback.addEventListener('click', function() {
+            feedbackContainer.classList.add('hidden');
+            feedbackButton.classList.remove('hidden');
+            
+            // Reset form
+            feedbackForm.reset();
+            feedbackSuccess.classList.add('hidden');
+            feedbackError.classList.add('hidden');
+        });
+        
+        // Handle form submission
+        feedbackForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const feature = document.getElementById('feedback-feature').value;
+            const rating = document.querySelector('input[name="rating"]:checked').value;
+            const text = document.getElementById('feedback-text').value;
+            
+            // Submit feedback
+            fetch('/api/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    feature: feature,
+                    rating: parseInt(rating),
+                    text: text,
+                    timestamp: new Date().toISOString(),
+                    page: window.location.pathname
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    feedbackSuccess.classList.remove('hidden');
+                    feedbackError.classList.add('hidden');
+                    
+                    // Reset form
+                    feedbackForm.reset();
+                    
+                    // Hide form after 3 seconds
+                    setTimeout(function() {
+                        feedbackContainer.classList.add('hidden');
+                        feedbackButton.classList.remove('hidden');
+                        feedbackSuccess.classList.add('hidden');
+                    }, 3000);
+                } else {
+                    // Show error message
+                    feedbackError.classList.remove('hidden');
+                    feedbackSuccess.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting feedback:', error);
+                
+                // Show error message
+                feedbackError.classList.remove('hidden');
+                feedbackSuccess.classList.add('hidden');
+            });
+        });
+    });
+</script>

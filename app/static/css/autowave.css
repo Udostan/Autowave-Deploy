@@ -1,0 +1,81 @@
+/* AutoWave - Main Styling */
+
+/* Import the base Super Agent styles */
+@import url('/static/css/super_agent.css');
+
+/* AutoWave specific styling */
+:root {
+    --autowave-primary: #3b82f6;
+    --autowave-primary-dark: #1d4ed8;
+    --autowave-secondary: #10b981;
+    --autowave-accent: #8b5cf6;
+    --autowave-dark: #111827;
+    --autowave-light: #f9fafb;
+}
+
+/* Header styling */
+.tab-button.active {
+    border-color: var(--autowave-primary) !important;
+    color: var(--autowave-primary) !important;
+}
+
+.tab-button:hover:not(.active) {
+    border-color: var(--autowave-primary-dark) !important;
+    color: var(--autowave-primary) !important;
+}
+
+/* Button styling */
+.execute-button {
+    background-color: var(--autowave-primary) !important;
+}
+
+.execute-button:hover {
+    background-color: var(--autowave-primary-dark) !important;
+}
+
+/* Accent colors */
+.accent-border {
+    border-color: var(--autowave-accent) !important;
+}
+
+/* Logo styling */
+.autowave-logo {
+    font-weight: 700;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.025em;
+}
+
+/* Task progress styling */
+#thinkingIcon {
+    color: var(--autowave-primary) !important;
+}
+
+/* Enhanced UI elements */
+.autowave-card {
+    border-left: 4px solid var(--autowave-primary);
+    transition: all 0.2s ease-in-out;
+}
+
+.autowave-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Booking specific styling */
+.booking-results .price-comparison {
+    border-left: 4px solid var(--autowave-primary);
+}
+
+.booking-results .best-value-option {
+    border-left: 4px solid var(--autowave-secondary);
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+    .tab-button {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+}

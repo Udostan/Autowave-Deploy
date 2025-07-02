@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Agentic Capability Test</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .test-container {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        .test-section {
+            margin-bottom: 30px;
+        }
+        button {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #3182ce;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+        .info { color: #3b82f6; }
+        .test-results {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .code-sample {
+            background: #1f2937;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #10b981;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .improvement-keywords {
+            background: #374151;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Agentic Capability Test for Code Wave</h1>
+    
+    <div class="test-container">
+        <h2>🎯 Testing Intelligent Context Detection</h2>
+        <p>This test verifies that the main input box can intelligently detect when to:</p>
+        <ul>
+            <li><strong>Generate new code</strong> - When no existing code or clear new request</li>
+            <li><strong>Improve existing code</strong> - When there's existing code and improvement keywords</li>
+        </ul>
+        
+        <div class="test-section">
+            <h3>📋 Test Scenarios</h3>
+            
+            <div class="improvement-keywords">
+                <strong>Improvement Keywords Detected:</strong><br>
+                improve, fix, add, change, modify, update, enhance, optimize, make it, can you, please, also, now, then, next, better, more, less, different, another, new feature, bug, error, issue, problem, style, color, size, responsive, mobile, animation, effect, hover, click
+            </div>
+            
+            <button onclick="testNewCodeGeneration()">🆕 Test New Code Generation</button>
+            <button onclick="testCodeImprovement()">🔧 Test Code Improvement</button>
+            <button onclick="testEdgeCases()">⚡ Test Edge Cases</button>
+            <button onclick="clearResults()">🧹 Clear Results</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Test Results</h3>
+            <div id="testResults" class="test-results">
+                Ready to test agentic capability...
+            </div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>🔬 Manual Testing Instructions</h2>
+        <div class="test-section">
+            <h3>Step 1: Generate Initial Code</h3>
+            <p>1. Go to <a href="/code-wave" target="_blank" style="color: #60a5fa;">Code Wave page</a></p>
+            <p>2. In the main input box, type: <code>"Create a simple red button"</code></p>
+            <p>3. Click Generate - should create new code</p>
+            
+            <div class="code-sample">
+Expected: New code generation with reasoning steps showing "Starting code generation..."
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Step 2: Test Improvement Detection</h3>
+            <p>4. After code is generated, in the SAME main input box, type: <code>"make it blue"</code></p>
+            <p>5. Click Generate - should detect improvement request</p>
+            
+            <div class="code-sample">
+Expected: Chat message appears in reasoning section with improvement response
+NOT: New code generation that clears existing code
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Step 3: Test More Improvements</h3>
+            <p>6. Try: <code>"add hover effect"</code></p>
+            <p>7. Try: <code>"fix the styling"</code></p>
+            <p>8. Try: <code>"can you make it bigger?"</code></p>
+            
+            <div class="code-sample">
+Expected: Each should be treated as improvement, not new generation
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Step 4: Test New Generation</h3>
+            <p>9. Try: <code>"Create a complete login form with validation"</code></p>
+            
+            <div class="code-sample">
+Expected: Should clear existing code and start new generation
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            const testResults = document.getElementById('testResults');
+            testResults.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span><br>`;
+            testResults.scrollTop = testResults.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = 'Results cleared. Ready to test...<br>';
+        }
+
+        // Test the improvement detection logic
+        function isPromptForImprovement(prompt, existingCode) {
+            const improvementKeywords = [
+                'improve', 'fix', 'add', 'change', 'modify', 'update', 'enhance', 'optimize',
+                'make it', 'can you', 'please', 'also', 'now', 'then', 'next',
+                'better', 'more', 'less', 'different', 'another', 'new feature',
+                'bug', 'error', 'issue', 'problem', 'style', 'color', 'size',
+                'responsive', 'mobile', 'animation', 'effect', 'hover', 'click'
+            ];
+
+            const lowerPrompt = prompt.toLowerCase();
+            const hasImprovementKeywords = improvementKeywords.some(keyword => 
+                lowerPrompt.includes(keyword)
+            );
+
+            const isShortPrompt = prompt.split(' ').length < 10;
+            return existingCode.length > 100 && (hasImprovementKeywords || isShortPrompt);
+        }
+
+        async function testNewCodeGeneration() {
+            log('🆕 Testing New Code Generation Detection...', 'info');
+            
+            const testCases = [
+                { prompt: "Create a responsive website", existing: "", expected: "new" },
+                { prompt: "Build a todo list app", existing: "", expected: "new" },
+                { prompt: "Generate a contact form with validation", existing: "", expected: "new" },
+                { prompt: "Create a dashboard with charts and graphs", existing: "<html>existing code</html>", expected: "new" }
+            ];
+
+            testCases.forEach((test, index) => {
+                const result = isPromptForImprovement(test.prompt, test.existing);
+                const detected = result ? "improvement" : "new";
+                
+                if (detected === test.expected) {
+                    log(`✅ Test ${index + 1}: "${test.prompt}" → Correctly detected as ${detected}`, 'success');
+                } else {
+                    log(`❌ Test ${index + 1}: "${test.prompt}" → Expected ${test.expected}, got ${detected}`, 'error');
+                }
+            });
+        }
+
+        async function testCodeImprovement() {
+            log('🔧 Testing Code Improvement Detection...', 'info');
+            
+            const existingCode = `
+                <html>
+                <head><title>Test</title></head>
+                <body>
+                    <button style="background: red; padding: 10px;">Click me</button>
+                </body>
+                </html>
+            `;
+
+            const testCases = [
+                { prompt: "make it blue", expected: "improvement" },
+                { prompt: "add hover effect", expected: "improvement" },
+                { prompt: "fix the styling", expected: "improvement" },
+                { prompt: "can you make it bigger?", expected: "improvement" },
+                { prompt: "please improve the design", expected: "improvement" },
+                { prompt: "change the color", expected: "improvement" },
+                { prompt: "responsive", expected: "improvement" },
+                { prompt: "animation", expected: "improvement" }
+            ];
+
+            testCases.forEach((test, index) => {
+                const result = isPromptForImprovement(test.prompt, existingCode);
+                const detected = result ? "improvement" : "new";
+                
+                if (detected === test.expected) {
+                    log(`✅ Test ${index + 1}: "${test.prompt}" → Correctly detected as ${detected}`, 'success');
+                } else {
+                    log(`❌ Test ${index + 1}: "${test.prompt}" → Expected ${test.expected}, got ${detected}`, 'error');
+                }
+            });
+        }
+
+        async function testEdgeCases() {
+            log('⚡ Testing Edge Cases...', 'info');
+            
+            const existingCode = `<html><body><button>Test</button></body></html>`;
+            const shortCode = `<p>Hi</p>`;
+
+            const testCases = [
+                { prompt: "fix", existing: existingCode, expected: "improvement", note: "Very short improvement" },
+                { prompt: "blue", existing: existingCode, expected: "improvement", note: "Single word improvement" },
+                { prompt: "Create a new website from scratch", existing: existingCode, expected: "new", note: "Clear new request despite existing code" },
+                { prompt: "make it better", existing: shortCode, expected: "new", note: "Short existing code should trigger new generation" },
+                { prompt: "improve this", existing: "", expected: "new", note: "No existing code" }
+            ];
+
+            testCases.forEach((test, index) => {
+                const result = isPromptForImprovement(test.prompt, test.existing);
+                const detected = result ? "improvement" : "new";
+                
+                if (detected === test.expected) {
+                    log(`✅ Edge Case ${index + 1}: ${test.note} → Correctly detected as ${detected}`, 'success');
+                } else {
+                    log(`❌ Edge Case ${index + 1}: ${test.note} → Expected ${test.expected}, got ${detected}`, 'error');
+                }
+            });
+        }
+
+        // Initialize
+        log('🤖 Agentic Capability Test initialized', 'info');
+        log('Click the test buttons above to verify intelligent context detection', 'info');
+    </script>
+</body>
+</html>

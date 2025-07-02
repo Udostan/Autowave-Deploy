@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Display Test</title>
+    <link rel="stylesheet" href="/static/css/code_wave_chat.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .test-container {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        .test-section {
+            margin-bottom: 30px;
+        }
+        button {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #3182ce;
+        }
+        .document-steps-container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .document-placeholder {
+            text-align: center;
+            color: #666;
+            padding: 50px 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Chat Display Test</h1>
+    
+    <div class="test-container">
+        <h2>Test Chat Message Display</h2>
+        <p>This page tests if chat messages display correctly in the reasoning section.</p>
+        
+        <div class="test-section">
+            <h3>Simulated Reasoning Section</h3>
+            <div id="documentSteps" class="document-steps-container">
+                <div class="document-placeholder">
+                    <p>Chat messages will appear here when you click the test buttons below</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Controls</h3>
+            <button onclick="addTestUserMessage()">Add User Message</button>
+            <button onclick="addTestAssistantMessage()">Add Assistant Message</button>
+            <button onclick="addTestCodeChanges()">Add Code Changes</button>
+            <button onclick="clearMessages()">Clear Messages</button>
+            <button onclick="testRealAPI()">Test Real API</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Results</h3>
+            <div id="testResults" style="background: #2d2d2d; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 12px;">
+                Ready to test...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const documentSteps = document.getElementById('documentSteps');
+        const testResults = document.getElementById('testResults');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.innerHTML += `[${timestamp}] ${message}<br>`;
+            testResults.scrollTop = testResults.scrollHeight;
+        }
+
+        function addChatMessage(message, isUser = false, timestamp = null) {
+            log(`Adding ${isUser ? 'user' : 'assistant'} message: "${message}"`);
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `reasoning-chat-message ${isUser ? 'user' : 'assistant'}`;
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'message-header';
+            headerDiv.innerHTML = `
+                <span>${isUser ? '👤 You' : '🤖 Assistant'}</span>
+                <span class="message-timestamp">${timestamp || new Date().toLocaleTimeString()}</span>
+            `;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = message;
+
+            messageDiv.appendChild(headerDiv);
+            messageDiv.appendChild(contentDiv);
+
+            // Remove empty state if it exists
+            const emptyState = documentSteps.querySelector('.document-placeholder');
+            if (emptyState) {
+                emptyState.remove();
+                log('Removed empty state placeholder');
+            }
+
+            documentSteps.appendChild(messageDiv);
+            log('Message added to DOM');
+
+            // Scroll to bottom
+            documentSteps.scrollTop = documentSteps.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function addCodeChanges(changes, suggestions, improvedCode) {
+            const lastMessage = documentSteps.lastElementChild;
+            if (!lastMessage || !lastMessage.classList.contains('assistant')) {
+                log('No assistant message found to add code changes to');
+                return;
+            }
+
+            if (changes && changes.length > 0) {
+                const changesDiv = document.createElement('div');
+                changesDiv.className = 'code-changes';
+                changesDiv.innerHTML = `
+                    <div class="code-changes-title">Changes Made:</div>
+                    <ul class="code-changes-list">
+                        ${changes.map(change => `<li>${change}</li>`).join('')}
+                    </ul>
+                `;
+                lastMessage.appendChild(changesDiv);
+                log('Added code changes');
+            }
+
+            if (suggestions && suggestions.length > 0) {
+                const suggestionsDiv = document.createElement('div');
+                suggestionsDiv.className = 'suggestions';
+                suggestionsDiv.innerHTML = `
+                    <div class="suggestions-title">Suggestions:</div>
+                    <ul class="suggestions-list">
+                        ${suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
+                    </ul>
+                `;
+                lastMessage.appendChild(suggestionsDiv);
+                log('Added suggestions');
+            }
+
+            if (improvedCode) {
+                const applyBtn = document.createElement('button');
+                applyBtn.className = 'apply-code-btn';
+                applyBtn.textContent = 'Apply Code Changes';
+                applyBtn.onclick = function() {
+                    applyBtn.textContent = 'Applied ✓';
+                    applyBtn.disabled = true;
+                    applyBtn.style.background = '#059669';
+                    log('Code changes applied');
+                };
+                lastMessage.appendChild(applyBtn);
+                log('Added apply button');
+            }
+        }
+
+        function addTestUserMessage() {
+            addChatMessage('Can you help me create a button with hover effects?', true);
+        }
+
+        function addTestAssistantMessage() {
+            const message = addChatMessage('I\'ll help you create a button with hover effects. Here\'s a solution:', false);
+            
+            // Add code changes after a short delay to simulate real behavior
+            setTimeout(() => {
+                addCodeChanges(
+                    ['Added CSS hover effects', 'Improved button styling', 'Added transition animations'],
+                    ['Consider adding focus states', 'You might want to add active states too'],
+                    '<button class="hover-btn">Click me</button>'
+                );
+            }, 500);
+        }
+
+        function addTestCodeChanges() {
+            // First add an assistant message
+            addTestAssistantMessage();
+        }
+
+        function clearMessages() {
+            documentSteps.innerHTML = `
+                <div class="document-placeholder">
+                    <p>Chat messages will appear here when you click the test buttons below</p>
+                </div>
+            `;
+            testResults.innerHTML = 'Messages cleared. Ready to test...<br>';
+            log('All messages cleared');
+        }
+
+        async function testRealAPI() {
+            log('Testing real API...');
+            
+            try {
+                const response = await fetch('/api/code-wave/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Create a simple red button',
+                        current_code: '',
+                        session_id: 'test_display_' + Date.now(),
+                        conversation_history: []
+                    })
+                });
+
+                const data = await response.json();
+                log(`API Response: ${response.status}`);
+                
+                if (data.success) {
+                    log('API returned success, adding messages...');
+                    
+                    // Add user message
+                    addChatMessage('Create a simple red button', true);
+                    
+                    // Add assistant response
+                    const assistantMsg = addChatMessage(data.response, false, new Date(data.timestamp).toLocaleTimeString());
+                    
+                    // Add code changes if any
+                    if (data.changes_made || data.suggestions || data.improved_code) {
+                        setTimeout(() => {
+                            addCodeChanges(data.changes_made, data.suggestions, data.improved_code);
+                        }, 500);
+                    }
+                    
+                    log('Real API test completed successfully!');
+                } else {
+                    log(`API Error: ${data.error}`);
+                }
+                
+            } catch (error) {
+                log(`API Test Error: ${error.message}`);
+            }
+        }
+
+        // Initialize
+        log('Chat Display Test initialized');
+        log('Click the buttons above to test chat message display');
+    </script>
+</body>
+</html>

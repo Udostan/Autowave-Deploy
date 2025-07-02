@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block title %}Agen911 - Research{% endblock %}
+
+{% block header %}Welcome to Research{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <div class="search-description">
+        <p>Get comprehensive research on any topic with structured, detailed information backed by reliable sources.</p>
+    </div>
+
+    {% if error %}
+    <div class="error-message">{{ error }}</div>
+    {% endif %}
+
+    <div class="search-container">
+        <form method="post" class="search-form">
+            <input type="text" name="query" class="search-box" placeholder="Enter your research topic or question..." required>
+            <button type="submit" class="search-button">Research</button>
+        </form>
+    </div>
+
+    <div class="search-tips">
+        <h3>Research Tips</h3>
+        <ul>
+            <li>Be specific with your query for more targeted results</li>
+            <li>Use keywords rather than full sentences for factual research</li>
+            <li>For complex topics, try breaking them down into smaller questions</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .search-page {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .search-description {
+        margin-bottom: 25px;
+        color: var(--dark-gray);
+        font-size: 17px;
+    }
+
+    .error-message {
+        background-color: #331111;
+        color: #ff6666;
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        border: 1px solid #662222;
+    }
+
+    .search-form {
+        margin-bottom: 30px;
+    }
+
+    .search-tips {
+        background-color: #222222;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 40px;
+        border: 1px solid #333333;
+    }
+
+    .search-tips h3 {
+        margin-top: 0;
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+
+    .search-tips ul {
+        padding-left: 20px;
+    }
+
+    .search-tips li {
+        margin-bottom: 10px;
+        color: var(--dark-gray);
+    }
+</style>
+{% endblock %}

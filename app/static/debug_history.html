@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug History API</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #e0e0e0; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-result { background: #2d2d2d; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; }
+        .success { border-color: #28a745; }
+        .error { border-color: #dc3545; }
+        pre { background: #1e1e1e; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>History API Debug Tool</h1>
+        
+        <button onclick="testUnifiedHistory()">Test Unified History API</button>
+        <button onclick="testHistorySearch()">Test History Search API</button>
+        <button onclick="testHistoryTrack()">Test History Track API</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        
+        function addResult(title, success, data) {
+            const div = document.createElement('div');
+            div.className = `test-result ${success ? 'success' : 'error'}`;
+            div.innerHTML = `
+                <h3>${title}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            resultsDiv.appendChild(div);
+        }
+        
+        async function testUnifiedHistory() {
+            try {
+                console.log('Testing unified history API...');
+                const response = await fetch('/api/history/unified?limit=10');
+                const data = await response.json();
+                
+                addResult('Unified History API', response.ok && data.success, {
+                    status: response.status,
+                    success: data.success,
+                    count: data.count,
+                    history_length: data.history ? data.history.length : 0,
+                    sample_items: data.history ? data.history.slice(0, 3) : [],
+                    error: data.error
+                });
+                
+                if (data.history && data.history.length > 0) {
+                    // Check for Agent Wave activities
+                    const agentWaveActivities = data.history.filter(item => item.agent_type === 'agent_wave');
+                    addResult('Agent Wave Activities Found', agentWaveActivities.length > 0, {
+                        total_activities: data.history.length,
+                        agent_wave_count: agentWaveActivities.length,
+                        agent_wave_activities: agentWaveActivities
+                    });
+                }
+                
+            } catch (error) {
+                addResult('Unified History API', false, {
+                    error: error.message,
+                    stack: error.stack
+                });
+            }
+        }
+        
+        async function testHistorySearch() {
+            try {
+                console.log('Testing history search API...');
+                const response = await fetch('/api/history/search?limit=10');
+                const data = await response.json();
+                
+                addResult('History Search API', response.ok && data.success, {
+                    status: response.status,
+                    success: data.success,
+                    history_length: data.history ? data.history.length : 0,
+                    sample_items: data.history ? data.history.slice(0, 2) : [],
+                    error: data.error
+                });
+                
+            } catch (error) {
+                addResult('History Search API', false, {
+                    error: error.message,
+                    stack: error.stack
+                });
+            }
+        }
+        
+        async function testHistoryTrack() {
+            try {
+                console.log('Testing history track API...');
+                const testData = {
+                    user_id: 'test_user_' + Date.now(),
+                    agent_type: 'agent_wave',
+                    activity_type: 'test_activity',
+                    input_data: { test: 'debug history tracking' },
+                    output_data: { result: 'test successful' },
+                    success: true
+                };
+                
+                const response = await fetch('/api/history/track', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                const data = await response.json();
+                
+                addResult('History Track API', response.ok && data.success, {
+                    status: response.status,
+                    success: data.success,
+                    activity_id: data.activity_id,
+                    error: data.error,
+                    test_data: testData
+                });
+                
+            } catch (error) {
+                addResult('History Track API', false, {
+                    error: error.message,
+                    stack: error.stack
+                });
+            }
+        }
+        
+        // Auto-run tests on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                testUnifiedHistory();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

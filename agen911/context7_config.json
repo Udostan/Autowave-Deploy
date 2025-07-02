@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "context7-prime-agent": {
+      "command": "python",
+      "args": [
+        "-m",
+        "app.mcp.context7_server"
+      ],
+      "env": {
+        "PORT": "5012"
+      }
+    }
+  }
+}
