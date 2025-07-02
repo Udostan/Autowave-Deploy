@@ -29,7 +29,7 @@ webdriver-manager==4.0.1
 
 # SUPABASE - HEROKU COMPATIBLE (UPDATED FOR PROXY FIX)
 supabase==2.8.0
-realtime==1.0.3
+realtime==2.0.5
 websockets==11.0.3
 
 # ADDITIONAL DEPENDENCIES FOR AUTOWAVE
