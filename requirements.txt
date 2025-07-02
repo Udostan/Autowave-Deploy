@@ -36,6 +36,7 @@ websockets==11.0.3
 gunicorn==21.2.0
 urllib3==2.0.7
 certifi==2023.7.22
+cryptography==41.0.7
 
 # BUILD TOOLS - HEROKU COMPATIBILITY
 setuptools>=65.0.0
