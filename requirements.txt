@@ -14,6 +14,9 @@ beautifulsoup4==4.12.2
 # IMAGE PROCESSING
 Pillow==10.0.1
 
+# PDF PROCESSING
+PyPDF2==3.0.1
+
 # SUPABASE - HEROKU COMPATIBLE
 supabase==2.3.4
 realtime==1.0.3
