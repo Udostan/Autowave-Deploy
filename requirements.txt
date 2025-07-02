@@ -17,6 +17,9 @@ Pillow==10.0.1
 # PDF PROCESSING
 PyPDF2==3.0.1
 
+# DOCX PROCESSING
+python-docx==0.8.11
+
 # SUPABASE - HEROKU COMPATIBLE
 supabase==2.3.4
 realtime==1.0.3
