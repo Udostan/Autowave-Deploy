@@ -17,7 +17,11 @@ from datetime import datetime, timedelta
 from app.prime_agent.task_manager import task_manager
 from app.utils.booking_handler import BookingHandler
 from app.visual_browser.selenium_visual_browser import SeleniumVisualBrowser
-from app.utils.browser_use_agent import BrowserUseWrapper
+try:
+    from app.utils.browser_use_agent import BrowserUseWrapper
+    BROWSER_USE_AVAILABLE = True
+except ImportError:
+    BROWSER_USE_AVAILABLE = False
 from app.visual_browser.stealth_browser import StealthBrowserSync
 from app.api.gemini import GeminiAPI
 from app.services.memory_integration import memory_integration
@@ -60,13 +64,16 @@ class RealWebBrowsingContext7Tools:
                 except Exception as e:
                     logger.warning(f"Failed to initialize StealthBrowser: {e}")
 
-                # PRIORITY 2: Try BrowserUseWrapper (advanced CAPTCHA bypass)
-                try:
-                    self.browser = BrowserUseWrapper(headless=True)
-                    logger.info("Browser initialized with BrowserUseWrapper (advanced CAPTCHA bypass)")
-                    return True
-                except Exception as e:
-                    logger.warning(f"Failed to initialize BrowserUseWrapper: {e}")
+                # PRIORITY 2: Try BrowserUseWrapper (advanced CAPTCHA bypass) - if available
+                if BROWSER_USE_AVAILABLE:
+                    try:
+                        self.browser = BrowserUseWrapper(headless=True)
+                        logger.info("Browser initialized with BrowserUseWrapper (advanced CAPTCHA bypass)")
+                        return True
+                    except Exception as e:
+                        logger.warning(f"Failed to initialize BrowserUseWrapper: {e}")
+                else:
+                    logger.info("BrowserUseWrapper not available, skipping to next option")
 
                 # PRIORITY 3: Fallback to enhanced Selenium browser
                 self.browser = SeleniumVisualBrowser()

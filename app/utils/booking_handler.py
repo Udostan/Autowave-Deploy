@@ -10,16 +10,31 @@ import json
 import urllib.parse
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
-from .browser_use_agent import BrowserUseWrapper
+try:
+    from .browser_use_agent import BrowserUseWrapper
+    BROWSER_USE_AVAILABLE = True
+except ImportError:
+    BROWSER_USE_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
 class BookingHandler:
     """Handler for booking-related tasks."""
-    
+
     def __init__(self):
         """Initialize the booking handler."""
-        self.browser = BrowserUseWrapper()
+        if BROWSER_USE_AVAILABLE:
+            try:
+                self.browser = BrowserUseWrapper()
+                self.available = True
+            except Exception as e:
+                logger.warning(f"Failed to initialize BrowserUseWrapper: {e}")
+                self.browser = None
+                self.available = False
+        else:
+            logger.info("BrowserUseWrapper not available, using fallback mode")
+            self.browser = None
+            self.available = False
         
     def search_flights(self, origin, destination, departure_date, return_date=None):
         """

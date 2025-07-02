@@ -52,10 +52,10 @@ class BrowserUseWrapper:
             headless (bool, optional): Whether to run the browser in headless mode. Defaults to False.
         """
         if not BROWSER_USE_AVAILABLE:
-            raise ImportError(
-                "browser-use is not installed. Please install it with 'pip install browser-use pyperclip playwright' "
-                "and then run 'playwright install chromium'"
-            )
+            print("⚠️  browser-use is not available. Using fallback mode.")
+            self.available = False
+            self.agent = None
+            return
 
         if not LANGCHAIN_AVAILABLE:
             raise ImportError(
