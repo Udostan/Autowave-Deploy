@@ -27,8 +27,8 @@ markdown==3.4.4
 selenium==4.15.2
 webdriver-manager==4.0.1
 
-# SUPABASE - HEROKU COMPATIBLE
-supabase==2.3.4
+# SUPABASE - HEROKU COMPATIBLE (UPDATED FOR PROXY FIX)
+supabase==2.8.0
 realtime==1.0.3
 websockets==11.0.3
 
@@ -38,6 +38,7 @@ urllib3==2.0.7
 certifi==2023.7.22
 cryptography==41.0.7
 stripe==7.8.0
+groq==0.4.1
 
 # BUILD TOOLS - HEROKU COMPATIBILITY
 setuptools>=65.0.0
