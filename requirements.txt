@@ -37,6 +37,7 @@ gunicorn==21.2.0
 urllib3==2.0.7
 certifi==2023.7.22
 cryptography==41.0.7
+stripe==7.8.0
 
 # BUILD TOOLS - HEROKU COMPATIBILITY
 setuptools>=65.0.0
