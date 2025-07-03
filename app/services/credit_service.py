@@ -437,6 +437,20 @@ class CreditService:
             logger.error(f"Error in fallback credit consumption: {str(e)}")
             return False
 
+    def get_daily_usage_fallback(self, user_id: str) -> int:
+        """Get daily usage from fallback storage"""
+        try:
+            if not hasattr(self, '_usage_storage'):
+                return 0
+
+            today = datetime.now().date().isoformat()
+            key = f"{user_id}_{today}"
+
+            return self._usage_storage.get(key, 0)
+        except Exception as e:
+            logger.error(f"Error getting daily usage: {str(e)}")
+            return 0
+
     def _reset_daily_credits_fallback(self, user_id: str) -> bool:
         """Reset daily credits in fallback mode"""
         try:

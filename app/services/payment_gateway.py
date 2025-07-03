@@ -77,7 +77,37 @@ class PaystackGateway(PaymentGateway):
             'Authorization': f'Bearer {self.secret_key}',
             'Content-Type': 'application/json'
         }
+
+        # Apple Pay configuration (Paystack supports Apple Pay)
+        self.apple_pay_enabled = os.getenv('APPLE_PAY_ENABLED', 'true').lower() == 'true'
+        self.app_domain = os.getenv('APP_URL', 'https://autowave-deploy-c341ab2c8e0d.herokuapp.com')
+
+        # Alternative payment methods availability
+        self.supported_payment_methods = {
+            'apple_pay': self.apple_pay_enabled and not self.test_mode,  # Apple Pay only in live mode
+            'google_pay': False,  # Not supported by Paystack
+            'amazon_pay': False,  # Not supported by Paystack
+            'cash_app': False,    # Not supported by Paystack
+            'cards': True,        # Always supported
+            'bank_transfer': True, # Always supported
+            'ussd': True,         # Always supported
+            'mobile_money': True  # Always supported
+        }
     
+    def get_available_payment_methods(self) -> Dict[str, Any]:
+        """Get available payment methods for this gateway"""
+        return {
+            'success': True,
+            'payment_methods': self.supported_payment_methods,
+            'apple_pay_available': self.supported_payment_methods['apple_pay'],
+            'apple_pay_note': 'Apple Pay is available through Paystack in live mode' if self.supported_payment_methods['apple_pay'] else 'Apple Pay requires live Paystack keys',
+            'alternative_methods': {
+                'google_pay': 'Not supported by Paystack - requires Stripe integration',
+                'amazon_pay': 'Not supported by Paystack - requires direct Amazon Pay integration',
+                'cash_app': 'Not supported by Paystack - requires Stripe integration'
+            }
+        }
+
     def create_customer(self, email: str, name: str) -> Dict[str, Any]:
         """Create a Paystack customer"""
         try:

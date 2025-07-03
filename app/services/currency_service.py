@@ -145,23 +145,52 @@ class CurrencyService:
                 if info['currency'] == currency.upper():
                     currency_info = info
                     break
-            
+
             if not currency_info:
                 return f"{amount:.2f} {currency}"
-            
+
             symbol = currency_info.get('symbol', currency)
             decimal_places = currency_info.get('decimal_places', 2)
-            
+
             # Format with appropriate decimal places
             if currency.upper() == 'NGN':
                 # For Naira, format with commas for thousands
                 return f"{symbol}{amount:,.{decimal_places}f}"
             else:
                 return f"{symbol}{amount:.{decimal_places}f}"
-                
+
         except Exception as e:
             logger.error(f"Error formatting amount: {str(e)}")
             return f"{amount:.2f} {currency}"
+
+    def format_price_with_naira(self, amount_usd: float) -> Dict[str, Any]:
+        """Format price showing USD primary with Naira conversion below"""
+        try:
+            # Calculate Naira equivalent
+            naira_amount = amount_usd * self.usd_to_ngn_rate
+
+            return {
+                'usd_amount': amount_usd,
+                'usd_formatted': f"${amount_usd:,.2f}",
+                'naira_amount': naira_amount,
+                'naira_formatted': f"₦{naira_amount:,.0f}",
+                'dual_display': f"${amount_usd:,.2f}",
+                'naira_subtitle': f"₦{naira_amount:,.0f}",
+                'primary_currency': 'USD',
+                'secondary_currency': 'NGN'
+            }
+        except Exception as e:
+            logger.error(f"Error formatting price with Naira: {str(e)}")
+            return {
+                'usd_amount': amount_usd,
+                'usd_formatted': f"${amount_usd:,.2f}",
+                'naira_amount': amount_usd * 1650,
+                'naira_formatted': f"₦{amount_usd * 1650:,.0f}",
+                'dual_display': f"${amount_usd:,.2f}",
+                'naira_subtitle': f"₦{amount_usd * 1650:,.0f}",
+                'primary_currency': 'USD',
+                'secondary_currency': 'NGN'
+            }
     
     def get_provider_currency_info(self, provider: str) -> Dict[str, Any]:
         """Get currency information for a payment provider"""
