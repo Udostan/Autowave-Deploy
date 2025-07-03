@@ -42,6 +42,10 @@ def get_subscription_plans():
                 plan.annual_price_usd, provider, 'annual'
             )
 
+            # Calculate Naira conversion for dual display
+            monthly_naira = plan.monthly_price_usd * 1650
+            annual_naira = plan.annual_price_usd * 1650
+
             plan_data = {
                 'id': plan.id,
                 'name': plan.plan_name,
@@ -55,17 +59,23 @@ def get_subscription_plans():
                 'pricing': {
                     'monthly': {
                         'usd': plan.monthly_price_usd,
+                        'naira': monthly_naira,
+                        'naira_formatted': f"₦{monthly_naira:,.0f}",
                         'local': monthly_conversion['converted_amount'],
                         'currency': monthly_conversion['to_currency'],
                         'formatted': monthly_conversion['display_price'],
-                        'exchange_rate': monthly_conversion['exchange_rate']
+                        'exchange_rate': monthly_conversion['exchange_rate'],
+                        'dual_display': f"${plan.monthly_price_usd} (₦{monthly_naira:,.0f})"
                     },
                     'annual': {
                         'usd': plan.annual_price_usd,
+                        'naira': annual_naira,
+                        'naira_formatted': f"₦{annual_naira:,.0f}",
                         'local': annual_conversion['converted_amount'],
                         'currency': annual_conversion['to_currency'],
                         'formatted': annual_conversion['display_price'],
-                        'exchange_rate': annual_conversion['exchange_rate']
+                        'exchange_rate': annual_conversion['exchange_rate'],
+                        'dual_display': f"${plan.annual_price_usd} (₦{annual_naira:,.0f})"
                     }
                 }
             }
@@ -75,7 +85,13 @@ def get_subscription_plans():
             'success': True,
             'plans': plans_data,
             'provider': provider,
-            'currency_info': currency_service.get_provider_currency_info(provider)
+            'currency_info': currency_service.get_provider_currency_info(provider),
+            'dual_currency': {
+                'primary': 'USD',
+                'secondary': 'NGN',
+                'exchange_rate': 1650,
+                'display_format': 'USD with Naira below'
+            }
         })
 
     except Exception as e:

@@ -705,39 +705,45 @@ function updatePricingDisplay(plans, provider, currencyInfo) {
         const planCard = document.querySelector(`[data-plan="${plan.name}"]`);
         if (!planCard) return;
 
-        // Update monthly prices
+        // Update monthly prices with USD + Naira display
         const monthlyPrice = planCard.querySelector('.monthly-price');
         if (monthlyPrice && plan.pricing.monthly) {
             const pricing = plan.pricing.monthly;
-            if (provider === 'paystack' && pricing.currency !== 'USD') {
-                monthlyPrice.innerHTML = `
-                    <span class="text-3xl font-bold">${pricing.formatted}</span>
-                    <span class="text-sm text-gray-400 ml-2">(~$${pricing.usd})</span>
-                `;
-            } else {
-                monthlyPrice.innerHTML = `<span class="text-3xl font-bold">$${pricing.usd}</span>`;
-            }
+            // Calculate Naira equivalent (1 USD = 1650 NGN)
+            const nairaAmount = pricing.usd * 1650;
+
+            monthlyPrice.innerHTML = `
+                <div class="price-display">
+                    <span class="text-3xl font-bold">$${pricing.usd}</span>
+                    <div class="text-sm text-gray-400 mt-1">₦${nairaAmount.toLocaleString()}</div>
+                </div>
+            `;
         }
 
-        // Update annual prices
+        // Update annual prices with USD + Naira display
         const annualPrice = planCard.querySelector('.annual-price');
         if (annualPrice && plan.pricing.annual) {
             const pricing = plan.pricing.annual;
-            if (provider === 'paystack' && pricing.currency !== 'USD') {
-                annualPrice.innerHTML = `
-                    <span class="text-3xl font-bold">${pricing.formatted}</span>
-                    <span class="text-sm text-gray-400 ml-2">(~$${pricing.usd})</span>
-                `;
-            } else {
-                annualPrice.innerHTML = `<span class="text-3xl font-bold">$${pricing.usd}</span>`;
-            }
+            // Calculate Naira equivalent (1 USD = 1650 NGN)
+            const nairaAmount = pricing.usd * 1650;
+
+            annualPrice.innerHTML = `
+                <div class="price-display">
+                    <span class="text-3xl font-bold">$${pricing.usd}</span>
+                    <div class="text-sm text-gray-400 mt-1">₦${nairaAmount.toLocaleString()}</div>
+                </div>
+            `;
         }
     });
 
-    // Show currency info if using local currency
-    if (provider === 'paystack' && currencyInfo.currency !== 'USD') {
-        showCurrencyInfo(currencyInfo, provider);
-    }
+    // Always show currency info for dual display
+    showCurrencyInfo({
+        currency: 'USD',
+        symbol: '$',
+        secondary_currency: 'NGN',
+        secondary_symbol: '₦',
+        exchange_rate: 1650
+    }, provider);
 }
 
 // Show currency conversion info
