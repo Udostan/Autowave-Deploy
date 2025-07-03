@@ -19,12 +19,12 @@ class CurrencyService:
         self.exchange_rate_mode = os.getenv('EXCHANGE_RATE_MODE', 'fixed')
         self.usd_to_ngn_rate = float(os.getenv('USD_TO_NGN_RATE', '1650'))
         
-        # Currency configurations for different payment providers
+        # Currency configurations for different payment providers - FORCE USD PRIMARY
         self.provider_currencies = {
             'paystack': {
-                'currency': os.getenv('PAYSTACK_CURRENCY', 'NGN'),
-                'country': os.getenv('PAYSTACK_COUNTRY', 'NG'),
-                'symbol': '₦',
+                'currency': 'USD',  # Force USD for international users
+                'country': 'US',    # Force US for Apple Pay compatibility
+                'symbol': '$',
                 'decimal_places': 2
             },
             'stripe': {

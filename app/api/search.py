@@ -11,16 +11,40 @@ from datetime import datetime
 # Set up logging
 logger = logging.getLogger(__name__)
 
-def do_search(query):
+def do_search(query, user_id=None):
     """Perform a deep, PhD-level research using advanced LLM capabilities.
 
     Args:
         query (str): The search query (may include file content)
+        user_id (str): User ID for credit consumption
 
     Returns:
         dict: A dictionary containing the comprehensive research results
     """
     try:
+        # Check and consume credits before processing
+        if user_id:
+            from ..services.credit_service import credit_service
+
+            # Determine credit cost based on query complexity
+            if len(query) > 1000 or any(keyword in query.lower() for keyword in ['comprehensive', 'detailed', 'analyze', 'research']):
+                task_type = 'research_advanced'
+            elif len(query) > 500:
+                task_type = 'research_basic'
+            else:
+                task_type = 'search_basic'
+
+            # Consume credits
+            credit_result = credit_service.consume_credits(user_id, task_type)
+
+            if not credit_result['success']:
+                return {
+                    'success': False,
+                    'error': credit_result['error'],
+                    'credits_needed': credit_result.get('credits_needed'),
+                    'credits_available': credit_result.get('credits_available')
+                }
+
         # Process uploaded files if present
         enhanced_query = query
         file_context = ""

@@ -14,46 +14,46 @@ logger = logging.getLogger(__name__)
 class CreditService:
     """Service for managing user credits and consumption tracking"""
     
-    # Credit costs based on competitor analysis (Genspark/Manus)
+    # Credit costs based on competitor analysis (Genspark/Manus) - EXACT MATCH
     CREDIT_COSTS = {
-        # Basic AI Tasks
-        'chat_message': 2,
-        'simple_search': 3,
-        'text_generation': 3,
+        # Basic AI Tasks (Genspark-style)
+        'chat_message': 1,
+        'simple_search': 2,
+        'text_generation': 2,
         'basic_query': 1,
-        
-        # AutoWave Chat
+
+        # AutoWave Chat (Genspark-style)
         'autowave_chat_basic': 2,
-        'autowave_chat_advanced': 5,
+        'autowave_chat_advanced': 4,
+
+        # Code Wave (Website Creation) - Manus-style
+        'code_wave_simple': 200,      # Simple webpage (Manus: 200 credits)
+        'code_wave_advanced': 360,    # Advanced webpage (Manus: 360 credits)
+        'code_wave_complex': 900,     # Complex web app (Manus: 900 credits)
+
+        # Agent Wave (Document Processing) - Genspark-style
+        'agent_wave_email': 8,
+        'agent_wave_seo': 12,
+        'agent_wave_learning': 15,
+        'agent_wave_document': 10,
         
-        # Code Wave (Website Creation)
-        'code_wave_simple': 15,
-        'code_wave_advanced': 25,
-        'code_wave_complex': 35,
-        
-        # Agent Wave (Document Processing)
-        'agent_wave_email': 10,
-        'agent_wave_seo': 15,
-        'agent_wave_learning': 20,
-        'agent_wave_document': 12,
-        
-        # Prime Agent Tools
-        'prime_agent_basic': 8,
-        'prime_agent_complex': 15,
-        'prime_agent_visual_browser': 20,
-        'prime_agent_multi_tool': 25,  # Multi-tool orchestration costs more
-        'prime_agent_job_search': 8,
-        'prime_agent_travel': 12,
-        'prime_agent_real_estate': 10,
-        'prime_agent_weather': 3,
-        'prime_agent_news': 5,
-        'prime_agent_flight': 15,
-        'prime_agent_hotel': 12,
-        
-        # Research Lab
-        'research_basic': 20,
-        'research_advanced': 30,
-        'research_deep_analysis': 40,
+        # Prime Agent Tools - Genspark-style pricing
+        'prime_agent_basic': 5,
+        'prime_agent_complex': 12,
+        'prime_agent_visual_browser': 15,
+        'prime_agent_multi_tool': 20,  # Multi-tool orchestration costs more
+        'prime_agent_job_search': 6,
+        'prime_agent_travel': 8,
+        'prime_agent_real_estate': 7,
+        'prime_agent_weather': 2,
+        'prime_agent_news': 3,
+        'prime_agent_flight': 10,
+        'prime_agent_hotel': 8,
+
+        # Research Lab - Genspark-style pricing
+        'research_basic': 8,
+        'research_advanced': 15,
+        'research_deep_analysis': 25,
         
         # File Processing
         'file_upload_small': 5,
@@ -117,28 +117,46 @@ class CreditService:
     }
     
     def __init__(self):
+        self.db = None
+        self.supabase = None
+
+        # Try to initialize Supabase directly for credit tracking
         try:
-            # Try to import and initialize DatabaseService
-            from .database_service import DatabaseService
-            self.db = DatabaseService()
-            logger.info("DatabaseService initialized successfully")
-        except (ImportError, ModuleNotFoundError):
-            # Fallback if DatabaseService is not available
-            self.db = None
-            logger.warning("DatabaseService not available, using fallback mode")
+            from supabase import create_client
+            import os
+
+            supabase_url = os.getenv('SUPABASE_URL')
+            supabase_key = os.getenv('SUPABASE_ANON_KEY')
+
+            if supabase_url and supabase_key:
+                self.supabase = create_client(supabase_url, supabase_key)
+                self.db = True  # Mark as available
+                logger.info("✅ Credit service initialized with Supabase")
+            else:
+                logger.warning("❌ Supabase credentials not found, using fallback mode")
+        except Exception as e:
+            logger.warning(f"❌ Failed to initialize Supabase for credits: {e}, using fallback mode")
     
     def get_user_credits(self, user_id: str) -> Dict[str, Any]:
         """Get user's current credit status"""
         try:
-            # If no database service available, return free plan defaults
+            # If Supabase available, get real credit data
+            if self.supabase:
+                return self._get_credits_from_supabase(user_id)
+
+            # If no database service available, return free plan defaults with dynamic tracking
             if not self.db:
+                # Get usage from fallback storage
+                today_usage = self.get_daily_usage_fallback(user_id)
+                remaining = max(0, 50 - today_usage)
+
                 return {
                     'plan': 'free',
                     'type': 'daily',
-                    'remaining': 50,
+                    'remaining': remaining,
                     'total': 50,
                     'reset_date': None,
-                    'percentage': 100
+                    'percentage': (remaining / 50) * 100
                 }
 
             # Get user's current plan
@@ -228,8 +246,8 @@ class CreditService:
                 }
             
             # Consume credits
-            if self.db:
-                success = self.db.consume_user_credits(user_id, task_type, credit_cost)
+            if self.supabase:
+                success = self._consume_credits_supabase(user_id, task_type, credit_cost)
             else:
                 # Fallback mode - use in-memory storage
                 success = self._consume_credits_fallback(user_id, credit_cost, task_type)
@@ -256,6 +274,45 @@ class CreditService:
                 'success': False,
                 'error': 'Credit system error',
                 'plan': 'unknown'
+            }
+
+    def _get_credits_from_supabase(self, user_id: str) -> Dict[str, Any]:
+        """Get user credits from Supabase"""
+        try:
+            from datetime import datetime, timedelta
+
+            # Get today's usage
+            today = datetime.now().date().isoformat()
+
+            # Query today's credit usage
+            usage_result = self.supabase.table('credit_usage').select('credits_consumed').eq('user_id', user_id).eq('date', today).execute()
+
+            total_used_today = sum(record['credits_consumed'] for record in usage_result.data) if usage_result.data else 0
+
+            # For now, assume free plan (50 daily credits)
+            # TODO: Get actual plan from user subscription
+            total_credits = 50
+            remaining = max(0, total_credits - total_used_today)
+
+            return {
+                'plan': 'free',
+                'type': 'daily',
+                'remaining': remaining,
+                'total': total_credits,
+                'reset_date': (datetime.now() + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0),
+                'percentage': (remaining / total_credits) * 100 if total_credits > 0 else 0
+            }
+
+        except Exception as e:
+            logger.error(f"❌ Error getting credits from Supabase: {str(e)}")
+            # Return fallback
+            return {
+                'plan': 'free',
+                'type': 'daily',
+                'remaining': 50,
+                'total': 50,
+                'reset_date': None,
+                'percentage': 100
             }
     
     def get_task_credit_cost(self, task_type: str) -> int:
@@ -329,6 +386,34 @@ class CreditService:
 
         except Exception as e:
             logger.error(f"Error resetting daily credits: {str(e)}")
+            return False
+
+    def _consume_credits_supabase(self, user_id: str, task_type: str, amount: int) -> bool:
+        """Consume credits using Supabase"""
+        try:
+            from datetime import datetime
+
+            # Log credit usage in Supabase
+            usage_data = {
+                'user_id': user_id,
+                'task_type': task_type,
+                'credits_consumed': amount,
+                'timestamp': datetime.utcnow().isoformat(),
+                'date': datetime.utcnow().date().isoformat()
+            }
+
+            # Insert usage record
+            result = self.supabase.table('credit_usage').insert(usage_data).execute()
+
+            if result.data:
+                logger.info(f"✅ Consumed {amount} credits for {task_type} (user: {user_id}, Supabase)")
+                return True
+            else:
+                logger.error(f"❌ Failed to log credit usage in Supabase")
+                return False
+
+        except Exception as e:
+            logger.error(f"❌ Error consuming credits in Supabase: {str(e)}")
             return False
 
     def _consume_credits_fallback(self, user_id: str, amount: int, task_type: str) -> bool:
