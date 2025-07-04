@@ -17,6 +17,12 @@ from datetime import datetime, timedelta
 from app.prime_agent.task_manager import task_manager
 from app.utils.booking_handler import BookingHandler
 from app.visual_browser.selenium_visual_browser import SeleniumVisualBrowser
+try:
+    from app.utils.browser_use_agent import BrowserUseWrapper
+    BROWSER_USE_AVAILABLE = True
+except ImportError:
+    BROWSER_USE_AVAILABLE = False
+from app.visual_browser.stealth_browser import StealthBrowserSync
 from app.api.gemini import GeminiAPI
 from app.services.memory_integration import memory_integration
 from app.services.file_processor import file_processor
@@ -62,53 +68,98 @@ class RealWebBrowsingContext7Tools:
             return None
 
     def initialize_browser(self):
-        """Initialize browser with Heroku optimization"""
+        """Initialize advanced browser with CAPTCHA bypass capabilities"""
         if not self.browser:
             try:
-                # Detect Heroku environment - always use lightweight mode for Context7 tools
+                # Detect Heroku environment
                 is_heroku = os.environ.get('DYNO') is not None
-
                 if is_heroku:
-                    logger.info("🔧 HEROKU DETECTED: Using lightweight mode for Context7 tools to prevent memory crashes")
-                    logger.info("💡 Context7 tools will use simulated content for better app stability")
-                    logger.info("🎯 Other agents (prime agent, etc.) will work normally")
-                    # On Heroku, skip browser initialization for Context7 tools only
-                    return False
-                else:
-                    logger.info("🚀 HEROKU DETECTED: Initializing SeleniumVisualBrowser with Chrome buildpack")
-                    logger.info("🔧 LOCAL DEVELOPMENT: Initializing SeleniumVisualBrowser for Context7 tools")
+                    logger.info("🚀 HEROKU DETECTED: Initializing browser for Heroku environment with Chrome buildpack")
 
-                    # Initialize SeleniumVisualBrowser (the ONLY browser that works with Context7 tools)
-                    self.browser = SeleniumVisualBrowser(headless=True)
+                # PRIORITY 1: Try StealthBrowser (most advanced CAPTCHA bypass)
+                try:
+                    self.browser = StealthBrowserSync(headless=True)
                     start_result = self.browser.start()
-
-                    if start_result.get('success'):
-                        logger.info("✅ Browser initialized successfully for local development")
+                    if start_result and start_result.get('success'):
+                        logger.info("✅ Browser initialized with StealthBrowser (MAXIMUM CAPTCHA bypass)")
                         return True
                     else:
-                        error_msg = start_result.get('error', 'Unknown error')
-                        logger.error(f"❌ Failed to start SeleniumVisualBrowser: {error_msg}")
-                        return False
+                        logger.warning(f"⚠️ StealthBrowser failed to start: {start_result}")
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to initialize StealthBrowser: {e}")
+
+                # PRIORITY 2: Try BrowserUseWrapper (advanced CAPTCHA bypass) - if available
+                if BROWSER_USE_AVAILABLE:
+                    try:
+                        self.browser = BrowserUseWrapper(headless=True)
+                        logger.info("✅ Browser initialized with BrowserUseWrapper (advanced CAPTCHA bypass)")
+                        return True
+                    except Exception as e:
+                        logger.warning(f"⚠️ Failed to initialize BrowserUseWrapper: {e}")
+                else:
+                    logger.info("ℹ️ BrowserUseWrapper not available, skipping to next option")
+
+                # PRIORITY 3: Fallback to enhanced Selenium browser (HEROKU-OPTIMIZED)
+                logger.info("🔧 Attempting Selenium browser with Heroku optimizations...")
+                self.browser = SeleniumVisualBrowser(headless=True)
+                start_result = self.browser.start()
+                if start_result.get('success'):
+                    logger.info("✅ Browser initialized with enhanced Selenium (Heroku-optimized)")
+                    return True
+                else:
+                    logger.error(f"❌ Failed to start Selenium browser: {start_result.get('error')}")
+                    if is_heroku:
+                        logger.error("🚨 HEROKU BROWSER FAILURE - Chrome buildpack may not be properly configured")
+                        logger.error("💡 Make sure Chrome buildpack is installed: https://github.com/heroku/heroku-buildpack-chrome-for-testing")
+
+                    # Check if we should force real browsing (no fallback to simulated content)
+                    force_real_browsing = os.environ.get('FORCE_REAL_BROWSING', 'false').lower() == 'true'
+                    if force_real_browsing:
+                        logger.error("🚫 FORCE_REAL_BROWSING enabled - will not fallback to simulated content")
+                        raise Exception("Real browsing required but browser initialization failed")
+
+                    return False
 
             except Exception as e:
-                logger.error(f"❌ Failed to initialize SeleniumVisualBrowser: {e}")
+                logger.error(f"❌ Failed to initialize any browser: {e}")
                 return False
         return True
 
     def _navigate_browser(self, url: str) -> Dict[str, Any]:
-        """Navigate browser using SeleniumVisualBrowser"""
+        """Navigate browser with support for all browser types"""
         try:
-            # SeleniumVisualBrowser navigation (the only browser type we use)
-            return self.browser.navigate(url)
+            if isinstance(self.browser, StealthBrowserSync):
+                # StealthBrowser navigation (MAXIMUM CAPTCHA bypass)
+                return self.browser.navigate(url)
+            elif isinstance(self.browser, BrowserUseWrapper):
+                # BrowserUseWrapper navigation
+                result = self.browser.browse_web(url)
+                return {
+                    'success': True,
+                    'url': url,
+                    'title': result.get('title', ''),
+                    'content': result.get('content', '')
+                }
+            else:
+                # SeleniumVisualBrowser navigation
+                return self.browser.navigate(url)
         except Exception as e:
             logger.error(f"Error navigating to {url}: {e}")
             return {'success': False, 'error': str(e)}
 
     def _take_browser_screenshot(self) -> str:
-        """Take screenshot using SeleniumVisualBrowser"""
+        """Take screenshot with support for all browser types"""
         try:
-            # SeleniumVisualBrowser screenshot (the only browser type we use)
-            return self.browser.take_screenshot()
+            if isinstance(self.browser, StealthBrowserSync):
+                # StealthBrowser screenshot (MAXIMUM CAPTCHA bypass)
+                return self.browser.take_screenshot()
+            elif isinstance(self.browser, BrowserUseWrapper):
+                # BrowserUseWrapper doesn't have direct screenshot method
+                # We'll use a placeholder or implement if needed
+                return ""
+            else:
+                # SeleniumVisualBrowser screenshot
+                return self.browser.take_screenshot()
         except Exception as e:
             logger.error(f"Error taking screenshot: {e}")
             return ""
