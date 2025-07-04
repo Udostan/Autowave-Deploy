@@ -161,6 +161,26 @@ class SeleniumVisualBrowser:
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--window-size=1280,800")
 
+            # HEROKU-SPECIFIC ARGUMENTS for containerized environment
+            chrome_options.add_argument("--remote-debugging-port=9222")
+            chrome_options.add_argument("--disable-background-timer-throttling")
+            chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+            chrome_options.add_argument("--disable-renderer-backgrounding")
+            chrome_options.add_argument("--disable-features=TranslateUI")
+            chrome_options.add_argument("--disable-ipc-flooding-protection")
+            chrome_options.add_argument("--single-process")  # Important for Heroku
+            chrome_options.add_argument("--memory-pressure-off")
+
+            # Detect if running on Heroku
+            is_heroku = os.environ.get('DYNO') is not None
+            if is_heroku:
+                logger.info("Detected Heroku environment - applying Heroku-specific Chrome configuration")
+                chrome_options.add_argument("--disable-web-security")
+                chrome_options.add_argument("--allow-running-insecure-content")
+                chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+                # Use Chrome binary from buildpack
+                chrome_options.binary_location = "/app/.chrome-for-testing/chrome-linux64/chrome"
+
             # ADVANCED STEALTH FEATURES (copied from live_browser.py)
             # Add comprehensive stealth arguments to avoid detection and bypass CAPTCHA
             chrome_options.add_argument("--disable-blink-features=AutomationControlled")
@@ -200,8 +220,25 @@ class SeleniumVisualBrowser:
                 # Continue anyway, this is not critical
             
             # Set up Chrome service
-            service = Service(ChromeDriverManager().install())
-            
+            try:
+                if is_heroku:
+                    # Use ChromeDriver from buildpack on Heroku
+                    chromedriver_path = "/app/.chrome-for-testing/chromedriver-linux64/chromedriver"
+                    if os.path.exists(chromedriver_path):
+                        service = Service(chromedriver_path)
+                        logger.info(f"Using Heroku ChromeDriver: {chromedriver_path}")
+                    else:
+                        # Fallback to ChromeDriverManager
+                        service = Service(ChromeDriverManager().install())
+                        logger.warning("Heroku ChromeDriver not found, using ChromeDriverManager")
+                else:
+                    # Use ChromeDriverManager for local development
+                    service = Service(ChromeDriverManager().install())
+                    logger.info("Using ChromeDriverManager for local development")
+            except Exception as e:
+                logger.warning(f"Error setting up Chrome service: {e}, using fallback")
+                service = Service(ChromeDriverManager().install())
+
             # Create a new Chrome driver
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
             

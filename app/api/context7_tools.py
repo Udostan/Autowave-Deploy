@@ -71,41 +71,57 @@ class RealWebBrowsingContext7Tools:
         """Initialize advanced browser with CAPTCHA bypass capabilities"""
         if not self.browser:
             try:
+                # Detect Heroku environment
+                is_heroku = os.environ.get('DYNO') is not None
+                if is_heroku:
+                    logger.info("🚀 HEROKU DETECTED: Initializing browser for Heroku environment")
+
                 # PRIORITY 1: Try StealthBrowser (most advanced CAPTCHA bypass)
                 try:
                     self.browser = StealthBrowserSync(headless=True)
                     start_result = self.browser.start()
                     if start_result and start_result.get('success'):
-                        logger.info("Browser initialized with StealthBrowser (MAXIMUM CAPTCHA bypass)")
+                        logger.info("✅ Browser initialized with StealthBrowser (MAXIMUM CAPTCHA bypass)")
                         return True
                     else:
-                        logger.warning(f"StealthBrowser failed to start: {start_result}")
+                        logger.warning(f"⚠️ StealthBrowser failed to start: {start_result}")
                 except Exception as e:
-                    logger.warning(f"Failed to initialize StealthBrowser: {e}")
+                    logger.warning(f"⚠️ Failed to initialize StealthBrowser: {e}")
 
                 # PRIORITY 2: Try BrowserUseWrapper (advanced CAPTCHA bypass) - if available
                 if BROWSER_USE_AVAILABLE:
                     try:
                         self.browser = BrowserUseWrapper(headless=True)
-                        logger.info("Browser initialized with BrowserUseWrapper (advanced CAPTCHA bypass)")
+                        logger.info("✅ Browser initialized with BrowserUseWrapper (advanced CAPTCHA bypass)")
                         return True
                     except Exception as e:
-                        logger.warning(f"Failed to initialize BrowserUseWrapper: {e}")
+                        logger.warning(f"⚠️ Failed to initialize BrowserUseWrapper: {e}")
                 else:
-                    logger.info("BrowserUseWrapper not available, skipping to next option")
+                    logger.info("ℹ️ BrowserUseWrapper not available, skipping to next option")
 
-                # PRIORITY 3: Fallback to enhanced Selenium browser
-                self.browser = SeleniumVisualBrowser()
+                # PRIORITY 3: Fallback to enhanced Selenium browser (HEROKU-OPTIMIZED)
+                logger.info("🔧 Attempting Selenium browser with Heroku optimizations...")
+                self.browser = SeleniumVisualBrowser(headless=True)
                 start_result = self.browser.start()
                 if start_result.get('success'):
-                    logger.info("Browser initialized with enhanced Selenium (basic stealth)")
+                    logger.info("✅ Browser initialized with enhanced Selenium (Heroku-optimized)")
                     return True
                 else:
-                    logger.error(f"Failed to start Selenium browser: {start_result.get('error')}")
+                    logger.error(f"❌ Failed to start Selenium browser: {start_result.get('error')}")
+                    if is_heroku:
+                        logger.error("🚨 HEROKU BROWSER FAILURE - Chrome buildpack may not be properly configured")
+                        logger.error("💡 Make sure Chrome buildpack is installed: https://github.com/heroku/heroku-buildpack-chrome-for-testing")
+
+                    # Check if we should force real browsing (no fallback to simulated content)
+                    force_real_browsing = os.environ.get('FORCE_REAL_BROWSING', 'false').lower() == 'true'
+                    if force_real_browsing:
+                        logger.error("🚫 FORCE_REAL_BROWSING enabled - will not fallback to simulated content")
+                        raise Exception("Real browsing required but browser initialization failed")
+
                     return False
 
             except Exception as e:
-                logger.error(f"Failed to initialize any browser: {e}")
+                logger.error(f"❌ Failed to initialize any browser: {e}")
                 return False
         return True
 
