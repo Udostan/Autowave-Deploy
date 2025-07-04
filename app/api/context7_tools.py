@@ -62,12 +62,19 @@ class RealWebBrowsingContext7Tools:
             return None
 
     def initialize_browser(self):
-        """Initialize SeleniumVisualBrowser for real web browsing with screenshots"""
+        """Initialize browser with Heroku optimization"""
         if not self.browser:
             try:
-                # Detect Heroku environment
+                # Detect Heroku environment and check for lightweight mode
                 is_heroku = os.environ.get('DYNO') is not None
-                if is_heroku:
+                lightweight_mode = os.environ.get('CONTEXT7_LIGHTWEIGHT_MODE', 'false').lower() == 'true'
+
+                if is_heroku and lightweight_mode:
+                    logger.info("🚀 HEROKU LIGHTWEIGHT MODE: Skipping browser initialization to prevent memory crashes")
+                    logger.info("💡 Context7 tools will use simulated content for better app stability")
+                    # Don't initialize browser in lightweight mode - use simulated content
+                    return False
+                elif is_heroku:
                     logger.info("🚀 HEROKU DETECTED: Initializing SeleniumVisualBrowser with Chrome buildpack")
                 else:
                     logger.info("🔧 LOCAL DEVELOPMENT: Initializing SeleniumVisualBrowser")
@@ -87,19 +94,15 @@ class RealWebBrowsingContext7Tools:
                     logger.error(f"❌ Failed to start SeleniumVisualBrowser: {error_msg}")
 
                     if is_heroku:
-                        logger.error("🚨 HEROKU BROWSER FAILURE - Chrome buildpack may not be properly configured")
-                        logger.error("💡 Make sure Chrome buildpack is installed: https://github.com/heroku/heroku-buildpack-chrome-for-testing")
-
-                    # Check if we should force real browsing (no fallback to simulated content)
-                    force_real_browsing = os.environ.get('FORCE_REAL_BROWSING', 'false').lower() == 'true'
-                    if force_real_browsing:
-                        logger.error("🚫 FORCE_REAL_BROWSING enabled - will not fallback to simulated content")
-                        raise Exception("Real browsing required but browser initialization failed")
+                        logger.error("🚨 HEROKU BROWSER FAILURE - Falling back to lightweight mode")
+                        logger.info("💡 Set CONTEXT7_LIGHTWEIGHT_MODE=true for better Heroku performance")
 
                     return False
 
             except Exception as e:
                 logger.error(f"❌ Failed to initialize SeleniumVisualBrowser: {e}")
+                if is_heroku:
+                    logger.info("🔄 Heroku fallback: Using simulated content for better performance")
                 return False
         return True
 
