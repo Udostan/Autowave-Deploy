@@ -573,6 +573,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = conversationInput.value.trim();
         if (!message) return;
 
+        // Check credits before sending message
+        if (window.creditSystem) {
+            const canProceed = await window.creditSystem.enforceCredits('code_generation_simple');
+            if (!canProceed) {
+                console.log('Insufficient credits for Agentic Code');
+                return;
+            }
+        }
+
         isProcessing = true;
         conversationSendBtn.disabled = true;
 
@@ -731,6 +740,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Step 4: Final response
             if (data.explanation) {
                 addAgentMessage(data.explanation);
+            }
+
+            // Consume credits after successful code generation
+            if (window.creditSystem) {
+                window.creditSystem.consumeCredits('code_generation_simple').then(result => {
+                    if (result.success) {
+                        console.log('Credits consumed successfully for Agentic Code:', result.consumed);
+                    } else {
+                        console.warn('Failed to consume credits for Agentic Code:', result.error);
+                    }
+                }).catch(error => {
+                    console.error('Error consuming credits for Agentic Code:', error);
+                });
             }
 
             // Track successful activity in enhanced history

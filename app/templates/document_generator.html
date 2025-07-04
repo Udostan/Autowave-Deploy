@@ -1331,12 +1331,21 @@
         }
 
         // Handle generate button click
-        generateButton.addEventListener('click', function() {
+        generateButton.addEventListener('click', async function() {
             const content = documentContent.value.trim();
 
             if (!content) {
                 alert('Please describe what you want to create.');
                 return;
+            }
+
+            // Check credits before generating document
+            if (window.creditSystem) {
+                const canProceed = await window.creditSystem.enforceCredits('agent_wave_document');
+                if (!canProceed) {
+                    console.log('Insufficient credits for Agent Wave');
+                    return;
+                }
             }
 
             // Clear the input field immediately to allow for new input
@@ -1381,6 +1390,19 @@
                         downloadLink.id = 'pdfDownloadLink';
                         downloadLink.style.display = 'none';
                         document.body.appendChild(downloadLink);
+                    }
+
+                    // Consume credits after successful document generation
+                    if (window.creditSystem) {
+                        window.creditSystem.consumeCredits('agent_wave_document').then(result => {
+                            if (result.success) {
+                                console.log('Credits consumed successfully for Agent Wave:', result.consumed);
+                            } else {
+                                console.warn('Failed to consume credits for Agent Wave:', result.error);
+                            }
+                        }).catch(error => {
+                            console.error('Error consuming credits for Agent Wave:', error);
+                        });
                     }
 
                     // Track successful activity in enhanced history

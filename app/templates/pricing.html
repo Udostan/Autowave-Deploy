@@ -524,29 +524,45 @@ function updateCreditsDisplay(credits, maxCredits, creditType = 'monthly') {
     const creditsDisplay = document.getElementById('credits-display');
     const progressBar = document.getElementById('credits-progress-bar');
 
+    // Check if this is an admin user with unlimited credits
+    const isUnlimited = credits === -1 || maxCredits === -1 || creditType === 'unlimited';
+
     if (creditsDisplay) {
-        creditsDisplay.textContent = credits;
-        console.log('Updated credits display text to:', credits);
+        if (isUnlimited) {
+            creditsDisplay.textContent = 'Unlimited';
+            creditsDisplay.style.color = '#7c3aed'; // Purple color for admin
+            console.log('Updated credits display text to: Unlimited (Admin)');
+        } else {
+            creditsDisplay.textContent = credits;
+            console.log('Updated credits display text to:', credits);
+        }
     }
 
     if (progressBar) {
-        const percentage = (credits / maxCredits) * 100;
-        progressBar.style.width = percentage + '%';
-        console.log('Updated progress bar width to:', percentage + '%');
-
-        // Change color based on credit level
-        if (credits <= 10) {
-            progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-gradient-to-r from-red-600 to-red-800';
-            if (creditsDisplay) creditsDisplay.style.color = '#dc2626';
-            console.log('Applied red color scheme for low credits');
-        } else if (credits <= 25) {
-            progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-gradient-to-r from-yellow-500 to-orange-500';
-            if (creditsDisplay) creditsDisplay.style.color = '#d97706';
-            console.log('Applied yellow color scheme for medium credits');
+        if (isUnlimited) {
+            // Admin users get full purple progress bar
+            progressBar.style.width = '100%';
+            progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-gradient-to-r from-purple-500 to-blue-500';
+            console.log('Applied purple color scheme for admin unlimited credits');
         } else {
-            progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-500';
-            if (creditsDisplay) creditsDisplay.style.color = '#059669';
-            console.log('Applied green color scheme for high credits');
+            const percentage = (credits / maxCredits) * 100;
+            progressBar.style.width = percentage + '%';
+            console.log('Updated progress bar width to:', percentage + '%');
+
+            // Change color based on credit level
+            if (credits <= 10) {
+                progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-gradient-to-r from-red-600 to-red-800';
+                if (creditsDisplay) creditsDisplay.style.color = '#dc2626';
+                console.log('Applied red color scheme for low credits');
+            } else if (credits <= 25) {
+                progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-gradient-to-r from-yellow-500 to-orange-500';
+                if (creditsDisplay) creditsDisplay.style.color = '#d97706';
+                console.log('Applied yellow color scheme for medium credits');
+            } else {
+                progressBar.className = 'h-3 rounded-full transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-500';
+                if (creditsDisplay) creditsDisplay.style.color = '#059669';
+                console.log('Applied green color scheme for high credits');
+            }
         }
     }
 }
@@ -600,7 +616,60 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUserPlanInfo();
     // Load pricing with currency conversion
     loadPricingWithCurrency();
+
+    // Integrate with Universal Credit System
+    initializeUniversalCreditIntegration();
 });
+
+// Integration with Universal Credit System
+function initializeUniversalCreditIntegration() {
+    console.log('Initializing Universal Credit System integration for pricing page...');
+
+    // Wait for Universal Credit System to be ready
+    const checkCreditSystem = setInterval(() => {
+        if (window.creditSystem && window.creditSystem.isInitialized) {
+            console.log('Universal Credit System is ready, updating pricing page...');
+
+            // Update pricing page with current credits
+            const creditStatus = window.creditSystem.getCreditStatus();
+            updateCreditsDisplay(creditStatus.remaining, creditStatus.total, creditStatus.type);
+
+            // Update plan display
+            const planDisplay = document.getElementById('current-plan-display');
+            if (planDisplay) {
+                // Check if admin user with unlimited credits
+                const isUnlimited = creditStatus.remaining === 'unlimited' || creditStatus.remaining === -1 || creditStatus.type === 'unlimited';
+
+                if (isUnlimited) {
+                    planDisplay.textContent = 'Admin Plan';
+                    planDisplay.style.backgroundColor = '#7c3aed'; // Purple for admin
+                    planDisplay.style.color = '#fff';
+                } else {
+                    planDisplay.textContent = creditStatus.plan.charAt(0).toUpperCase() + creditStatus.plan.slice(1) + ' Plan';
+
+                    // Update plan display styling based on plan
+                    if (creditStatus.plan === 'pro') {
+                        planDisplay.style.backgroundColor = '#059669';
+                        planDisplay.style.color = '#fff';
+                    } else if (creditStatus.plan === 'plus') {
+                        planDisplay.style.backgroundColor = '#fbbf24';
+                        planDisplay.style.color = '#000';
+                    } else {
+                        planDisplay.style.backgroundColor = '#f5f5f5';
+                        planDisplay.style.color = '#000';
+                    }
+                }
+            }
+
+            clearInterval(checkCreditSystem);
+        }
+    }, 100);
+
+    // Clear interval after 10 seconds if credit system doesn't load
+    setTimeout(() => {
+        clearInterval(checkCreditSystem);
+    }, 10000);
+}
 
 // Load user plan and credit information
 async function loadUserPlanInfo() {
@@ -617,19 +686,29 @@ async function loadUserPlanInfo() {
             // Update current plan display
             const planDisplay = document.getElementById('current-plan-display');
             if (planDisplay) {
-                planDisplay.textContent = userInfo.display_name || 'Free Plan';
-                console.log('Updated plan display to:', userInfo.display_name);
+                // Check if admin user with unlimited credits
+                const isUnlimited = userInfo.credits && (userInfo.credits.remaining === -1 || userInfo.credits.total === -1 || userInfo.credits.type === 'unlimited') || userInfo.plan_name === 'admin';
 
-                // Update plan badge color based on plan
-                if (userInfo.plan_name === 'free') {
-                    planDisplay.style.backgroundColor = '#f5f5f5';
-                    planDisplay.style.color = '#000';
-                } else if (userInfo.plan_name === 'plus') {
-                    planDisplay.style.background = 'linear-gradient(90deg, #3b82f6, #8b5cf6)';
-                    planDisplay.style.color = 'white';
-                } else if (userInfo.plan_name === 'pro') {
-                    planDisplay.style.backgroundColor = '#fbbf24';
-                    planDisplay.style.color = '#000';
+                if (isUnlimited) {
+                    planDisplay.textContent = 'Admin Plan';
+                    planDisplay.style.backgroundColor = '#7c3aed'; // Purple for admin
+                    planDisplay.style.color = '#fff';
+                    console.log('Updated plan display to: Admin Plan');
+                } else {
+                    planDisplay.textContent = userInfo.display_name || 'Free Plan';
+                    console.log('Updated plan display to:', userInfo.display_name);
+
+                    // Update plan badge color based on plan
+                    if (userInfo.plan_name === 'free') {
+                        planDisplay.style.backgroundColor = '#f5f5f5';
+                        planDisplay.style.color = '#000';
+                    } else if (userInfo.plan_name === 'plus') {
+                        planDisplay.style.background = 'linear-gradient(90deg, #3b82f6, #8b5cf6)';
+                        planDisplay.style.color = 'white';
+                    } else if (userInfo.plan_name === 'pro') {
+                        planDisplay.style.backgroundColor = '#fbbf24';
+                        planDisplay.style.color = '#000';
+                    }
                 }
             }
 
@@ -642,10 +721,18 @@ async function loadUserPlanInfo() {
                 // Update credits text based on type
                 const creditsText = document.getElementById('credits-text');
                 if (creditsText) {
-                    if (credits.type === 'daily') {
+                    // Check if admin user with unlimited credits
+                    const isUnlimited = credits.remaining === -1 || credits.total === -1 || credits.type === 'unlimited';
+
+                    if (isUnlimited) {
+                        creditsText.textContent = 'Admin Plan - Unlimited credits available';
+                        creditsText.style.color = '#7c3aed'; // Purple color for admin
+                    } else if (credits.type === 'daily') {
                         creditsText.textContent = `${credits.remaining} credits remaining today (resets daily)`;
+                        creditsText.style.color = '#888'; // Reset to default color
                     } else {
                         creditsText.textContent = `${credits.remaining} credits remaining this month`;
+                        creditsText.style.color = '#888'; // Reset to default color
                     }
                     console.log('Updated credits text to:', creditsText.textContent);
                 }

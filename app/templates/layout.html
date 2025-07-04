@@ -802,11 +802,24 @@
         const progressBar = document.getElementById('dropdown-credits-bar');
         const creditsText = document.getElementById('dropdown-credits-text');
 
-        if (creditsDisplay) creditsDisplay.textContent = credits;
+        // Check if this is an admin user with unlimited credits
+        const isUnlimited = credits === -1 || maxCredits === -1 || creditType === 'unlimited';
+
+        if (creditsDisplay) {
+            if (isUnlimited) {
+                creditsDisplay.textContent = 'Unlimited';
+                creditsDisplay.className = 'text-lg font-bold text-purple-600';
+            } else {
+                creditsDisplay.textContent = credits;
+                creditsDisplay.className = ''; // Reset class for regular users
+            }
+        }
 
         // Update text based on credit type
         if (creditsText) {
-            if (creditType === 'daily') {
+            if (isUnlimited) {
+                creditsText.textContent = 'Admin - Unlimited Credits';
+            } else if (creditType === 'daily') {
                 creditsText.textContent = `${credits} remaining today`;
             } else {
                 creditsText.textContent = `${credits} remaining this month`;
@@ -814,19 +827,26 @@
         }
 
         if (progressBar) {
-            const percentage = (credits / maxCredits) * 100;
-            progressBar.style.width = percentage + '%';
-
-            // Change color to dark red when credits are low (10 or less)
-            if (credits <= 10) {
-                progressBar.className = 'h-1.5 rounded-full transition-all duration-300 bg-gradient-to-r from-red-600 to-red-800';
-                creditsDisplay.className = 'text-lg font-bold text-red-600';
-            } else if (credits <= 25) {
-                progressBar.className = 'h-1.5 rounded-full transition-all duration-300 bg-gradient-to-r from-yellow-500 to-orange-500';
-                creditsDisplay.className = 'text-lg font-bold text-yellow-600';
+            if (isUnlimited) {
+                // Admin users get full purple progress bar
+                progressBar.style.width = '100%';
+                progressBar.className = 'h-1.5 rounded-full transition-all duration-300 bg-gradient-to-r from-purple-500 to-blue-500';
+                // Don't override creditsDisplay class - it's already set above
             } else {
-                progressBar.className = 'h-1.5 rounded-full transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-500';
-                creditsDisplay.className = 'text-lg font-bold text-green-600';
+                const percentage = (credits / maxCredits) * 100;
+                progressBar.style.width = percentage + '%';
+
+                // Change color to dark red when credits are low (10 or less)
+                if (credits <= 10) {
+                    progressBar.className = 'h-1.5 rounded-full transition-all duration-300 bg-gradient-to-r from-red-600 to-red-800';
+                    if (creditsDisplay) creditsDisplay.className = 'text-lg font-bold text-red-600';
+                } else if (credits <= 25) {
+                    progressBar.className = 'h-1.5 rounded-full transition-all duration-300 bg-gradient-to-r from-yellow-500 to-orange-500';
+                    if (creditsDisplay) creditsDisplay.className = 'text-lg font-bold text-yellow-600';
+                } else {
+                    progressBar.className = 'h-1.5 rounded-full transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-500';
+                    if (creditsDisplay) creditsDisplay.className = 'text-lg font-bold text-green-600';
+                }
             }
         }
     }
@@ -849,9 +869,9 @@
         window.dispatchEvent(new CustomEvent('creditsUpdated'));
     };
 
-    // Auto-refresh credits every 30 seconds
+    // Auto-refresh credits every 30 seconds (disabled when Universal Credit System is active)
     setInterval(function() {
-        if (window.refreshCredits) {
+        if (window.refreshCredits && !window.legacyAutoRefreshDisabled) {
             window.refreshCredits();
         }
     }, 30000);
@@ -861,6 +881,14 @@
         try {
             console.log(`Consuming credits for task: ${taskType}, amount: ${amount}`);
 
+            // Use Universal Credit System if available
+            if (window.creditSystem && window.creditSystem.isInitialized) {
+                console.log('Using Universal Credit System for credit consumption');
+                return await window.creditSystem.consumeCredits(taskType, amount);
+            }
+
+            // Fallback to direct API call
+            console.log('Using fallback credit consumption method');
             const response = await fetch('/payment/consume-credits', {
                 method: 'POST',
                 headers: {
@@ -1039,6 +1067,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         checkAuthStatus();
 
+        // Initialize Universal Credit System integration
+        initializeUniversalCreditSidebarIntegration();
+
         // Account Dropdown Event Listeners
         const dropdownUpgradeBtn = document.getElementById('dropdown-upgrade-btn');
         if (dropdownUpgradeBtn) {
@@ -1111,6 +1142,34 @@
         });
 
     });
+
+    // Integration with Universal Credit System for sidebar
+    function initializeUniversalCreditSidebarIntegration() {
+        console.log('Initializing Universal Credit System integration for sidebar...');
+
+        // Wait for Universal Credit System to be ready
+        const checkCreditSystem = setInterval(() => {
+            if (window.creditSystem && window.creditSystem.isInitialized) {
+                console.log('Universal Credit System is ready, updating sidebar...');
+
+                // Update sidebar with current credits
+                const creditStatus = window.creditSystem.getCreditStatus();
+                updateDropdownCredits(creditStatus.remaining, creditStatus.total, creditStatus.type);
+
+                // Disable legacy auto-refresh to prevent conflicts
+                window.legacyAutoRefreshDisabled = true;
+                console.log('Legacy auto-refresh disabled to prevent conflicts with Universal Credit System');
+
+                clearInterval(checkCreditSystem);
+            }
+        }, 100);
+
+        // Clear interval after 10 seconds if credit system doesn't load
+        setTimeout(() => {
+            clearInterval(checkCreditSystem);
+        }, 10000);
+    }
+
 </script>
 
 <!-- Professional History System -->
@@ -1468,6 +1527,9 @@ body.history-page .history-toggle {
 
 <!-- Session Restoration System JavaScript -->
 <script src="{{ url_for('static', filename='js/session_restoration.js') }}"></script>
+
+<!-- Universal Credit System JavaScript -->
+<script src="{{ url_for('static', filename='js/universal_credit_system.js') }}?v=admin-fix-2024"></script>
 
 <!-- Professional History System is now active -->
 

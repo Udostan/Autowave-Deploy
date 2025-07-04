@@ -510,9 +510,18 @@
         }
 
         // Handle search button click
-        searchButton.addEventListener('click', function() {
+        searchButton.addEventListener('click', async function() {
             const query = researchQuery.value.trim();
             if (!query) return;
+
+            // Check credits before starting research
+            if (window.creditSystem) {
+                const canProceed = await window.creditSystem.enforceCredits('research_basic');
+                if (!canProceed) {
+                    console.log('Insufficient credits for Research Lab');
+                    return;
+                }
+            }
 
             // Get uploaded files if available
             let fileContent = '';
@@ -539,6 +548,19 @@
                 // Display final report
                 finalReport.innerHTML = data.results || 'No results found.';
                 finalReport.classList.remove('hidden');
+
+                // Consume credits after successful research
+                if (window.creditSystem) {
+                    window.creditSystem.consumeCredits('research_basic').then(result => {
+                        if (result.success) {
+                            console.log('Credits consumed successfully for Research Lab:', result.consumed);
+                        } else {
+                            console.warn('Failed to consume credits for Research Lab:', result.error);
+                        }
+                    }).catch(error => {
+                        console.error('Error consuming credits for Research Lab:', error);
+                    });
+                }
 
                 // Track activity in enhanced history
                 if (window.trackActivity) {

@@ -787,8 +787,17 @@
 
 
             // Function to send message to API
-            function sendMessage(message) {
+            async function sendMessage(message) {
                 console.log('=== sendMessage called with:', message);
+
+                // Check credits before sending message
+                if (window.creditSystem) {
+                    const canProceed = await window.creditSystem.enforceCredits('autowave_chat_basic');
+                    if (!canProceed) {
+                        console.log('Insufficient credits for AutoWave Chat');
+                        return;
+                    }
+                }
 
                 // Get uploaded files if available
                 let fileContent = '';
@@ -931,6 +940,19 @@ I'm designed to provide helpful, accurate information and I'll be fully operatio
                         } else {
                             // If it's a normal response, display it as is
                             addMessage(data.response, false);
+
+                            // Consume credits after successful response
+                            if (window.creditSystem) {
+                                window.creditSystem.consumeCredits('autowave_chat_basic').then(result => {
+                                    if (result.success) {
+                                        console.log('Credits consumed successfully:', result.consumed);
+                                    } else {
+                                        console.warn('Failed to consume credits:', result.error);
+                                    }
+                                }).catch(error => {
+                                    console.error('Error consuming credits:', error);
+                                });
+                            }
 
                             // Track activity in enhanced history
                             if (window.trackActivity) {

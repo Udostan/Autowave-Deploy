@@ -122,6 +122,11 @@ def get_user_payment_info():
                 }
             })
 
+        # Check if user is admin first
+        from ..services.admin_service import admin_service
+        user_email = session.get('user_email', '')
+        is_admin_user = admin_service.is_admin(user_email)
+
         # Use CreditService for accurate credit information
         from ..services.credit_service import credit_service
         credit_info = credit_service.get_user_credits(user_id)
@@ -143,27 +148,46 @@ def get_user_payment_info():
                 logger.error(f"Error creating free subscription: {str(e)}")
 
         # Build response with accurate credit information
-        plan_name = credit_info.get('plan', 'free')
-        display_names = {
-            'free': 'Free Plan',
-            'plus': 'Plus Plan',
-            'pro': 'Pro Plan',
-            'enterprise': 'Enterprise Plan'
-        }
+        if is_admin_user:
+            # Admin user with unlimited credits
+            user_info = {
+                'plan_name': 'admin',
+                'display_name': 'Admin Plan',
+                'credits': {
+                    'remaining': -1,  # Unlimited
+                    'total': -1,      # Unlimited
+                    'type': 'unlimited',
+                    'percentage': 100,
+                    'reset_date': None
+                },
+                'authenticated': True,
+                'subscription_status': 'active',
+                'is_admin': True
+            }
+        else:
+            # Regular user
+            plan_name = credit_info.get('plan', 'free')
+            display_names = {
+                'free': 'Free Plan',
+                'plus': 'Plus Plan',
+                'pro': 'Pro Plan',
+                'enterprise': 'Enterprise Plan'
+            }
 
-        user_info = {
-            'plan_name': plan_name,
-            'display_name': display_names.get(plan_name, 'Free Plan'),
-            'credits': {
-                'remaining': credit_info.get('remaining', 50),
-                'total': credit_info.get('total', 50),
-                'type': credit_info.get('type', 'daily'),
-                'percentage': credit_info.get('percentage', 100),
-                'reset_date': credit_info.get('reset_date')
-            },
-            'authenticated': True,
-            'subscription_status': getattr(user_subscription, 'status', 'active') if user_subscription else 'active'
-        }
+            user_info = {
+                'plan_name': plan_name,
+                'display_name': display_names.get(plan_name, 'Free Plan'),
+                'credits': {
+                    'remaining': credit_info.get('remaining', 50),
+                    'total': credit_info.get('total', 50),
+                    'type': credit_info.get('type', 'daily'),
+                    'percentage': credit_info.get('percentage', 100),
+                    'reset_date': credit_info.get('reset_date')
+                },
+                'authenticated': True,
+                'subscription_status': getattr(user_subscription, 'status', 'active') if user_subscription else 'active',
+                'is_admin': False
+            }
 
         return jsonify({
             'success': True,

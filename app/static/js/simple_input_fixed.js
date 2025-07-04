@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Execute Task button
     if (executeTaskBtn) {
         console.log('Execute Task button found');
-        executeTaskBtn.addEventListener('click', function() {
+        executeTaskBtn.addEventListener('click', async function() {
             console.log('Execute Task button clicked');
 
             if (!taskDescription) {
@@ -170,6 +170,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!description) {
                 alert('Please enter a task description');
                 return;
+            }
+
+            // Check credits before executing task
+            if (window.creditSystem) {
+                const canProceed = await window.creditSystem.enforceCredits('prime_agent_task');
+                if (!canProceed) {
+                    console.log('Insufficient credits for Prime Agent task');
+                    return;
+                }
             }
 
             // Show results container with progress tracking
@@ -724,6 +733,19 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </div>
                     `;
+
+                    // Consume credits after successful task completion
+                    if (window.creditSystem) {
+                        window.creditSystem.consumeCredits('prime_agent_task').then(result => {
+                            if (result.success) {
+                                console.log('Credits consumed successfully for Prime Agent task:', result.consumed);
+                            } else {
+                                console.warn('Failed to consume credits for Prime Agent task:', result.error);
+                            }
+                        }).catch(error => {
+                            console.error('Error consuming credits for Prime Agent task:', error);
+                        });
+                    }
 
                     // Track successful activity in enhanced history
                     if (window.trackActivity) {

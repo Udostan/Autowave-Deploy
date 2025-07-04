@@ -82,6 +82,15 @@ class PrimeAgentTools {
             return;
         }
 
+        // Check credits before executing task
+        if (window.creditSystem) {
+            const canProceed = await window.creditSystem.enforceCredits('context7_package_tracking');
+            if (!canProceed) {
+                console.log('Insufficient credits for Context7 Tools');
+                return;
+            }
+        }
+
         // Get uploaded files if available
         let fileContent = '';
         if (window.universalFileUpload) {
@@ -366,6 +375,19 @@ class PrimeAgentTools {
         if (this.eventSource) {
             this.eventSource.close();
             this.eventSource = null;
+        }
+
+        // Consume credits after successful task completion
+        if (window.creditSystem) {
+            window.creditSystem.consumeCredits('context7_package_tracking').then(result => {
+                if (result.success) {
+                    console.log('Credits consumed successfully for Context7 Tools:', result.consumed);
+                } else {
+                    console.warn('Failed to consume credits for Context7 Tools:', result.error);
+                }
+            }).catch(error => {
+                console.error('Error consuming credits for Context7 Tools:', error);
+            });
         }
 
         // Show completion indicator

@@ -116,7 +116,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(screen_recorder_bp)
     app.register_blueprint(screen_recorder_ws_bp)
-    app.register_blueprint(api_bp)
+    app.register_blueprint(api_bp, url_prefix='/api')
 
     # Register Agentic Code blueprint
     from app.api.agentic_code import agentic_code_bp

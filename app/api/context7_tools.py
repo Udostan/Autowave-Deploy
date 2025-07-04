@@ -7636,32 +7636,8 @@ def execute_context7_task():
         # Execute Context 7 tools with real web browsing
         def execute_task():
             try:
-                # Helper function to check and consume credits
-                def check_and_consume_credits(tool_type: str) -> bool:
-                    """Check and consume credits for a tool. Returns True if successful, False if insufficient credits."""
-                    if user_id:
-                        credit_result = credit_service.consume_credits(user_id, tool_type)
-                        if not credit_result.get('success', False):
-                            error_result = {
-                                "success": False,
-                                "task_summary": f"""# ❌ Insufficient Credits
-
-## {tool_type.replace('context7_', '').replace('_', ' ').title()} requires {credit_service.get_task_credit_cost(tool_type)} credits
-
-**Available Credits**: {credit_result.get('credits_available', 0)}
-**Credits Needed**: {credit_result.get('credits_needed', 0)}
-**Current Plan**: {credit_result.get('plan', 'free')}
-
-### 💳 Upgrade Your Plan
-To access Context 7 tools with real web browsing, please upgrade your plan or wait for daily credit reset.
-
-[Upgrade Plan](/pricing)
-""",
-                                "error": "Insufficient credits"
-                            }
-                            task_manager.complete_task(task_id, error_result)
-                            return False
-                    return True
+                # Note: Credit checking is now handled by Universal Credit System on frontend
+                # This ensures consistent credit enforcement across all pages
 
                 # Detect tool type and use real web browsing
                 task_lower = enhanced_task.lower()
@@ -7671,209 +7647,163 @@ To access Context 7 tools with real web browsing, please upgrade your plan or wa
                 # Flight booking detection
                 if any(term in task_lower for term in ["flight", "fly", "airplane", "airline", "book flight", "air travel"]):
                     tool_type = "context7_flight_booking"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_flight_booking(task_id, enhanced_task)
 
                 # Hotel search detection
                 elif any(term in task_lower for term in ["hotel", "accommodation", "stay", "book hotel", "find hotel"]):
                     tool_type = "context7_hotel_booking"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_hotel_search(task_id, enhanced_task)
 
                 # Restaurant booking detection
                 elif any(term in task_lower for term in ["restaurant", "dining", "book restaurant", "find restaurant", "table", "reservation"]):
                     tool_type = "context7_ride_booking"  # Using ride booking cost for restaurant
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_restaurant_booking(task_id, enhanced_task)
 
                 # Price comparison detection (check this BEFORE real estate to avoid conflicts)
                 elif any(term in task_lower for term in ["compare price", "price comparison", "best price", "cheapest", "find deals", "amazon", "compare prices"]):
                     tool_type = "context7_package_tracking"  # Using package tracking cost for price comparison
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_price_comparison(task_id, enhanced_task)
 
                 # Real estate search detection
                 elif any(term in task_lower for term in ["apartment", "house", "real estate", "rent", "buy house", "property", "zillow"]):
                     tool_type = "context7_home_services"  # Using home services cost for real estate
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_real_estate_search(task_id, enhanced_task)
 
                 # Ride booking detection
                 elif any(term in task_lower for term in ["uber", "lyft", "ride", "taxi", "rideshare", "get a ride"]):
                     tool_type = "context7_ride_booking"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_ride_booking(task_id, enhanced_task)
 
                 # Event ticket detection
                 elif any(term in task_lower for term in ["ticket", "concert", "event", "show", "sports", "theater"]):
                     tool_type = "context7_home_services"  # Using home services cost for events
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_event_ticket_search(task_id, enhanced_task)
 
                 # Job search detection
                 elif any(term in task_lower for term in ["job", "career", "employment", "hiring", "work", "position"]):
                     tool_type = "context7_job_search"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_job_search(task_id, enhanced_task)
 
                 # Medical appointment detection
                 elif any(term in task_lower for term in ["doctor", "medical", "appointment", "health", "clinic", "hospital"]):
                     tool_type = "context7_medical_appointment"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_medical_appointment(task_id, enhanced_task)
 
                 # Government services detection
                 elif any(term in task_lower for term in ["dmv", "passport", "government", "irs", "tax", "license"]):
                     tool_type = "context7_government_services"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_government_services(task_id, enhanced_task)
 
                 # Shipping tracker detection
                 elif any(term in task_lower for term in ["track", "package", "shipping", "delivery", "fedex", "ups", "usps"]):
                     tool_type = "context7_package_tracking"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_shipping_tracker(task_id, enhanced_task)
 
                 # Financial monitor detection
                 elif any(term in task_lower for term in ["bank", "account", "finance", "credit", "balance", "transaction"]):
                     tool_type = "context7_financial_monitoring"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_financial_monitor(task_id, enhanced_task)
 
                 # Business plan detection
                 elif any(term in task_lower for term in ["business plan", "startup", "entrepreneur", "business model"]):
                     tool_type = "context7_business_plan"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_business_plan(task_id, enhanced_task)
 
                 # Travel planning detection
                 elif any(term in task_lower for term in ["plan a trip", "travel plan", "itinerary", "visit", "vacation", "travel to"]):
                     tool_type = "context7_travel_planning"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_travel_planning(task_id, enhanced_task)
 
                 # Form filling detection
                 elif any(term in task_lower for term in ["fill form", "form filling", "complete form", "tax form", "application form", "survey", "fill out", "contact form", "automatically", "auto fill", "registration form", "signup form"]):
                     tool_type = "context7_form_filling"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_form_filling(task_id, enhanced_task)
 
                 # Pharmacy search detection
                 elif any(term in task_lower for term in ["pharmacy", "prescription", "medication", "drug store", "cvs", "walgreens", "medicine"]):
                     tool_type = "context7_pharmacy_search"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_pharmacy_search(task_id, enhanced_task)
 
                 # Car rental detection
                 elif any(term in task_lower for term in ["car rental", "rent a car", "enterprise", "hertz", "budget", "auto rental", "vehicle rental"]):
                     tool_type = "context7_car_rental"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_car_rental_search(task_id, enhanced_task)
 
                 # Fitness search detection
                 elif any(term in task_lower for term in ["gym", "fitness", "workout", "personal trainer", "yoga", "exercise", "planet fitness"]):
                     tool_type = "context7_fitness_services"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_fitness_search(task_id, enhanced_task)
 
                 # Home services detection
                 elif any(term in task_lower for term in ["contractor", "home repair", "plumber", "electrician", "handyman", "home services", "angie", "taskrabbit"]):
                     tool_type = "context7_home_services"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_home_services_search(task_id, enhanced_task)
 
                 # Legal services detection
                 elif any(term in task_lower for term in ["lawyer", "attorney", "legal", "law firm", "legal advice", "consultation", "avvo"]):
                     tool_type = "context7_legal_services"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_legal_services_search(task_id, enhanced_task)
 
                 # Online course detection
                 elif any(term in task_lower for term in ["online course", "certification", "coursera", "udemy", "edx", "learn", "training", "skill development"]):
                     tool_type = "context7_online_course_search"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_online_course_search(task_id, enhanced_task)
 
                 # Banking services detection
                 elif any(term in task_lower for term in ["bank", "banking", "credit card", "loan", "mortgage", "savings account", "checking account", "financial services"]):
                     tool_type = "context7_banking_services"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_banking_services_search(task_id, enhanced_task)
 
                 # Appliance repair detection
                 elif any(term in task_lower for term in ["appliance repair", "fix", "repair", "broken", "washing machine", "dryer", "refrigerator", "dishwasher", "electronics repair"]):
                     tool_type = "context7_appliance_repair"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_appliance_repair_search(task_id, enhanced_task)
 
                 # Gardening services detection
                 elif any(term in task_lower for term in ["landscaping", "gardening", "lawn care", "tree service", "yard work", "garden", "landscape"]):
                     tool_type = "context7_gardening_services"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_gardening_services_search(task_id, enhanced_task)
 
                 # Event planning detection
                 elif any(term in task_lower for term in ["event planning", "wedding", "party", "catering", "event", "celebration", "birthday party"]):
                     tool_type = "context7_event_planning"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_event_planning_search(task_id, enhanced_task)
 
                 # Auto maintenance detection
                 elif any(term in task_lower for term in ["auto repair", "car repair", "mechanic", "oil change", "tire", "brake", "auto maintenance", "car service"]):
                     tool_type = "context7_auto_maintenance"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_auto_maintenance_search(task_id, enhanced_task)
 
                 # Tech support detection
                 elif any(term in task_lower for term in ["tech support", "computer repair", "it support", "geek squad", "tech help", "computer help", "laptop repair"]):
                     tool_type = "context7_tech_support"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_tech_support_search(task_id, enhanced_task)
 
                 # Cleaning services detection
                 elif any(term in task_lower for term in ["cleaning", "house cleaning", "maid", "housekeeping", "cleaning service", "clean house"]):
                     tool_type = "context7_cleaning_services"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_cleaning_services_search(task_id, enhanced_task)
 
                 # Tutoring services detection
                 elif any(term in task_lower for term in ["tutor", "tutoring", "math tutor", "homework help", "test prep", "academic help", "study help"]):
                     tool_type = "context7_tutoring_services"
-                    if not check_and_consume_credits(tool_type):
-                        return
                     result = real_context7_tools.execute_tutoring_services_search(task_id, enhanced_task)
 
                 # If we have a result from real web browsing, use it
                 if result:
                     task_manager.complete_task(task_id, result)
+
+                    # Consume credits after successful completion (backend fallback)
+                    # Note: Frontend Universal Credit System handles primary credit enforcement
+                    if result.get('success', False) and tool_type and user_id:
+                        try:
+                            credit_result = credit_service.consume_credits(user_id, tool_type)
+                            if credit_result.get('success', False):
+                                logger.info(f"Credits consumed for {tool_type}: {credit_result.get('credits_consumed', 0)}")
+                            else:
+                                logger.warning(f"Failed to consume credits for {tool_type}: {credit_result.get('error', 'Unknown error')}")
+                        except Exception as e:
+                            logger.error(f"Error consuming credits for {tool_type}: {str(e)}")
 
                     # Store successful result in memory
                     if result.get('success', False):
