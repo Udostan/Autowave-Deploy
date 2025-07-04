@@ -74,7 +74,7 @@ class RealWebBrowsingContext7Tools:
                 # Detect Heroku environment
                 is_heroku = os.environ.get('DYNO') is not None
                 if is_heroku:
-                    logger.info("🚀 HEROKU DETECTED: Initializing browser for Heroku environment")
+                    logger.info("🚀 HEROKU DETECTED: Initializing browser for Heroku environment with Chrome buildpack")
 
                 # PRIORITY 1: Try StealthBrowser (most advanced CAPTCHA bypass)
                 try:
