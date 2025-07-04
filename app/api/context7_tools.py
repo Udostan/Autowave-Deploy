@@ -65,44 +65,33 @@ class RealWebBrowsingContext7Tools:
         """Initialize browser with Heroku optimization"""
         if not self.browser:
             try:
-                # Detect Heroku environment and check for lightweight mode
+                # Detect Heroku environment - always use lightweight mode for Context7 tools
                 is_heroku = os.environ.get('DYNO') is not None
-                lightweight_mode = os.environ.get('CONTEXT7_LIGHTWEIGHT_MODE', 'false').lower() == 'true'
 
-                if is_heroku and lightweight_mode:
-                    logger.info("🚀 HEROKU LIGHTWEIGHT MODE: Skipping browser initialization to prevent memory crashes")
+                if is_heroku:
+                    logger.info("🔧 HEROKU DETECTED: Using lightweight mode for Context7 tools to prevent memory crashes")
                     logger.info("💡 Context7 tools will use simulated content for better app stability")
-                    # Don't initialize browser in lightweight mode - use simulated content
+                    logger.info("🎯 Other agents (prime agent, etc.) will work normally")
+                    # On Heroku, skip browser initialization for Context7 tools only
                     return False
-                elif is_heroku:
+                else:
                     logger.info("🚀 HEROKU DETECTED: Initializing SeleniumVisualBrowser with Chrome buildpack")
-                else:
-                    logger.info("🔧 LOCAL DEVELOPMENT: Initializing SeleniumVisualBrowser")
+                    logger.info("🔧 LOCAL DEVELOPMENT: Initializing SeleniumVisualBrowser for Context7 tools")
 
-                # Initialize SeleniumVisualBrowser (the ONLY browser that works with Context7 tools)
-                self.browser = SeleniumVisualBrowser(headless=True)
-                start_result = self.browser.start()
+                    # Initialize SeleniumVisualBrowser (the ONLY browser that works with Context7 tools)
+                    self.browser = SeleniumVisualBrowser(headless=True)
+                    start_result = self.browser.start()
 
-                if start_result.get('success'):
-                    if is_heroku:
-                        logger.info("✅ Browser initialized successfully on Heroku with Chrome buildpack")
-                    else:
+                    if start_result.get('success'):
                         logger.info("✅ Browser initialized successfully for local development")
-                    return True
-                else:
-                    error_msg = start_result.get('error', 'Unknown error')
-                    logger.error(f"❌ Failed to start SeleniumVisualBrowser: {error_msg}")
-
-                    if is_heroku:
-                        logger.error("🚨 HEROKU BROWSER FAILURE - Falling back to lightweight mode")
-                        logger.info("💡 Set CONTEXT7_LIGHTWEIGHT_MODE=true for better Heroku performance")
-
-                    return False
+                        return True
+                    else:
+                        error_msg = start_result.get('error', 'Unknown error')
+                        logger.error(f"❌ Failed to start SeleniumVisualBrowser: {error_msg}")
+                        return False
 
             except Exception as e:
                 logger.error(f"❌ Failed to initialize SeleniumVisualBrowser: {e}")
-                if is_heroku:
-                    logger.info("🔄 Heroku fallback: Using simulated content for better performance")
                 return False
         return True
 
