@@ -7652,13 +7652,47 @@ def execute_context7_task():
         # Execute Context 7 tools with real web browsing
         def execute_task():
             try:
-                # Note: Credit checking is now handled by Universal Credit System on frontend
-                # This ensures consistent credit enforcement across all pages
+                # Initialize credit service for token-based consumption
+                from ..services.credit_service import CreditService
+                credit_service = CreditService()
 
                 # Detect tool type and use real web browsing
                 task_lower = enhanced_task.lower()
                 result = None
                 tool_type = None
+
+                # Determine task complexity for credit calculation
+                if len(enhanced_task) > 500 or any(keyword in task_lower for keyword in ['complex', 'comprehensive', 'detailed', 'advanced']):
+                    task_type = 'context7_tools_complex'
+                else:
+                    task_type = 'context7_tools_basic'
+
+                # Pre-consume minimum credits (will be adjusted after execution)
+                pre_credit_result = credit_service.consume_credits(
+                    user_id=user_id,
+                    task_type=task_type,
+                    input_text=enhanced_task,
+                    output_text="",  # Will update after execution
+                    use_token_based=True
+                )
+
+                if not pre_credit_result['success']:
+                    error_result = {
+                        "success": False,
+                        "task_summary": f"""# ❌ Insufficient Credits
+
+You need more credits to use Context7 Tools.
+
+**Current Plan:** {pre_credit_result.get('plan', 'Free')}
+**Credits Available:** {pre_credit_result.get('credits_available', 0)}
+**Credits Needed:** {pre_credit_result.get('credits_needed', 1)}
+
+[Upgrade Plan](/pricing)
+""",
+                        "error": "Insufficient credits"
+                    }
+                    task_manager.complete_task(task_id, error_result)
+                    return
 
                 # Flight booking detection
                 if any(term in task_lower for term in ["flight", "fly", "airplane", "airline", "book flight", "air travel"]):
@@ -7807,19 +7841,33 @@ def execute_context7_task():
 
                 # If we have a result from real web browsing, use it
                 if result:
-                    task_manager.complete_task(task_id, result)
-
-                    # Consume credits after successful completion (backend fallback)
-                    # Note: Frontend Universal Credit System handles primary credit enforcement
-                    if result.get('success', False) and tool_type and user_id:
+                    # Calculate final token-based credits after tool execution
+                    if user_id and user_id != 'anonymous':
                         try:
-                            credit_result = credit_service.consume_credits(user_id, tool_type)
-                            if credit_result.get('success', False):
-                                logger.info(f"Credits consumed for {tool_type}: {credit_result.get('credits_consumed', 0)}")
-                            else:
-                                logger.warning(f"Failed to consume credits for {tool_type}: {credit_result.get('error', 'Unknown error')}")
+                            # Get the generated content for token counting
+                            output_text = str(result.get('task_summary', ''))
+                            execution_time = 2.0  # Context7 tools typically take 2+ minutes
+                            tool_calls = 1  # Each Context7 tool counts as 1 tool call
+
+                            # Calculate actual credits consumed based on tokens
+                            final_credit_result = credit_service.calculate_token_based_credits(
+                                input_text=enhanced_task,
+                                output_text=output_text,
+                                task_type=task_type,
+                                execution_time_minutes=execution_time,
+                                tool_calls=tool_calls,
+                                image_count=1  # Context7 tools often include screenshots
+                            )
+
+                            # Add credit breakdown to response
+                            result['credits_consumed'] = pre_credit_result['credits_consumed']
+                            result['credit_breakdown'] = final_credit_result
+
+                            logger.info(f"Token-based credits consumed for {task_type}: {pre_credit_result['credits_consumed']}")
                         except Exception as e:
-                            logger.error(f"Error consuming credits for {tool_type}: {str(e)}")
+                            logger.error(f"Error calculating final credits: {e}")
+
+                    task_manager.complete_task(task_id, result)
 
                     # Store successful result in memory
                     if result.get('success', False):

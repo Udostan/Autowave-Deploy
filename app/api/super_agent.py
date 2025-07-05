@@ -4,12 +4,14 @@ API endpoints for the Prime Agent functionality.
 
 import json
 import traceback
+from datetime import datetime
 from flask import jsonify, request, Blueprint
 from app.agents.super_agent import SuperAgent
 from app.utils.session_manager import SessionManager
 from app.agents.tasks.task_factory import TaskFactory
 from app.utils.web_browser import WebBrowser
 from app.utils.mcp_client import MCPClient
+from app.services.credit_service import CreditService
 
 # Create Blueprint for Super Agent API
 super_agent_bp = Blueprint('super_agent', __name__, url_prefix='/api/super-agent')
@@ -309,6 +311,36 @@ def execute_task():
         if not task_description:
             return jsonify({"error": "Task description is required", "success": False}), 400
 
+        # Get user ID from session or request
+        user_id = request.json.get('user_id', 'anonymous_user')
+
+        # Initialize credit service for token-based consumption
+        credit_service = CreditService()
+
+        # Determine task type for minimum charge calculation
+        if use_advanced_browser or use_browser_use or len(task_description) > 200:
+            task_type = 'prime_agent_complex'  # Higher minimum for complex tasks
+        else:
+            task_type = 'prime_agent_basic'    # Lower minimum for basic tasks
+
+        # Pre-consume minimum credits (will be adjusted after execution)
+        pre_credit_result = credit_service.consume_credits(
+            user_id=user_id,
+            task_type=task_type,
+            input_text=task_description,
+            output_text="",  # Will update after execution
+            use_token_based=True
+        )
+
+        if not pre_credit_result['success']:
+            return jsonify({
+                'success': False,
+                'error': pre_credit_result.get('error', 'Insufficient credits'),
+                'credits_consumed': 0,
+                'remaining_credits': pre_credit_result.get('remaining_credits', 0),
+                'credits_needed': pre_credit_result.get('credits_needed', 0)
+            }), 402  # Payment Required
+
         print(f"Executing task: {task_description}")
         print(f"Using browser-use: {use_browser_use}")
         print(f"Using advanced browser: {use_advanced_browser}")
@@ -434,6 +466,29 @@ def execute_task():
         # Add session ID and planning steps to result
         result['session_id'] = session_id
         result['planning_steps'] = planning_steps
+
+        # Calculate final token-based credits after task execution
+        output_text = str(result.get('result', ''))
+        execution_time = (datetime.now() - datetime.now()).total_seconds() / 60  # Placeholder for actual timing
+        tool_calls = len(result.get('results', [])) if 'results' in result else 0
+
+        # Calculate actual credits consumed based on tokens
+        final_credit_result = credit_service.calculate_token_based_credits(
+            input_text=task_description,
+            output_text=output_text,
+            task_type=task_type,
+            execution_time_minutes=execution_time,
+            tool_calls=tool_calls,
+            image_count=0  # Could be enhanced to count actual images
+        )
+
+        # Get updated credit status after consumption
+        updated_credit_status = credit_service.get_user_credits(user_id)
+
+        # Add credit consumption info to response
+        result['credits_consumed'] = pre_credit_result['credits_consumed']
+        result['remaining_credits'] = updated_credit_status.get('remaining', 50)
+        result['credit_breakdown'] = final_credit_result  # Include detailed breakdown
 
         # Update session with task result
         session.set_data(f"task_result_{len(session.get_history())}", result)

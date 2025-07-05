@@ -14,30 +14,30 @@ class UniversalCreditSystem {
         this.isInitialized = false;
         this.version = '2.0.1'; // Cache buster for admin fix
         this.creditCosts = {
-            // Basic AI Tasks
+            // Basic AI Tasks (Genspark-style: 1 credit per basic task)
             'chat_message': 1,
-            'simple_search': 2,
-            'text_generation': 2,
+            'simple_search': 1,
+            'text_generation': 1,
             'basic_query': 1,
 
-            // AutoWave Chat (dark-chat)
-            'autowave_chat_basic': 2,
-            'autowave_chat_advanced': 4,
+            // AutoWave Chat (dark-chat) - Genspark-style: 1-3 credits
+            'autowave_chat_basic': 1,
+            'autowave_chat_advanced': 3,
 
-            // Prime Agent (autowave)
-            'prime_agent_task': 5,
-            'prime_agent_complex': 8,
+            // Prime Agent (autowave) - Genspark-style: 2-6 credits
+            'prime_agent_basic': 2,
+            'prime_agent_complex': 6,
 
-            // Agent Wave (document-generator)
-            'agent_wave_email': 8,
-            'agent_wave_seo': 12,
-            'agent_wave_learning': 15,
-            'agent_wave_document': 10,
+            // Agent Wave (document-generator) - Reduced costs
+            'agent_wave_email': 3,
+            'agent_wave_seo': 5,
+            'agent_wave_learning': 8,
+            'agent_wave_document': 4,
 
-            // Research Lab (deep-research)
-            'research_basic': 10,
-            'research_advanced': 20,
-            'research_comprehensive': 30,
+            // Research Lab (deep-research) - Genspark-style: 3-12 credits
+            'research_basic': 3,
+            'research_advanced': 8,
+            'research_comprehensive': 12,
 
             // Agentic Code (Design)
             'code_generation_simple': 15,

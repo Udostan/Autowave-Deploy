@@ -511,7 +511,10 @@ def generate_document():
     """
     start_time = time.time()
     session_id = str(uuid.uuid4())
-    user_id = "anonymous_user"  # TODO: Get from session/auth
+
+    # Get user_id from session for credit consumption
+    from flask import session
+    user_id = session.get('user_id', 'anonymous')
 
     try:
         data = request.get_json()
@@ -542,6 +545,33 @@ def generate_document():
                 'success': False,
                 'error': 'No content provided'
             })
+
+        # Initialize credit service for token-based consumption
+        from ..services.credit_service import CreditService
+        credit_service = CreditService()
+
+        # Determine task type for minimum charge calculation
+        if len(content) > 1000 or any(keyword in content.lower() for keyword in ['complex', 'comprehensive', 'detailed', 'advanced']):
+            task_type = 'design_complex'
+        else:
+            task_type = 'design_basic'
+
+        # Pre-consume minimum credits (will be adjusted after execution)
+        pre_credit_result = credit_service.consume_credits(
+            user_id=user_id,
+            task_type=task_type,
+            input_text=content,
+            output_text="",  # Will update after execution
+            use_token_based=True
+        )
+
+        if not pre_credit_result['success']:
+            return jsonify({
+                'success': False,
+                'error': pre_credit_result.get('error', 'Insufficient credits'),
+                'credits_needed': pre_credit_result.get('credits_needed'),
+                'credits_available': pre_credit_result.get('credits_available')
+            }), 402  # Payment Required
 
         # Log the request for debugging
         logger.info(f"Processing document generation request: {content[:100]}...")
@@ -678,6 +708,37 @@ def generate_document():
             success=True,
             session_id=session_id
         )
+
+        # Calculate final token-based credits after document generation
+        if user_id and user_id != 'anonymous':
+            try:
+                # Get the generated content for token counting
+                output_text = document_html
+                execution_time = processing_time_ms / 60000  # Convert to minutes
+
+                # Calculate actual credits consumed based on tokens
+                final_credit_result = credit_service.calculate_token_based_credits(
+                    input_text=content,
+                    output_text=output_text,
+                    task_type=task_type,
+                    execution_time_minutes=execution_time,
+                    tool_calls=1,  # Document generation counts as 1 tool call
+                    image_count=0
+                )
+
+                # Add credit breakdown to response
+                response_data = {
+                    'success': True,
+                    'document_html': document_html,
+                    'pdf_base64': pdf_base64,
+                    'preview': document_result.get('preview', ''),
+                    'session_id': session_id,
+                    'credits_consumed': pre_credit_result['credits_consumed'],
+                    'credit_breakdown': final_credit_result
+                }
+                return jsonify(response_data)
+            except Exception as e:
+                logger.error(f"Error calculating final credits: {e}")
 
         return jsonify({
             'success': True,

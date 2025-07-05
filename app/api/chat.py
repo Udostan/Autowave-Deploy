@@ -408,15 +408,18 @@ def chat_message():
         # Process the chat message
         result = do_chat(message)
 
+        # Get updated credit status after consumption
+        updated_credit_status = credit_service.get_user_credits(user_id)
+
         # Add credit consumption info to response
         result['credits_consumed'] = credit_result['credits_consumed']
-        result['remaining_credits'] = credit_result['remaining_credits']
+        result['remaining_credits'] = updated_credit_status.get('remaining', 50)
 
         return jsonify({
             'success': True,
             'response': result.get('response', ''),
             'credits_consumed': credit_result['credits_consumed'],
-            'remaining_credits': credit_result['remaining_credits']
+            'remaining_credits': updated_credit_status.get('remaining', 50)
         })
     except Exception as e:
         logger.error(f"Error processing chat message: {str(e)}")

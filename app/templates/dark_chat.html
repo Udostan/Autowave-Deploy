@@ -803,14 +803,59 @@
                 })
                 .then(response => {
                     console.log("API response status:", response.status);
+
+                    // Handle credit errors (402 status)
+                    if (response.status === 402) {
+                        return response.json().then(errorData => {
+                            hideTypingIndicator();
+
+                            const creditError = `
+## 💳 Insufficient Credits
+
+You need **${errorData.credits_needed || 'more'}** credits to use this feature, but you only have **${errorData.credits_available || 0}** credits remaining.
+
+### 🚀 Get More Credits:
+- **Free Plan**: Get 50 free credits every 24 hours
+- **Plus Plan ($15/month)**: 1,000 credits monthly
+- **Pro Plan ($169/month)**: Unlimited credits
+
+[Upgrade Your Plan](/pricing) to continue using AutoWave!`;
+
+                            addMessage(creditError, false);
+                            return null; // Don't process further
+                        });
+                    }
+
                     return response.json();
                 })
                 .then(data => {
                     try {
+                        // Skip processing if data is null (credit error already handled)
+                        if (!data) {
+                            return;
+                        }
+
                         // Hide typing indicator
                         hideTypingIndicator();
 
                         console.log("API response data:", data);
+
+                        // Update credits if provided in response
+                        if (data.credits_consumed && data.remaining_credits !== undefined) {
+                            console.log(`💳 Credits consumed: ${data.credits_consumed}, Remaining: ${data.remaining_credits}`);
+
+                            // Update credit display in sidebar if it exists
+                            const creditDisplay = document.querySelector('.credit-count, .credits-remaining, [data-credits]');
+                            if (creditDisplay) {
+                                creditDisplay.textContent = data.remaining_credits;
+                                console.log(`💳 Updated credit display to: ${data.remaining_credits}`);
+                            }
+
+                            // Update universal credit system if available
+                            if (window.universalCreditSystem) {
+                                window.universalCreditSystem.updateCredits(data.remaining_credits);
+                            }
+                        }
 
                         // Add AI response
                         if (data.response) {

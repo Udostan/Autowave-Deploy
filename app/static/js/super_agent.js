@@ -472,6 +472,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (data.error) {
+                    // Check if this is a credit-related error
+                    const isCreditError = data.error.toLowerCase().includes('credit') ||
+                                         data.error.toLowerCase().includes('insufficient') ||
+                                         data.error.toLowerCase().includes('payment required');
+
                     // Track failed activity
                     if (window.trackActivity) {
                         try {
@@ -488,19 +493,39 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
 
-                    // Display error
+                    // Display error with special handling for credit errors
+                    const errorClass = isCreditError ? 'border-yellow-200' : 'border-red-200';
+                    const errorBgClass = isCreditError ? 'bg-yellow-50' : 'bg-red-50';
+                    const errorTextClass = isCreditError ? 'text-yellow-700' : 'text-red-700';
+                    const errorIcon = isCreditError ?
+                        `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>` :
+                        `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>`;
+
+                    const upgradeButton = isCreditError ?
+                        `<div class="mt-4">
+                            <a href="/pricing" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                                </svg>
+                                Upgrade Plan
+                            </a>
+                        </div>` : '';
+
                     taskResults.innerHTML = `
-                        <div class="bg-white rounded-lg shadow-sm border border-red-200 overflow-hidden">
-                            <div class="bg-red-50 px-6 py-4 border-b border-red-200">
-                                <h3 class="text-lg font-semibold text-red-700 flex items-center">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                    </svg>
-                                    Error
+                        <div class="bg-white rounded-lg shadow-sm border ${errorClass} overflow-hidden">
+                            <div class="${errorBgClass} px-6 py-4 border-b ${errorClass}">
+                                <h3 class="text-lg font-semibold ${errorTextClass} flex items-center">
+                                    ${errorIcon}
+                                    ${isCreditError ? 'Insufficient Credits' : 'Error'}
                                 </h3>
                             </div>
-                            <div class="p-6 text-red-700">
+                            <div class="p-6 ${errorTextClass}">
                                 ${data.error}
+                                ${upgradeButton}
                             </div>
                         </div>
                     `;
@@ -1069,6 +1094,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Initial update
                     updateTaskResults();
 
+                    // Handle credit consumption if present in response
+                    if (data.credits_consumed !== undefined && data.remaining_credits !== undefined) {
+                        console.log(`Credits consumed: ${data.credits_consumed}, Remaining: ${data.remaining_credits}`);
+
+                        // Update Universal Credit System if available
+                        if (window.creditSystem && window.creditSystem.isInitialized) {
+                            console.log('Updating Universal Credit System with new credit info');
+                            window.creditSystem.userCredits.remaining = data.remaining_credits;
+                            window.creditSystem.updateSidebarCredits();
+                        }
+
+                        // Also trigger global credit refresh
+                        if (window.refreshCredits) {
+                            window.refreshCredits();
+                        }
+
+                        // Show credit consumption notification
+                        if (window.showNotification) {
+                            window.showNotification(`Used ${data.credits_consumed} credits for this task. ${data.remaining_credits} remaining.`, 'success');
+                        }
+                    }
+
                     // Track successful activity in enhanced history
                     if (window.trackActivity) {
                         try {
@@ -1085,7 +1132,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 screenshot_count: screenshots.length,
                                 has_web_images: webImages.length > 0,
                                 web_image_count: webImages.length,
-                                sources_count: sources.length
+                                sources_count: sources.length,
+                                credits_consumed: data.credits_consumed,
+                                remaining_credits: data.remaining_credits
                             });
                         } catch (trackError) {
                             console.warn('Error tracking activity:', trackError);

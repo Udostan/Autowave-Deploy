@@ -22,27 +22,33 @@ def do_search(query, user_id=None):
         dict: A dictionary containing the comprehensive research results
     """
     try:
-        # Check and consume credits before processing
+        # Check and consume credits before processing (token-based)
         if user_id:
-            from ..services.credit_service import credit_service
+            from ..services.credit_service import CreditService
 
-            # Determine credit cost based on query complexity
+            credit_service = CreditService()
+
+            # Determine task type for minimum charge calculation
             if len(query) > 1000 or any(keyword in query.lower() for keyword in ['comprehensive', 'detailed', 'analyze', 'research']):
-                task_type = 'research_advanced'
-            elif len(query) > 500:
-                task_type = 'research_basic'
+                task_type = 'research_lab_complex'
             else:
-                task_type = 'search_basic'
+                task_type = 'research_lab_basic'
 
-            # Consume credits
-            credit_result = credit_service.consume_credits(user_id, task_type)
+            # Pre-consume minimum credits (will be adjusted after execution)
+            pre_credit_result = credit_service.consume_credits(
+                user_id=user_id,
+                task_type=task_type,
+                input_text=query,
+                output_text="",  # Will update after execution
+                use_token_based=True
+            )
 
-            if not credit_result['success']:
+            if not pre_credit_result['success']:
                 return {
                     'success': False,
-                    'error': credit_result['error'],
-                    'credits_needed': credit_result.get('credits_needed'),
-                    'credits_available': credit_result.get('credits_available')
+                    'error': pre_credit_result.get('error', 'Insufficient credits'),
+                    'credits_needed': pre_credit_result.get('credits_needed'),
+                    'credits_available': pre_credit_result.get('credits_available')
                 }
 
         # Process uploaded files if present
@@ -143,6 +149,31 @@ Further research on {query} is needed to fully understand its complexity and sig
         if "Error with Groq API" in final_report or "exceeded your current quota" in final_report:
             logger.warning(f"Error message detected in final report")
             return {"results": "I'm sorry, but I'm currently experiencing high demand and can't process your research request at the moment. Please try again later."}
+
+        # Calculate final token-based credits after research completion
+        if user_id:
+            try:
+                # Calculate actual credits consumed based on tokens
+                final_credit_result = credit_service.calculate_token_based_credits(
+                    input_text=query,
+                    output_text=final_report,
+                    task_type=task_type,
+                    execution_time_minutes=0,  # Could be enhanced to track actual time
+                    tool_calls=len(research_questions),  # Count research questions as tool calls
+                    image_count=0
+                )
+
+                # Add credit breakdown to response
+                result = {
+                    "results": final_report,
+                    "credits_consumed": pre_credit_result['credits_consumed'],
+                    "credit_breakdown": final_credit_result
+                }
+                return result
+            except Exception as e:
+                logger.error(f"Error calculating final credits: {str(e)}")
+                # Return without credit breakdown if calculation fails
+                pass
 
         return {"results": final_report}
     except Exception as e:

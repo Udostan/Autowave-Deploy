@@ -1733,11 +1733,9 @@ if __name__ == "__main__":
 assistant = AgenticCodeAssistant()
 
 @agentic_code_bp.route('/process', methods=['POST'])
-@trial_limit('code_wave_daily_trials', 3, allow_guest=True, guest_limit=1)  # Free users get 3 trials per day, guests get 1 trial
-@require_credits(5, 'code_wave', 'code_generation')  # Paid users consume 5 credits
 def process_agentic_request():
     """
-    Process agentic code request with step-by-step updates
+    Process agentic code request with step-by-step updates using token-based credit consumption
     """
     start_time = time.time()
     try:
@@ -1750,9 +1748,36 @@ def process_agentic_request():
         if not message:
             return jsonify({'error': 'Message is required'}), 400
 
-        # Get user_id from session for activity logging
+        # Get user_id from session for activity logging and credit consumption
         from flask import session
-        user_id = session.get('user_id')
+        user_id = session.get('user_id', 'anonymous')
+
+        # Initialize credit service for token-based consumption
+        from ..services.credit_service import CreditService
+        credit_service = CreditService()
+
+        # Determine task type for minimum charge calculation
+        if len(message) > 500 or any(keyword in message.lower() for keyword in ['complex', 'advanced', 'comprehensive']):
+            task_type = 'design_complex'
+        else:
+            task_type = 'design_basic'
+
+        # Pre-consume minimum credits (will be adjusted after execution)
+        pre_credit_result = credit_service.consume_credits(
+            user_id=user_id,
+            task_type=task_type,
+            input_text=message,
+            output_text="",  # Will update after execution
+            use_token_based=True
+        )
+
+        if not pre_credit_result['success']:
+            return jsonify({
+                'success': False,
+                'error': pre_credit_result.get('error', 'Insufficient credits'),
+                'credits_needed': pre_credit_result.get('credits_needed'),
+                'credits_available': pre_credit_result.get('credits_available')
+            }), 402  # Payment Required
 
         # Process uploaded files if present (from universal file upload)
         enhanced_message = message
@@ -1819,6 +1844,29 @@ def process_agentic_request():
                 )
             except Exception as e:
                 print(f"Failed to log Agentic Code activity: {e}")
+
+        # Calculate final token-based credits after code generation
+        if user_id and user_id != 'anonymous':
+            try:
+                # Get the generated code and explanation for token counting
+                output_text = str(result.get('code', '')) + str(result.get('explanation', ''))
+                execution_time = processing_time_ms / 60000  # Convert to minutes
+
+                # Calculate actual credits consumed based on tokens
+                final_credit_result = credit_service.calculate_token_based_credits(
+                    input_text=message,
+                    output_text=output_text,
+                    task_type=task_type,
+                    execution_time_minutes=execution_time,
+                    tool_calls=len(result.get('steps', [])),  # Count steps as tool calls
+                    image_count=0
+                )
+
+                # Add credit breakdown to response
+                result['credits_consumed'] = pre_credit_result['credits_consumed']
+                result['credit_breakdown'] = final_credit_result
+            except Exception as e:
+                print(f"Error calculating final credits: {e}")
 
         return jsonify(result)
 

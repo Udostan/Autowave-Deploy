@@ -397,11 +397,14 @@ Steps to set up:
         if not query:
             return jsonify({'error': 'No query provided'}), 400
 
+        # Get user ID from session for credit consumption
+        user_id = session.get('user_id', 'anonymous')
+
         # Import the search API
         from app.api.search import do_search
 
-        # Process search using the search API
-        response = do_search(query)
+        # Process search using the search API with user_id for credit consumption
+        response = do_search(query, user_id=user_id)
 
         return jsonify(response)
 
@@ -438,6 +441,30 @@ Steps to set up:
         if not message:
             return jsonify({'error': 'No message provided'}), 400
 
+        # Get user_id from session if not provided in request
+        if not user_id:
+            user_id = session.get('user_id', 'anonymous')
+
+        # Check and consume credits before processing
+        from app.services.credit_service import credit_service
+
+        # Determine credit cost based on message complexity (Genspark-style: 1-3 credits)
+        if len(message) > 500 or any(keyword in message.lower() for keyword in ['analyze', 'research', 'detailed', 'comprehensive']):
+            task_type = 'autowave_chat_advanced'  # 3 credits
+        else:
+            task_type = 'autowave_chat_basic'     # 1 credit
+
+        # Consume credits
+        credit_result = credit_service.consume_credits(user_id, task_type)
+
+        if not credit_result['success']:
+            return jsonify({
+                'success': False,
+                'error': credit_result.get('error', 'Insufficient credits'),
+                'credits_needed': credit_result.get('credits_needed'),
+                'credits_available': credit_result.get('credits_available')
+            }), 402
+
         # Import the chat API and activity logger
         from app.api.chat import do_chat
         from app.services.activity_logger import log_chat_activity
@@ -445,11 +472,22 @@ Steps to set up:
         # Process chat using the chat API
         response = do_chat(message)
 
+        # Add credit consumption info to response
+        if isinstance(response, dict):
+            response['credits_consumed'] = credit_result['credits_consumed']
+            response['remaining_credits'] = credit_result['remaining_credits']
+        else:
+            response = {
+                'response': response,
+                'credits_consumed': credit_result['credits_consumed'],
+                'remaining_credits': credit_result['remaining_credits']
+            }
+
         # Calculate processing time
         processing_time_ms = int((time.time() - start_time) * 1000)
 
         # Log activity if user_id is available
-        if user_id:
+        if user_id and user_id != 'anonymous':
             try:
                 log_chat_activity(
                     user_id=user_id,
